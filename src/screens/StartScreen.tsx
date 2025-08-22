@@ -1,21 +1,18 @@
 import React from 'react';
-import { View, Image, ImageBackground, Text, TouchableOpacity } from 'react-native';
+import { View, Image, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { StartScreenData } from '../data/startscreendata/StartScreenData';
-
-
 
 interface StartScreenProps {
   navigation: any;
 }
 
-
 const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
+  const { width, height } = Dimensions.get('window');
   const leftColumn = StartScreenData.slice(0, 3);
   const rightColumn = StartScreenData.slice(3, 6);
 
   return (
     <View className="flex-1 w-full relative">
-        
       <View className="flex-row justify-between p-5 z-0">
         <View className="flex flex-col justify-between">
           {leftColumn.map((item, index) => (
@@ -46,8 +43,10 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
         className="absolute top-0 left-0 w-full h-full z-0"
       />
 
-      <View className="absolute flex gap-3 bottom-10 w-full px-5 z-10 ">
-        <Text className="text-7xl font-bold text-white ">i-takalo</Text>
+      <View className="absolute flex gap-3 bottom-12 w-full px-5 z-10 ">
+        <Text className="font-bold text-white"style={{ fontSize: width * 0.12 }}>
+          i-takalo
+        </Text>
         <View className="mb-4">
           <Text className=" text-white text-xl">
             Plateforme de tendance juvénile,
@@ -66,7 +65,6 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
       </View>
     </View>
   );
-}
+};
 
-
-export default StartScreen
+export default StartScreen;

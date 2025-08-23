@@ -40,7 +40,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
       <Image
         source={require('../assets/images/StartImageScreen/blueeffect.png')}
         resizeMode="cover"
-        className="absolute top-0 left-0 w-full h-full z-0"
+        className="absolute w-full h-full z-0"
       />
 
       <View className="absolute flex gap-3 bottom-12 w-full px-5 z-10 ">

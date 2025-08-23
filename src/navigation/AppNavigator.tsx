@@ -8,7 +8,7 @@ import SplashScreen from '../screens/SplashScreen';
 
 const AppNavigator = () => {
   const { user } = useContext(AuthContext);
-    /* const [isLoading, setIsLoading] = useState(true); 
+  /* const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     
@@ -24,7 +24,8 @@ const AppNavigator = () => {
   } */
 
   return (
-    <NavigationContainer>
+    /*     mila averina avadika aveo
+     */ <NavigationContainer>
       {user ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );

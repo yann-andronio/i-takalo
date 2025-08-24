@@ -58,7 +58,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
 
         <TouchableOpacity
           className="bg-[#FEF094] w-full flex items-center px-6 py-3 rounded-full"
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.replace('Login')}
         >
           <Text className="text-black font-bold text-lg">Commencer</Text>
         </TouchableOpacity>

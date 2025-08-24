@@ -1,9 +1,21 @@
-import React, { useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import React, { useContext, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+} from 'react-native';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { AuthContext } from '../context/AuthContext';
+import { stylebtn, textinput } from '../styles/Styles';
+import { EyeIcon , EyeSlashIcon } from 'phosphor-react-native';
 
 interface RegisterFormData {
   name: string;
@@ -18,110 +30,155 @@ const ValidationSchema = yup.object({
   prenom: yup.string().required('Veuillez entrer votre prénom'),
   email: yup.string().email('Email invalide').required('Veuillez entrer votre email'),
   password: yup.string().min(6, 'Au moins 6 caractères').required('Mot de passe requis'),
-  confirmPassword: yup.string().oneOf([yup.ref('password')], 'Les mots de passe doivent correspondre').required('Veuillez confirmer votre mot de passe'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Les mots de passe doivent correspondre')
+    .required('Veuillez confirmer votre mot de passe'),
 });
 
 const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { register: registerUser } = useContext(AuthContext);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<RegisterFormData>({
     resolver: yupResolver(ValidationSchema),
   });
 
   const onSubmit = (data: RegisterFormData) => {
-    console.log('Register:', data);
-    registerUser(data); 
+    registerUser(data);
     reset();
-    navigation.navigate('Login');
+    navigation.replace('Login');
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: 'white', justifyContent: 'flex-end' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <ImageBackground
+      source={require('../assets/images/LoginScreenImage/background.png')}
+      className="flex-1"
+      resizeMode="cover"
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', padding: 20 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
-        <View className="flex-1 justify-center">
-          <Text className="text-2xl font-bold mb-5">S’inscrire</Text>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="bg-white rounded-t-3xl p-6">
 
-          <Text>Nom:</Text>
-          <TextInput
-            placeholder="Votre nom"
-            className={`bg-white text-black w-full p-3 border rounded-lg ${
-              errors.name ? 'border-red-400' : 'border-gray-300'
-            }`}
-            onChangeText={(text) => setValue('name', text)}
-            {...register('name')}
-          />
-          {errors.name && <Text className="text-sm text-red-400 mt-1">{errors.name.message}</Text>}
+            <View className="items-center mb-5 ">
+              <Image
+                source={require('../assets/images/RegisterScreenImage/reg.png')}
+                className="w-50 h-50"
+                resizeMode="contain"
+              />
+            </View>
 
-          <Text>Prénom:</Text>
-          <TextInput
-            placeholder="Votre prénom"
-            className={`bg-white text-black w-full p-3 border rounded-lg ${
-              errors.prenom ? 'border-red-400' : 'border-gray-300'
-            }`}
-            onChangeText={(text) => setValue('prenom', text)}
-            {...register('prenom')}
-          />
-          {errors.prenom && <Text className="text-sm text-red-400 mt-1">{errors.prenom.message}</Text>}
+            <Text className="text-4xl font-bold mb-8 text-center">S’inscrire</Text>
+         
 
-          <Text>Email:</Text>
-          <TextInput
-            placeholder="Votre e-mail"
-            className={`bg-white text-black w-full p-3 border rounded-lg ${
-              errors.email ? 'border-red-400' : 'border-gray-300'
-            }`}
-            autoCapitalize="none"
-            onChangeText={(text) => setValue('email', text)}
-            {...register('email')}
-          />
-          {errors.email && <Text className="text-sm text-red-400 mt-1">{errors.email.message}</Text>}
+            <View className="mb-4">
+              <TextInput
+                placeholder="Nom"
+                placeholderTextColor="#6B7280"
+                className={`${textinput} ${errors.name ? 'border-red-400' : 'border-gray-200'}`}
+                onChangeText={text => setValue('name', text)}
+                {...register('name')}
+              />
+              {errors.name && <Text className="text-sm text-red-400 mt-1">{errors.name.message}</Text>}
+            </View>
 
-          <Text>Mot de passe:</Text>
-          <TextInput
-            placeholder="Votre mot de passe"
-            secureTextEntry
-            className={`bg-white text-black w-full p-3 border rounded-lg ${
-              errors.password ? 'border-red-400' : 'border-gray-300'
-            }`}
-            onChangeText={(text) => setValue('password', text)}
-            {...register('password')}
-          />
-          {errors.password && <Text className="text-sm text-red-400 mt-1">{errors.password.message}</Text>}
+            <View className="mb-4">
+              <TextInput
+                placeholder="Prénom"
+                placeholderTextColor="#6B7280"
+                className={`${textinput}  ${errors.prenom ? 'border-red-400' : 'border-gray-200'}`}
+                onChangeText={text => setValue('prenom', text)}
+                {...register('prenom')}
+              />
+              {errors.prenom && <Text className="text-sm text-red-400 mt-1">{errors.prenom.message}</Text>}
+            </View>
 
-          <Text>Confirmer le mot de passe:</Text>
-          <TextInput
-            placeholder="Confirmez votre mot de passe"
-            secureTextEntry
-            className={`bg-white text-black w-full p-3 border rounded-lg ${
-              errors.confirmPassword ? 'border-red-400' : 'border-gray-300'
-            }`}
-            onChangeText={(text) => setValue('confirmPassword', text)}
-            {...register('confirmPassword')}
-          />
-          {errors.confirmPassword && <Text className="text-sm text-red-400 mt-1">{errors.confirmPassword.message}</Text>}
+            <View className="mb-4">
+              <TextInput
+                placeholder="Email"
+                placeholderTextColor="#6B7280"
+                autoCapitalize="none"
+                className={`${textinput} ${errors.email ? 'border-red-400' : 'border-gray-200'}`}
+                onChangeText={text => setValue('email', text)}
+                {...register('email')}
+              />
+              {errors.email && <Text className="text-sm text-red-400 mt-1">{errors.email.message}</Text>}
+            </View>
 
-          <TouchableOpacity
-            className="bg-green-500 p-3 rounded mt-3"
-            onPress={handleSubmit(onSubmit)}
-          >
-            <Text className="text-white text-center font-bold">S’inscrire</Text>
-          </TouchableOpacity>
+            <View className="mb-4 relative">
+              <TextInput
+                placeholder="Mot de passe"
+                placeholderTextColor="#6B7280"
+                secureTextEntry={!showPassword}
+                className={`${textinput} pr-12  ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
+                onChangeText={text => setValue('password', text)}
+                {...register('password')}
+              />
+              <TouchableOpacity
+                className="absolute right-4 top-3"
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeSlashIcon size={24} /> : <EyeIcon size={24} />}
+              </TouchableOpacity>
+              {errors.password && <Text className="text-sm text-red-400 mt-1">{errors.password.message}</Text>}
+            </View>
 
-          <TouchableOpacity
-            className="mt-4"
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text className="text-blue-500 text-center">Déjà un compte ? Se connecter</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <View className="mb-6 relative">
+              <TextInput
+                placeholder="Confirmer mot de passe"
+                placeholderTextColor="#6B7280"
+                secureTextEntry={!showConfirmPassword}
+                className={`${textinput} pr-12  ${errors.confirmPassword ? 'border-red-400' : 'border-gray-200'}`}
+                onChangeText={text => setValue('confirmPassword', text)}
+                {...register('confirmPassword')}
+              />
+              <TouchableOpacity
+                className="absolute right-4 top-3"
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeSlashIcon size={24} /> : <EyeIcon size={24} />}
+              </TouchableOpacity>
+              {errors.confirmPassword && <Text className="text-sm text-red-400 mt-1">{errors.confirmPassword.message}</Text>}
+            </View>
+
+            <TouchableOpacity className={stylebtn} onPress={handleSubmit(onSubmit)}>
+              <Text className="text-center font-bold text-lg">S’inscrire</Text>
+            </TouchableOpacity>
+
+            <View className="flex-row justify-center gap-5 mt-10">
+              <TouchableOpacity className="flex-1 flex-row justify-center gap-3 items-center border px-4 py-2 rounded-full">
+                <Image
+                  source={require('../assets/images/LoginScreenImage/Google.png')}
+                  className="w-9 h-9"
+                  resizeMode="contain"
+                />
+                <Text>Google</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="flex-1 flex-row justify-center gap-3 items-center border px-4 py-2 rounded-full">
+                <Image
+                  source={require('../assets/images/LoginScreenImage/Facebook.png')}
+                  className="w-9 h-9"
+                  resizeMode="contain"
+                />
+                <Text>Facebook</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity className="mt-6" onPress={() => navigation.replace('Login')}>
+              <Text className="text-center font-bold text-colortextbtn mb-5">Se connecter</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 

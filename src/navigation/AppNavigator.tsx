@@ -26,7 +26,7 @@ const AppNavigator = () => {
   return (
     /*     mila averina avadika aveo
      */ <NavigationContainer>
-      {user ? <MainNavigator /> : <AuthNavigator />}
+      {user ? <AuthNavigator />:<MainNavigator />  }
     </NavigationContainer>
   );
 };

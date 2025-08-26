@@ -1,43 +1,61 @@
-import React, { useContext } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, FlatList, StatusBar } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  FadersHorizontalIcon,
-  MagnifyingGlassIcon,
-} from 'phosphor-react-native';
 import HeroSection from '../components/HeroSection';
+import { ProductData, ProductDataI } from '../data/ProductData';
+import ProductCard from '../components/ProductCard';
+import FakeSearchBar from '../components/FakeSearchBar';
+import FilterModalForm from '../components/FilterModalForm';
 
 export default function HomeScreen() {
-  const { logout } = useContext(AuthContext);
+  const [ProductDta, SetProductData] = useState<ProductDataI[]>(ProductData);
+  const [modalVisible, setModalVisible] = useState(false);
 
+  const [appliedFilters, setAppliedFilters] = useState<any>(null); // Pour stocker les filtres appliqués
+
+  // Fonction appelée lorsque les filtres sont appliqués dans le modal
+  const handleApplyFilters = (filters: any) => {
+    console.log('Filtres reçus par HomeScreen:', filters);
+    setAppliedFilters(filters);
+  };
   return (
-    <SafeAreaView className=" flex-1 bg-white p-6">
-      <View className="w-full flex-row gap-5 items-center  ">
-        <View className="flex-row items-center bg-[#F9F9F9] w-full border border-[#C2C2C2] flex-1  rounded-xl px-3 py-1 shadow-md">
-          <MagnifyingGlassIcon size={24} weight="bold" color="#9F9F9F" />
+    <SafeAreaView className="flex-1 bg-white p-6">
+      <StatusBar hidden={false} translucent backgroundColor="transparent" />
 
-          <TextInput
-            placeholder="Rechercher "
-            placeholderTextColor="#9F9F9F"
-            className="flex-1  bg-[#F9F9F9] ml-2 text-[16px]"
-          />
-        </View>
-        <TouchableOpacity className="  items-center  ">
-          <FadersHorizontalIcon size={24} weight="bold" color="#000000" />
-        </TouchableOpacity>
+      <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
+
+      <View className="flex-1    rounded-2xl overflow-hidden">
+        <FlatList
+          data={ProductDta}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => <ProductCard item={item} />}
+          showsVerticalScrollIndicator={false}
+          numColumns={2}
+          columnWrapperStyle={{
+            justifyContent: 'space-between',
+            marginBottom: 12,
+          }}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          ListHeaderComponent={
+            <>
+              <View className="mt-4 mb-6">
+                <HeroSection />
+              </View>
+
+              <Text className="text-xl font-bold text-gray-800 mb-2">
+                Top Produits
+              </Text>
+            </>
+          }
+        />
       </View>
 
-      <View>
-          <HeroSection />
-      </View>
-
-      {/*  <TouchableOpacity
-        onPress={logout}
-        className="bg-red-500 px-6 py-3 rounded-xl"
-      >
-        <Text className="text-white font-semibold text-lg">Se déconnecter</Text>
-      </TouchableOpacity> */}
+      <FilterModalForm
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onApplyFilters={handleApplyFilters}
+      />
     </SafeAreaView>
   );
 }

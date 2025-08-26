@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Dimensions, ImageBackground,} from 'react-native';
 import { HouseIcon, ChatIcon, WalletIcon, UserIcon, PlusIcon,} from 'phosphor-react-native';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
-const HEIGHT_SIZE = width * 0.17; // hauteur de la barre
+const HEIGHT_SIZE = width * 0.17; 
 const BAR_WIDTH = width * 0.9;
 
 interface Props {
@@ -12,9 +13,18 @@ interface Props {
   navigation: any;
 }
 
+
 const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
+
+
+  const route = state.routes[state.index];
+  const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
+
+  // raha anaty screen de conditon eto de miala le tabbar
+  if (routeName === 'Search' || routeName === "Product") return null;
+
   return (
-    <View className=" bg-white h-[11%] absolute bottom-0 w-[100%] justify-center items-center ">
+    <View className="  h-[11%] absolute bottom-0 w-[100%] justify-center items-center ">
       <ImageBackground
         source={require('../assets/images/HomeScreenImage/Subtract.png')}
         style={styles.container}
@@ -26,7 +36,12 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
           const isFocused = state.index === index;
 
           const onPress = () => {
-            if (!isFocused) navigation.navigate(route.name);
+            if (route.name === 'Home' ) {
+              // Si on clique sur Home, réinitialiser le stack Home à HomeMain
+              navigation.navigate('Home', { screen: 'HomeMain' });
+            } else if (!isFocused) {
+              navigation.navigate(route.name);
+            }
           };
 
           // btext hoan btn sell izay mijanona anaty ImageBackground

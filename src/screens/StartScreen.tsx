@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, Dimensions } from 'react-native';
-import { StartScreenData } from '../data/startscreendata/StartScreenData';
+import { StartScreenData } from '../data/StartScreenData';
 
 interface StartScreenProps {
   navigation: any;

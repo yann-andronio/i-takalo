@@ -1,15 +1,5 @@
 import React, { useContext, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ImageBackground,
-  Image,
-  KeyboardAvoidingView, // <-- Importez KeyboardAvoidingView
-  ScrollView, // <-- Importez ScrollView
-  Platform, // <-- Utile pour les ajustements par plateforme
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ImageBackground, Image, KeyboardAvoidingView,  ScrollView,  Platform,} from 'react-native';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';

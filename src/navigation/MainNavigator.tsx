@@ -8,6 +8,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
 
 import CustomTabBar from '../components/CustomTabBar';
+import HomeStackNavigator from './HomeStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,7 +18,7 @@ const MainNavigator: React.FC = () => {
       screenOptions={{ headerShown: false }}
       tabBar={props => <CustomTabBar {...props} />}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="Chat" component={ChatScreen} />
       <Tab.Screen name="Sell" component={ProductAdScreen} />
       <Tab.Screen name="Wallet" component={WalletScreen} />

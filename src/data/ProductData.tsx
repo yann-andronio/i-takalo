@@ -4,7 +4,7 @@ export interface ProductDataI {
   status: string;
   price: string;
   likes: number;
-  category: string; // catégorie ajoutée
+  category: string; 
   image: any;
   profileImage?: any;
 }

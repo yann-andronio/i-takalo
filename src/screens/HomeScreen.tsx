@@ -12,12 +12,12 @@ export default function HomeScreen() {
   const [ProductDta, SetProductData] = useState<ProductDataI[]>(ProductData);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [appliedFilters, setAppliedFilters] = useState<any>(null); // Pour stocker les filtres appliqués
+  const [filterproductjiaby, setfilterproductjiaby] = useState<any>(null); 
 
-  // Fonction appelée lorsque les filtres sont appliqués dans le modal
+ 
   const handleApplyFilters = (filters: any) => {
-    console.log('Filtres reçus par HomeScreen:', filters);
-    setAppliedFilters(filters);
+    console.log('Filtres reçus par HomeScren:', filters);
+    setfilterproductjiaby(filters);
   };
   return (
     <SafeAreaView className="flex-1 bg-white p-6">

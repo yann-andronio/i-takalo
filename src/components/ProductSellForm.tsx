@@ -1,15 +1,12 @@
-/* submithandle migaranti comptabilite  avec yup.ObjectSchema<FormData> = yup.object({ */
-
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import React, { useCallback } from 'react';
 import { Plus, PlusIcon } from 'phosphor-react-native';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import * as yup from 'yup';
 
 import { RootStackParamListMainNavigatorTab } from '../types/Types';
-
 
 type FormData = {
     title: string;
@@ -32,17 +29,15 @@ const ValidationSchema: yup.ObjectSchema<FormData> = yup.object({
 export default function ProductSellForm() {
     const navigation = useNavigation<NavigationProp<RootStackParamListMainNavigatorTab>>();
 
-    const { register, setValue, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+    const { control, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
         resolver: yupResolver(ValidationSchema),
     });
 
-
-     useFocusEffect(
-            useCallback(() => {
-                // Réinitialise le formulaire à chaque fois que l'écran est focalisé
-                reset();
-            }, [reset])
-        );
+    useFocusEffect(
+        useCallback(() => {
+            reset();
+        }, [reset])
+    );
 
     const handleAddProduct: SubmitHandler<FormData> = (data) => {
         console.log('Produit à vendre validé :', data);
@@ -74,71 +69,113 @@ export default function ProductSellForm() {
             <View className="mb-5">
                 {/* titre */}
                 <Text className="text-base font-bold mb-2">Titre<Text className="text-red-500">*</Text></Text>
-                <TextInput
-                    className={`border rounded-lg p-3 text-black ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="Titre de l'article"
-                    placeholderTextColor="#6B7280"
-                    onChangeText={value => setValue('title', value)}
-                    {...register('title')}
+                <Controller
+                    control={control}
+                    name="title"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            className={`border rounded-lg p-3 text-black ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+                            placeholder="Titre de l'article"
+                            placeholderTextColor="#6B7280"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                        />
+                    )}
                 />
                 {errors.title && <Text className="text-red-500 mt-1">{errors.title.message}</Text>}
 
                 {/* cat */}
                 <Text className="text-base font-bold mb-2 mt-5">Catégorie<Text className="text-red-500">*</Text></Text>
-                <TextInput
-                    className={`border rounded-lg p-3 text-black ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="Ex : Vêtements, Électronique, Livres"
-                    placeholderTextColor="#6B7280"
-                    onChangeText={value => setValue('category', value)}
-                    {...register('category')}
+                <Controller
+                    control={control}
+                    name="category"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            className={`border rounded-lg p-3 text-black ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
+                            placeholder="Ex : Vêtements, Électronique, Livres"
+                            placeholderTextColor="#6B7280"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                        />
+                    )}
                 />
                 {errors.category && <Text className="text-red-500 mt-1">{errors.category.message}</Text>}
 
                 {/* desc */}
                 <Text className="text-base font-bold mb-2 mt-5">Description</Text>
-                <TextInput
-                    className={`border rounded-lg p-3 h-24 text-black ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="Décrivez l'état de l'article, ses caractéristiques, etc."
-                    placeholderTextColor="#6B7280"
-                    onChangeText={value => setValue('description', value)}
-                    multiline
-                    textAlignVertical="top"
-                    {...register('description')}
+                <Controller
+                    control={control}
+                    name="description"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            className={`border rounded-lg p-3 h-24 text-black ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
+                            placeholder="Décrivez l'état de l'article, ses caractéristiques, etc."
+                            placeholderTextColor="#6B7280"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                            multiline
+                            textAlignVertical="top"
+                        />
+                    )}
                 />
                 {errors.description && <Text className="text-red-500 mt-1">{errors.description.message}</Text>}
 
                 {/* Prix */}
                 <Text className="text-base font-bold mb-2 mt-5">Prix (en Ar)<Text className="text-red-500">*</Text></Text>
-                <TextInput
-                    className={`border rounded-lg p-3 text-black ${errors.price ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="Ex : 25000"
-                    placeholderTextColor="#6B7280"
-                    onChangeText={value => setValue('price', parseInt(value, 10))}
-                    keyboardType="numeric"
-                    {...register('price')}
+                <Controller
+                    control={control}
+                    name="price"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            className={`border rounded-lg p-3 text-black ${errors.price ? 'border-red-500' : 'border-gray-300'}`}
+                            placeholder="Ex : 25000"
+                            placeholderTextColor="#6B7280"
+                            onBlur={onBlur}
+                            onChangeText={text => onChange(parseInt(text, 10))}
+                            value={value ? value.toString() : ''}
+                            keyboardType="numeric"
+                        />
+                    )}
                 />
                 {errors.price && <Text className="text-red-500 mt-1">{errors.price.message}</Text>}
 
                 {/* Adresse */}
                 <Text className="text-base font-bold mb-2 mt-5">Adresse<Text className="text-red-500">*</Text></Text>
-                <TextInput
-                    className={`border rounded-lg p-3 text-black ${errors.adresse ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="Ville ou quartier"
-                    placeholderTextColor="#6B7280"
-                    onChangeText={value => setValue('adresse', value)}
-                    {...register('adresse')}
+                <Controller
+                    control={control}
+                    name="adresse"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            className={`border rounded-lg p-3 text-black ${errors.adresse ? 'border-red-500' : 'border-gray-300'}`}
+                            placeholder="Ville ou quartier"
+                            placeholderTextColor="#6B7280"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                        />
+                    )}
                 />
                 {errors.adresse && <Text className="text-red-500 mt-1">{errors.adresse.message}</Text>}
 
                 {/* Num tel */}
                 <Text className="text-base font-bold mb-2 mt-5">Numéro de téléphone</Text>
-                <TextInput
-                    className={`border rounded-lg p-3 text-black ${errors.telphone ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="Ex : 06 12 34 56 78"
-                    placeholderTextColor="#6B7280"
-                    onChangeText={value => setValue('telphone', value)}
-                    keyboardType="phone-pad"
-                    {...register('telphone')}
+                <Controller
+                    control={control}
+                    name="telphone"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            className={`border rounded-lg p-3 text-black ${errors.telphone ? 'border-red-500' : 'border-gray-300'}`}
+                            placeholder="Ex : 06 12 34 56 78"
+                            placeholderTextColor="#6B7280"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                            keyboardType="phone-pad"
+                        />
+                    )}
                 />
                 {errors.telphone && <Text className="text-red-500 mt-1">{errors.telphone.message}</Text>}
             </View>

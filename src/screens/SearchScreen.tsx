@@ -30,7 +30,7 @@ export default function SearchScreen() {
           <SearchBar onChangeText={setSearch} />
       </View>
 
-      <View className="flex-row justify-center mb-2 mt-4 gap-5 ">
+      <View className="flex-row justify-center mb-2  gap-5 ">
         <TouchableOpacity
           className={` py-3 rounded-full flex-1 items-center justify-center ${searchType === 'article' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
           onPress={() => setSearchType('article')}

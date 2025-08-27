@@ -39,7 +39,7 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: 20 }}
           ListHeaderComponent={
             <>
-              <View className="mt-4 mb-6">
+              <View className=" mb-6">
                 <HeroSection />
               </View>
 

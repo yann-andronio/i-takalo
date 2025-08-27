@@ -7,10 +7,13 @@ import { UserData, UserDataI } from '../data/UserData';
 import UserCard from '../components/UserCard';
 import SearchBar from '../components/SearchBar';
 import { SearchUtils } from '../utils/SearchUtils';
+import {  ArrowLeftIcon } from 'phosphor-react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function SearchScreen() {
   const [search, setSearch] = useState('');
   const [searchType, setSearchType] = useState<'article' | 'user'>('article');
+  const navigation = useNavigation()
 
   const filteredArticles = SearchUtils<ProductDataI>(ProductData, search, ['name','status','price',]);
   const filteredUsers = SearchUtils<UserDataI>(UserData, search, ['username','email',]);
@@ -19,7 +22,13 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white px-6 py-5">
-      <SearchBar onChangeText={setSearch} />
+
+      <View className="flex-row items-center gap-5 mb-5">
+          <TouchableOpacity onPress={()=>navigation.goBack()}>
+            <ArrowLeftIcon size={24} color="black" weight="bold" />
+          </TouchableOpacity>
+          <SearchBar onChangeText={setSearch} />
+      </View>
 
       <View className="flex-row justify-center mb-2 mt-4 gap-5 ">
         <TouchableOpacity

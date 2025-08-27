@@ -5,16 +5,18 @@ import { HeartIcon } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/Types';
+import { UserData } from '../data/UserData'; // 👈 importer les users
 
 interface ProductCardProps {
   item: ProductDataI;
 }
 
-/* hoan type de navigation misy params ihany manao an ty sinon libre comme dans fakesearchbar*/
 type ProductCardNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Product'>;
 
 export default function ProductCard({ item }: ProductCardProps) {
   const navigation = useNavigation<ProductCardNavigationProp>();
+
+  const user = UserData.find(u => u.id === item.userId);
 
   return (
     <TouchableOpacity
@@ -27,10 +29,10 @@ export default function ProductCard({ item }: ProductCardProps) {
         className="w-full h-72 justify-between"
         resizeMode="cover"
       >
-        {item.profileImage && (
+        {user && (
           <View className="absolute top-4 left-4 w-12 h-12 rounded-full border-2 border-white overflow-hidden">
             <Image
-              source={item.profileImage}
+              source={user.profileImage}
               className="w-full h-full"
               resizeMode="cover"
             />

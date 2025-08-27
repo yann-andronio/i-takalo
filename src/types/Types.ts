@@ -1,8 +1,15 @@
-// src/navigation/types.ts
 import { ProductDataI } from '../data/ProductData';
 
-export type RootStackParamList = {
-  HomeMain: undefined;          // Home n'a pas de params
-  Search: undefined;            // Search n'a pas de params
+export type RootStackParamListHomenavigatorScreen= {
+  HomeMain: undefined;         
+  Search: undefined;          
   Product: { item: ProductDataI }; // Product reçoit un objet item
+};
+export type RootStackParamListMainNavigatorTab = {
+    Home: undefined; 
+    Chat:undefined , 
+    Sell:undefined , 
+    Wallet:undefined , 
+    Profile:undefined
+
 };

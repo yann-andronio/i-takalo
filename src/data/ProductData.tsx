@@ -6,10 +6,8 @@ export interface ProductDataI {
   likes: number;
   category: string; 
   image: any;
-  profileImage?: any;
+  userId: string; 
 }
-
-const defaultImage = require('../assets/images/HeroSectionImage/p1.png');
 
 export const ProductData: ProductDataI[] = [
   {
@@ -20,7 +18,7 @@ export const ProductData: ProductDataI[] = [
     likes: 120,
     category: 'Vêtements',
     image: require('../assets/images/productCardImage/1.png'),
-    profileImage: defaultImage,
+    userId: '1', 
   },
   {
     id: '2',
@@ -30,7 +28,7 @@ export const ProductData: ProductDataI[] = [
     likes: 95,
     category: 'Accessoires',
     image: require('../assets/images/productCardImage/2.png'),
-    profileImage: defaultImage,
+    userId: '2',
   },
   {
     id: '3',
@@ -40,7 +38,7 @@ export const ProductData: ProductDataI[] = [
     likes: 75,
     category: 'Vêtements',
     image: require('../assets/images/productCardImage/3.png'),
-    profileImage: defaultImage,
+    userId: '1', 
   },
   {
     id: '4',
@@ -50,7 +48,7 @@ export const ProductData: ProductDataI[] = [
     likes: 50,
     category: 'Accessoires',
     image: require('../assets/images/productCardImage/4.png'),
-    profileImage: defaultImage,
+    userId: '3', 
   },
   {
     id: '5',
@@ -60,6 +58,6 @@ export const ProductData: ProductDataI[] = [
     likes: 65,
     category: 'Chaussures',
     image: require('../assets/images/productCardImage/5.png'),
-    profileImage: defaultImage,
+    userId: '4', 
   },
 ];

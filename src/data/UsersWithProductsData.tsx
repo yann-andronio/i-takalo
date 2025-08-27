@@ -12,7 +12,7 @@ export interface ProductDataI {
   image: any;
 }
 
-export interface UserDataI {
+export interface UsersWithProductsDataI {
   id: string;
   username: string;
   email: string;
@@ -23,7 +23,7 @@ export interface UserDataI {
 
 const defaultProfileImage = require('../assets/images/HeroSectionImage/p1.png');
 
-export const UsersWithProducts: UserDataI[] = [
+export const UsersWithProductsData: UsersWithProductsDataI[] = [
   {
     id: '1',
     username: 'JohnDoe',

@@ -2,14 +2,14 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { FadersHorizontalIcon, MagnifyingGlassIcon } from 'phosphor-react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/Types';
+import { RootStackParamListHomenavigatorScreen } from '../types/Types';
 
 type Props = {
   onFilterPress: () => void;
 };
 
 export default function FakeSearchBar({ onFilterPress }: Props) {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamListHomenavigatorScreen>>();
 
   const handlePress = () => {
     navigation.navigate('Search');

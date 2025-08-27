@@ -20,7 +20,6 @@ export default function ProductAdScreen() {
   const filtereddonations = SearchUtils<ProductDataI>(ProductData, search, ['name','status','price',]);
   const filteredUsers = SearchUtils<UserDataI>(UserData, search, ['username','email',]);
 
-  const resultCount = searchType === 'donation' ? filtereddonations.length : filteredUsers.length;
 
   return (
     <SafeAreaView className="flex-1 bg-white px-6 py-5">

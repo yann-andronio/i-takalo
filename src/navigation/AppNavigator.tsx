@@ -5,9 +5,10 @@ import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import { AuthContext } from '../context/AuthContext';
 import SplashScreen from '../screens/SplashScreen';
-
+import { ActivityIndicator, View } from 'react-native';
+import { red } from 'react-native-reanimated/lib/typescript/Colors';
 const AppNavigator = () => {
-  const { user } = useContext(AuthContext);
+  const { user , loadingtoken } = useContext(AuthContext);
   /* const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
@@ -23,6 +24,15 @@ const AppNavigator = () => {
     return <SplashScreen />; 
   } */
 
+
+
+if (loadingtoken) {
+    return (
+      <View className=' flex-1 bg-blue-700'>
+        <ActivityIndicator size="large" color={"red"}/>
+      </View>
+    );
+  }
   return (
     /*     mila averina avadika aveo
      */ <NavigationContainer>

@@ -1,48 +1,194 @@
-import React from 'react';
-import { View, Text, Image, ScrollView, Dimensions } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Dimensions,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ProductDataI } from '../data/ProductData';
 import { UserData } from '../data/UserData';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  ArrowLeftIcon,
+  MapPinIcon,
+  PhoneIcon,
+  TagIcon,
+  ChatTeardropTextIcon,
+  HeartIcon,
+  CubeTransparentIcon,
+  ClockCounterClockwiseIcon,
+} from 'phosphor-react-native';
 
-const { height, width } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-type ProductScreenRouteProp = RouteProp<{ Product: { item: ProductDataI } }, 'Product'>;
+type ProductScreenRouteProp = RouteProp<
+  { Product: { item: ProductDataI } },
+  'Product'
+>;
 
 export default function ProductScreen() {
+  const navigation = useNavigation();
   const route = useRoute<ProductScreenRouteProp>();
   const { item } = route.params;
-
   const user = UserData.find(u => u.id === item.userId);
 
+  const handlePhonePress = () => {
+    Linking.openURL(`tel:${item.telphone}`);
+  };
+
+  const handleARPress = () => {
+    console.log(
+      'Activation de la réalité augmentée pour le produit :',
+      item.titre,
+    );
+  };
+
+  const handleMessagePress = () => {
+    console.log("Envoi d'un message au vendeur :", user?.username);
+  };
+
+ 
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const descriptionLimit = 100;
+
+  const toggleDescription = () => setShowFullDescription(!showFullDescription);
+
+  const displayedDescription = showFullDescription? item.description: item.description?.slice(0, descriptionLimit) + (item.description && item.description.length > descriptionLimit ? '...' : '');
+
   return (
-    <ScrollView className="flex-1 bg-white p-4">
-      <View className="w-full mb-4 rounded-2xl overflow-hidden">
-        <Image
-          source={item.image}
-          style={{ width: width - 32, height: height * 0.5 }}
-          resizeMode="cover"
-        />
-      </View>
-
-      <Text className="text-2xl font-bold text-gray-900 mb-1">{item.name}</Text>
-      <Text className="text-lg text-gray-600 mb-2">{item.status}</Text>
-      <Text className="text-xl font-bold text-[#03233A] mb-4">
-        {item.price}
-      </Text>
-      <Text className="text-gray-500 mb-6">👍 {item.likes} likes</Text>
-
-      {user && (
-        <View className="flex-row items-center">
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1">
+        {/* Product Image Section */}
+        <View className="w-full h-[400px] relative">
           <Image
-            source={user.profileImage}
-            className="w-12 h-12 rounded-full mr-3"
+            source={item.image}
+            style={{ width: width, height: '100%' }}
+            resizeMode="cover"
+            className="rounded-b-3xl"
           />
-          <View>
-            <Text className="text-base font-bold">{user.username}</Text>
-            <Text className="text-sm text-gray-500">{user.email}</Text>
+
+          <View className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/60 to-transparent" />
+
+          <View className="absolute top-6 left-6 right-6 flex-row justify-between items-center z-10">
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              className="p-3 rounded-full bg-white/30 backdrop-blur-sm shadow"
+            >
+              <ArrowLeftIcon size={24} color="white" weight="bold" />
+            </TouchableOpacity>
+
+            <TouchableOpacity className="p-3 rounded-full bg-white/30 backdrop-blur-sm shadow">
+              <HeartIcon size={24} color="#EF4444" weight="bold" />
+            </TouchableOpacity>
           </View>
         </View>
-      )}
-    </ScrollView>
+
+        {/* Product Details Section */}
+        <View className="bg-white p-6 -mt-8 rounded-t-3xl shadow-lg">
+          <View className="flex-row justify-between items-start mb-4">
+            <View className="flex-1">
+              <Text className="text-3xl font-extrabold text-gray-900 mb-1">
+                {item.titre}
+              </Text>
+              <Text className="text-xl font-semibold text-gray-700">
+                {item.price}
+              </Text>
+            </View>
+            <View className="flex-row items-center bg-gray-100 p-2 rounded-lg">
+              <TagIcon size={18} color="#4B5563" weight="bold" />
+              <Text className="text-sm text-gray-600 ml-1 font-medium">
+                {item.category}
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-row items-center">
+              <MapPinIcon size={16} color="#4b5563" />
+              <Text className="text-sm text-gray-600 ml-2">{item.adresse}</Text>
+            </View>
+            <View className="flex-row items-center">
+              <ClockCounterClockwiseIcon size={16} color="#4b5563" />
+              <Text className="text-sm text-gray-600 ml-2">
+                Publié le 25 Août 2025
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center mb-6">
+            <HeartIcon size={16} color="#4b5563" weight="bold" />
+            <Text className="text-sm text-gray-600 ml-2 font-medium">
+              {item.likes} likes
+            </Text>
+          </View>
+
+          {user && (
+            <View className="flex-row items-center mb-6 p-4 bg-gray-100 rounded-xl">
+              <Image
+                source={user.profileImage}
+                className="w-14 h-14 rounded-full mr-4 border-2 border-white"
+              />
+              <View className="flex-1">
+                <Text className="text-lg font-bold text-gray-800">
+                  {user.username}
+                </Text>
+                <Text className="text-sm text-gray-500">{user.email}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={handlePhonePress}
+                className="p-3 bg-gray-200 rounded-full"
+              >
+                <PhoneIcon size={20} color="#000" weight="bold" />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Description Section avec "Voir plus / Voir moins" */}
+          <View className="mb-6">
+            <Text className="text-xl font-bold text-gray-800 mb-2">
+              Description
+            </Text>
+
+            <Text className="text-gray-600 leading-6">
+              {displayedDescription}
+            </Text>
+
+            {item.description && item.description.length > descriptionLimit && (
+              <TouchableOpacity onPress={toggleDescription}>
+                <Text className="text-black mt-1 font-semibold">
+                  {showFullDescription ? 'Voir moins' : 'Voir plus'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Call to Action Buttons */}
+          <View className="flex-row items-center justify-between gap-4">
+            <TouchableOpacity
+              className="flex-1 flex-row items-center justify-center p-4 bg-gray-200 rounded-xl"
+              onPress={handleARPress}
+            >
+              <CubeTransparentIcon size={20} color="#000" weight="bold" />
+              <Text className="text-base font-bold text-black ml-2">
+                Voir en AR
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-1 flex-row items-center justify-center p-4 bg-[#FEF094] rounded-xl"
+              onPress={handleMessagePress}
+            >
+              <ChatTeardropTextIcon size={20} color="#000" weight="bold" />
+              <Text className="text-base font-bold text-black ml-2">
+                Message
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -15,7 +15,7 @@ export default function SearchScreen() {
   const [searchType, setSearchType] = useState<'article' | 'user'>('article');
   const navigation = useNavigation()
 
-  const filteredArticles = SearchUtils<ProductDataI>(ProductData, search, ['name','status','price',]);
+  const filteredArticles = SearchUtils<ProductDataI>(ProductData, search, ['titre','category','price',]);
   const filteredUsers = SearchUtils<UserDataI>(UserData, search, ['username','email',]);
 
   const resultCount = searchType === 'article' ? filteredArticles.length : filteredUsers.length;
@@ -24,7 +24,7 @@ export default function SearchScreen() {
     <SafeAreaView className="flex-1 bg-white px-6 py-5">
 
       <View className="flex-row items-center gap-5 mb-5">
-          <TouchableOpacity onPress={()=>navigation.goBack()}>
+          <TouchableOpacity onPress={()=>navigation.goBack()}  className="p-2 rounded-full bg-gray-100">
             <ArrowLeftIcon size={24} color="black" weight="bold" />
           </TouchableOpacity>
           <SearchBar onChangeText={setSearch} />

@@ -9,7 +9,7 @@ interface SearchBarProps {
 export default function SearchBar({ onChangeText }: SearchBarProps) {
   return (
     <View className="w-full flex-row gap-5 items-center">
-      <View className="flex-row items-center bg-[#F9F9F9] w-[87%] border border-[#C2C2C2]  rounded-xl px-3  shadow-md">
+      <View className="flex-row items-center bg-[#F9F9F9] w-[84%] border border-[#C2C2C2]  rounded-xl px-3  shadow-md">
         <MagnifyingGlassIcon size={21} weight="bold" color="#9F9F9F" />
         <TextInput
           placeholder="Rechercher un article ou un membre"

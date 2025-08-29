@@ -4,19 +4,21 @@ import { ProductDataI } from '../data/ProductData';
 import { HeartIcon } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/Types';
-import { UserData } from '../data/UserData'; // 👈 importer les users
+import { RootStackParamListHomenavigatorScreen } from '../types/Types';
+import { UserData } from '../data/UserData'; 
 
 interface ProductCardProps {
   item: ProductDataI;
 }
 
-type ProductCardNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Product'>;
+type ProductCardNavigationProp = NativeStackNavigationProp<RootStackParamListHomenavigatorScreen, 'Product'>;
 
 export default function ProductCard({ item }: ProductCardProps) {
   const navigation = useNavigation<ProductCardNavigationProp>();
 
   const user = UserData.find(u => u.id === item.userId);
+  console.log("ITEM ===>", item)
+
 
   return (
     <TouchableOpacity
@@ -46,12 +48,12 @@ export default function ProductCard({ item }: ProductCardProps) {
         />
 
         <View className="absolute inset-x-0 bottom-0 p-4 ">
-          <View className="flex-row items-end justify-between">
+          <View className="flex-row items-end justify-between ">
             <View className="flex-1">
               <Text className="text-base font-bold text-white mb-1">
-                {item.name}
+                {item.titre}
               </Text>
-              <Text className="text-sm text-white opacity-80">{item.status}</Text>
+              <Text className="text-sm text-white opacity-80">{item.category}</Text>
             </View>
           </View>
 

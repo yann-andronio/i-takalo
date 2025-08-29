@@ -1,63 +1,75 @@
 export interface ProductDataI {
-  id: string; 
-  name: string;
-  status: string;
+  id: string;
+  titre: string;
+  category: string;
+  description?: string;
   price: string;
   likes: number;
-  category: string; 
+  adresse: string;
+  telphone: string;
   image: any;
-  userId: string; 
+  userId: string;
 }
 
 export const ProductData: ProductDataI[] = [
   {
     id: '1',
-    name: 'Pull en laine',
-    status: 'Neuf',
+    titre: 'Pull en laine',
+    category: 'Vêtements',
+    description:'Pull chaud en laine, coupe unisexe, idéal pour l’hiver. Ce pull est fabriqué avec des fibres de laine de haute qualité pour vous offrir confort et chaleur tout au long de la saison froide. Son design élégant et moderne s’adapte à toutes les occasions, que ce soit pour une sortie décontractée, une journée au bureau ou un événement spécial. Les finitions soignées garantissent durabilité et style. Facile à entretenir, ce pull se lave à la main ou en machine selon les instructions, tout en conservant sa forme et sa douceur. Disponible en plusieurs tailles et couleurs pour convenir à tous les goûts. Parfait pour compléter votre garde-robe et rester au chaud avec style.',
     price: 'Ar 25 000',
     likes: 120,
-    category: 'Vêtements',
+    adresse: 'Antananarivo, Analakely',
+    telphone: '034 12 345 67',
     image: require('../assets/images/productCardImage/1.png'),
-    userId: '1', 
+    userId: '1',
   },
   {
     id: '2',
-    name: 'Montre digitale',
-    status: 'Neuf',
+    titre: 'Montre digitale',
+    category: 'Accessoires',
+    description: 'Montre digitale avec affichage LED et alarme.',
     price: 'Ar 45 000',
     likes: 95,
-    category: 'Accessoires',
+    adresse: 'Antananarivo, Ankorondrano',
+    telphone: '032 45 678 90',
     image: require('../assets/images/productCardImage/2.png'),
     userId: '2',
   },
   {
     id: '3',
-    name: 'T-shirt coton',
-    status: 'Neuf',
+    titre: 'T-shirt coton',
+    category: 'Vêtements',
+    description: 'T-shirt 100% coton, respirant et confortable.',
     price: 'Ar 15 000',
     likes: 75,
-    category: 'Vêtements',
+    adresse: 'Antsirabe, Mahazoarivo',
+    telphone: '033 98 765 43',
     image: require('../assets/images/productCardImage/3.png'),
-    userId: '1', 
+    userId: '1',
   },
   {
     id: '4',
-    name: 'Sac à dos',
-    status: 'Neuf',
+    titre: 'Sac à dos',
+    category: 'Accessoires',
+    description: 'Sac à dos résistant, 20L, poches multiples.',
     price: 'Ar 35 000',
     likes: 50,
-    category: 'Accessoires',
+    adresse: 'Fianarantsoa, Tanambao',
+    telphone: '034 11 223 44',
     image: require('../assets/images/productCardImage/4.png'),
-    userId: '3', 
+    userId: '3',
   },
   {
     id: '5',
-    name: 'Chaussures sport',
-    status: 'Neuf',
+    titre: 'Chaussures sport',
+    category: 'Chaussures',
+    description: 'Chaussures légères, semelle antidérapante.',
     price: 'Ar 55 000',
     likes: 65,
-    category: 'Chaussures',
+    adresse: 'Toamasina, Bazary Be',
+    telphone: '032 22 333 44',
     image: require('../assets/images/productCardImage/5.png'),
-    userId: '4', 
+    userId: '4',
   },
 ];

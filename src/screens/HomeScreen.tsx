@@ -11,7 +11,7 @@ import FilterModalForm from '../components/FilterModalForm';
 export default function HomeScreen() {
   const [ProductDta, SetProductData] = useState<ProductDataI[]>(ProductData);
   const [modalVisible, setModalVisible] = useState(false);
-
+ const { logout } = useContext(AuthContext);
   const [filterproductjiaby, setfilterproductjiaby] = useState<any>(null); 
 
  
@@ -22,6 +22,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white p-6">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
+      <Text onPress={logout}>se deconnecter</Text>
 
       <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
 

@@ -14,17 +14,14 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function ProductAdScreen() {
      const navigation = useNavigation();
-  const [search, setSearch] = useState('');
-  const [searchType, setSearchType] = useState<'donation' | 'vente'>('donation');
+     const [searchType, setSearchType] = useState<'donation' | 'vente'>('donation');
 
-  const filtereddonations = SearchUtils<ProductDataI>(ProductData, search, ['name','status','price',]);
-  const filteredUsers = SearchUtils<UserDataI>(UserData, search, ['username','email',]);
 
 
   return (
     <SafeAreaView className="flex-1 bg-white px-6 py-5">
         <View className="flex-row items-center mb-5">
-          <TouchableOpacity onPress={()=>navigation.goBack()}>
+          <TouchableOpacity onPress={()=>navigation.goBack()}  className="p-2 rounded-full bg-gray-100">
             <ArrowLeftIcon size={24} color="black" weight="bold" />
           </TouchableOpacity>
            <Text className="text-lg font-bold ml-5">Ajout article</Text>
@@ -52,8 +49,6 @@ export default function ProductAdScreen() {
       </View>
 
 
-    
-    
       {
         searchType === "donation"  ?  <DonationAdForm/>:<ProductSellForm/>
       }

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, Image, KeyboardAvoidingView,  ScrollView,  Platform,} from 'react-native';
-import { useForm } from 'react-hook-form';
+import { View, Text, TextInput, TouchableOpacity, ImageBackground, Image, KeyboardAvoidingView, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { AuthContext } from '../context/AuthContext';
@@ -22,17 +22,17 @@ const ValidationSchema = yup.object({
 });
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-  const { login } = useContext(AuthContext);
+  const { login  , loading } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<LoginFormData>({
+  const { control, handleSubmit, formState: { errors }, reset } = useForm<LoginFormData>({
     resolver: yupResolver(ValidationSchema),
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    login(data.email, data.password);
-    reset();
+  const onSubmit = async (data: LoginFormData) => {
+    const success = await login(data.email, data.password);
+    if (success) reset();
   };
-    const [showPassword, setShowPassword] = useState(false);
 
   return (
     <ImageBackground
@@ -41,7 +41,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       resizeMode="cover"
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Ajuste le comportement selon la plateforme
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         <ScrollView
@@ -63,25 +63,37 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </Text>
 
             <View className="mb-4">
-              <TextInput
-                placeholder="Votre e-mail"
-                placeholderTextColor="#6B7280"       
-                className={` ${textinput} ${errors.email ? 'border-red-400' : 'border-gray-200'}`}
-                autoCapitalize="none"
-                onChangeText={value => setValue('email', value)}
-                {...register('email')}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    placeholder="Votre e-mail"
+                    placeholderTextColor="#6B7280"
+                    className={`${textinput} ${errors.email ? 'border-red-400' : 'border-gray-200'}`}
+                    autoCapitalize="none"
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
               />
               {errors.email && <Text className="text-sm text-red-400 mt-1">{errors.email.message}</Text>}
             </View>
 
             <View className="mb-4 relative">
-              <TextInput
-                placeholder="Mot de passe"
-                placeholderTextColor="#6B7280"
-                secureTextEntry={!showPassword}
-                className={`${textinput} pr-12  ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
-                onChangeText={text => setValue('password', text)}
-                {...register('password')}
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    placeholder="Mot de passe"
+                    placeholderTextColor="#6B7280"
+                    secureTextEntry={!showPassword}
+                    className={`${textinput} pr-12 ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
               />
               <TouchableOpacity
                 className="absolute right-4 top-3"
@@ -92,8 +104,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               {errors.password && <Text className="text-sm text-red-400 mt-1">{errors.password.message}</Text>}
             </View>
 
-            <TouchableOpacity className={stylebtn} onPress={handleSubmit(onSubmit)}>
-              <Text className="text-center font-bold text-lg">Se connecter</Text>
+             <TouchableOpacity className={stylebtn} onPress={handleSubmit(onSubmit)} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="text-center font-bold text-lg">Se connecter</Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity className="mt-6 items-center">

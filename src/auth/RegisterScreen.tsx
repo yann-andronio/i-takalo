@@ -18,16 +18,16 @@ import { stylebtn, textinput } from '../styles/Styles';
 import { EyeIcon , EyeSlashIcon } from 'phosphor-react-native';
 
 interface RegisterFormData {
-  name: string;
-  prenom: string; 
+  first_name: string;  // prénom
+  last_name: string;   // nom
   email: string;
   password: string;
-  confirmPassword: string; 
+  confirmPassword: string; // uniquement pour validation front
 }
 
 const ValidationSchema = yup.object({
-  name: yup.string().required('Veuillez entrer votre nom'),
-  prenom: yup.string().required('Veuillez entrer votre prénom'),
+  first_name: yup.string().required('Veuillez entrer votre prénom'),
+  last_name: yup.string().required('Veuillez entrer votre nom'),
   email: yup.string().email('Email invalide').required('Veuillez entrer votre email'),
   password: yup.string().min(6, 'Au moins 6 caractères').required('Mot de passe requis'),
   confirmPassword: yup
@@ -41,15 +41,33 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<RegisterFormData>({
     resolver: yupResolver(ValidationSchema),
   });
 
-  const onSubmit = (data: RegisterFormData) => {
-    registerUser(data);
-    reset();
-    navigation.replace('Login');
+  const onSubmit = async (data: RegisterFormData) => {
+    setServerError(null);
+    try {
+      const registerdataalefa = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        password: data.password,
+      };
+      await registerUser(registerdataalefa); // envoi au backend Django
+      reset();
+      navigation.replace("Login");
+    } catch (error: any) {
+      console.log("Erreur lors de l'inscription :", error);
+      setServerError(
+        error.response?.data?.email?.[0] ||
+        error.response?.data?.password?.[0] ||
+        error.response?.data?.detail ||
+        "Erreur inconnue"
+      );
+    }
   };
 
   return (
@@ -67,8 +85,7 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           <View className="bg-white rounded-t-3xl p-6">
-
-            <View className="items-center mb-5 ">
+            <View className="items-center mb-5">
               <Image
                 source={require('../assets/images/RegisterScreenImage/reg.png')}
                 className="w-50 h-50"
@@ -77,30 +94,36 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
 
             <Text className="text-4xl font-bold mb-8 text-center">S’inscrire</Text>
-         
 
+            {serverError && <Text className="text-sm text-red-500 mb-3 text-center">{serverError}</Text>}
+
+          
+
+            {/* Nom */}
             <View className="mb-4">
               <TextInput
                 placeholder="Nom"
                 placeholderTextColor="#6B7280"
-                className={`${textinput} ${errors.name ? 'border-red-400' : 'border-gray-200'}`}
-                onChangeText={text => setValue('name', text)}
-                {...register('name')}
+                className={`${textinput} ${errors.last_name ? 'border-red-400' : 'border-gray-200'}`}
+                onChangeText={text => setValue('last_name', text)}
+                {...register('last_name')}
               />
-              {errors.name && <Text className="text-sm text-red-400 mt-1">{errors.name.message}</Text>}
+              {errors.last_name && <Text className="text-sm text-red-400 mt-1">{errors.last_name.message}</Text>}
             </View>
 
+              {/* Prénom */}
             <View className="mb-4">
               <TextInput
                 placeholder="Prénom"
                 placeholderTextColor="#6B7280"
-                className={`${textinput}  ${errors.prenom ? 'border-red-400' : 'border-gray-200'}`}
-                onChangeText={text => setValue('prenom', text)}
-                {...register('prenom')}
+                className={`${textinput} ${errors.first_name ? 'border-red-400' : 'border-gray-200'}`}
+                onChangeText={text => setValue('first_name', text)}
+                {...register('first_name')}
               />
-              {errors.prenom && <Text className="text-sm text-red-400 mt-1">{errors.prenom.message}</Text>}
+              {errors.first_name && <Text className="text-sm text-red-400 mt-1">{errors.first_name.message}</Text>}
             </View>
 
+            {/* Email */}
             <View className="mb-4">
               <TextInput
                 placeholder="Email"
@@ -113,12 +136,13 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               {errors.email && <Text className="text-sm text-red-400 mt-1">{errors.email.message}</Text>}
             </View>
 
+            {/* Mot de passe */}
             <View className="mb-4 relative">
               <TextInput
                 placeholder="Mot de passe"
                 placeholderTextColor="#6B7280"
                 secureTextEntry={!showPassword}
-                className={`${textinput} pr-12  ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
+                className={`${textinput} pr-12 ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
                 onChangeText={text => setValue('password', text)}
                 {...register('password')}
               />
@@ -131,12 +155,13 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               {errors.password && <Text className="text-sm text-red-400 mt-1">{errors.password.message}</Text>}
             </View>
 
+            {/* Confirmer mot de passe */}
             <View className="mb-6 relative">
               <TextInput
                 placeholder="Confirmer mot de passe"
                 placeholderTextColor="#6B7280"
                 secureTextEntry={!showConfirmPassword}
-                className={`${textinput} pr-12  ${errors.confirmPassword ? 'border-red-400' : 'border-gray-200'}`}
+                className={`${textinput} pr-12 ${errors.confirmPassword ? 'border-red-400' : 'border-gray-200'}`}
                 onChangeText={text => setValue('confirmPassword', text)}
                 {...register('confirmPassword')}
               />

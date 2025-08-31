@@ -7,18 +7,31 @@ import { ProductData, ProductDataI } from '../data/ProductData';
 import ProductCard from '../components/ProductCard';
 import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
+import FilterBarDons from '../components/FilterBarDons';
+import { ProductContext } from '../context/ProductContext';
 
 export default function HomeScreen() {
-  const [ProductDta, SetProductData] = useState<ProductDataI[]>(ProductData);
   const [modalVisible, setModalVisible] = useState(false);
- const { logout } = useContext(AuthContext);
-  const [filterproductjiaby, setfilterproductjiaby] = useState<any>(null); 
+  const { logout } = useContext(AuthContext);
+  const [filterproductjiaby, setfilterproductjiaby] = useState<any>(null);
+  const [filterproductdonation, setfilterfilterproductdonation] =
+    useState<any>(null);
+  const [isselectfilterDonation, setIsSelectfilterDonation] =
+    useState<string>('all');
 
- 
   const handleApplyFilters = (filters: any) => {
-    console.log('Filtres reçus par HomeScren:', filters);
+    console.log('Filtres vente reçus par HomeScren:', filters);
     setfilterproductjiaby(filters);
   };
+  const handleApplyFiltersBarDonation = (filters: any) => {
+    console.log('Filtres de donation reçus par HomeScren:', filters);
+    setfilterfilterproductdonation(filters);
+    setIsSelectfilterDonation(filters.category);
+  };
+
+
+  const {products} = useContext( ProductContext)
+
   return (
     <SafeAreaView className="flex-1 bg-white p-6">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
@@ -26,10 +39,12 @@ export default function HomeScreen() {
 
       <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
 
-      <View className="flex-1    rounded-2xl overflow-hidden">
+      <View className="flex-1 rounded-2xl overflow-hidden">
+        
+        {/* FlatList verticale principale */}
         <FlatList
-          data={ProductDta}
-          keyExtractor={item => item.id}
+          data={products}
+          keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => <ProductCard item={item} />}
           showsVerticalScrollIndicator={false}
           numColumns={2}
@@ -38,17 +53,38 @@ export default function HomeScreen() {
             marginBottom: 12,
           }}
           contentContainerStyle={{ paddingBottom: 20 }}
-          ListHeaderComponent={
-            <>
-              <View className=" mb-6">
-                <HeroSection />
+          ListHeaderComponent={() => (
+            <View>
+              <HeroSection />
+
+              <View className="mb-4">
+                <FilterBarDons
+                  isselectfilterDonation={isselectfilterDonation}
+                  onApplyFilters={handleApplyFiltersBarDonation}
+                />
               </View>
 
               <Text className="text-xl font-bold text-gray-800 mb-2">
-                Top Produits
+                Produit de Dons
               </Text>
-            </>
-          }
+
+              <FlatList
+                data={products.filter(p => p.type === 'DONATION')}
+                keyExtractor={item => item.id.toString()}
+                renderItem={({ item }) => <ProductCard item={item} />}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  gap: 10,
+                  marginBottom: 20,
+                }}
+              />
+
+              <Text className="text-xl font-bold text-gray-800 mb-2">
+                Produit en vente
+              </Text>
+            </View>
+          )}
         />
       </View>
 

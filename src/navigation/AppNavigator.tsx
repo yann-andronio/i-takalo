@@ -28,8 +28,8 @@ const AppNavigator = () => {
 
 if (loadingtoken) {
     return (
-      <View className=' flex-1 bg-blue-700'>
-        <ActivityIndicator size="large" color={"red"}/>
+      <View className=' flex-1 bg-[#FEF094] justify-center items-center'>
+        <ActivityIndicator size="large" color={"white"} />
       </View>
     );
   }

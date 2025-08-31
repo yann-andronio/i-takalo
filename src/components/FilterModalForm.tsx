@@ -13,7 +13,6 @@ interface FilterFormData {
   category: string;
   genre: string;
   style: string;
-  taille: string;
   saison: string;
   minPrice: string;
   maxPrice: string;
@@ -25,7 +24,6 @@ const filterOptions = {
   category: ['T-shirt', 'pantalon', 'robe', 'chaussure', 'veste'],
   genre: ['homme', 'femme', 'enfant'],
   style: ['sport', 'vintage', 'streetwear', 'classique', 'chic'],
-  taille: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
   saison: ['été', 'hiver', 'printemps', 'automne'],
 };
 
@@ -44,7 +42,6 @@ export default function FilterModalForm({ visible, onClose, onApplyFilters }: Pr
   const [category, setCategory] = useState<string>('all');
   const [genre, setGenre] = useState<string>('all');
   const [style, setStyle] = useState<string>('all');
-  const [taille, setTaille] = useState<string>('all');
   const [saison, setSaison] = useState<string>('all');
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
@@ -66,7 +63,6 @@ export default function FilterModalForm({ visible, onClose, onApplyFilters }: Pr
       category: category,
       genre: genre,
       style: style,
-      taille: taille,
       saison: saison,
       minPrice: minPrice,
       maxPrice: maxPrice,
@@ -80,7 +76,6 @@ export default function FilterModalForm({ visible, onClose, onApplyFilters }: Pr
     setCategory('all')
     setGenre('all')
     setStyle('all')
-    setTaille('all')
     setSaison('all')
     setMinPrice('')
     setMaxPrice('')
@@ -171,20 +166,7 @@ export default function FilterModalForm({ visible, onClose, onApplyFilters }: Pr
               </View>
             </View>
             
-            {/* Section Taille */}
-            <View className="mb-6">
-              <Text className="text-lg font-bold mb-3 capitalize">Par taille</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {filterOptions.taille.map((option) => (
-                  <FilterButton
-                    key={option}
-                    label={option}
-                    isSelected={taille === option}
-                    onPress={() => togglefilter(taille, setTaille, option)}
-                  />
-                ))}
-              </View>
-            </View>
+           
 
             {/* Section Prix */}
             <View className="mb-6">

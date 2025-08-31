@@ -7,6 +7,7 @@ import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation
 import * as yup from 'yup';
 
 import { RootStackParamListMainNavigatorTab } from '../types/Types';
+import API from '../api/Api';
 
 type FormData = {
     title: string;
@@ -39,21 +40,41 @@ export default function ProductSellForm() {
         }, [reset])
     );
 
-    const handleAddProduct: SubmitHandler<FormData> = (data) => {
-        console.log('Produit à vendre validé :', data);
-        
-        Alert.alert(
-            'Succès',
-            'Votre produit a été mis en vente. Vous allez être redirigé vers la page d\'accueil.',
-            [{
-                text: 'OK',
-                onPress: () => {
-                    reset(); 
-                    navigation.navigate('Home');
-                },
-            }]
-        );
-    };
+const handleAddProduct: SubmitHandler<FormData> = async (data) => {
+  try {
+    const response = await API.post("/api/v1/products/create/", {
+      title: data.title,
+      type: "SALE", // type vente
+      description: data.description,
+      price: data.price,
+      category: data.category,
+      adresse: data.adresse,
+      telphone: data.telphone,
+    });
+
+    console.log("Produit créé:", response.data);
+
+    Alert.alert(
+      "Succès",
+      "Votre produit a été mis en vente.",
+      [
+        {
+          text: "OK",
+          onPress: () => {
+            reset();
+            navigation.navigate('Home', {
+                screen: 'HomeMain',
+              });
+          },
+        },
+      ]
+    );
+  } catch (error: any) {
+    console.log("Erreur création produit:", error.response?.data || error.message);
+    Alert.alert("Erreur", "Impossible de créer le produit");
+  }
+};
+
 
     return (
         <ScrollView

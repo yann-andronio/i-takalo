@@ -7,6 +7,7 @@ import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation
 import * as yup from 'yup';
 
 import { RootStackParamListMainNavigatorTab } from '../types/Types';
+import API from '../api/Api';
 
 type FormData = {
   category: string;
@@ -41,21 +42,39 @@ export default function DonationAdForm() {
     }, [reset])
   );
 
-  const handleAddDonation: SubmitHandler<FormData> = (data) => {
-    console.log('Donation validée:', data);
+ const handleAddDonation: SubmitHandler<FormData> = async (data) => {
+  try {
+    const response = await API.post("/api/v1/products/create/", {
+      type: "DONATION",
+      description: data.description,
+      category: data.category,
+      adresse: data.adresse,
+      telphone: data.telphone,
+    });
+
+    console.log("Donation créée:", response.data);
 
     Alert.alert(
-      'Succès',
-      'Votre donation a été ajoutée. Vous allez être redirigé vers la page d\'accueil.',
-      [{
-        text: 'OK',
-        onPress: () => {
-          reset();
-          navigation.navigate('Home');
+      "Succès",
+      "Votre donation a été ajoutée.",
+      [
+        {
+          text: "OK",
+          onPress: () => {
+            reset();
+           navigation.navigate('Home', {
+                screen: 'HomeMain',
+              });
+          },
         },
-      }]
+      ]
     );
-  };
+  } catch (error: any) {
+    console.log("Erreur création donation:", error.response?.data || error.message);
+    Alert.alert("Erreur", "Impossible d'ajouter la donation");
+  }
+};
+
 
   return (
     <ScrollView className="flex-1 bg-white p-5" contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>

@@ -21,7 +21,7 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
 
   // raha anaty screen de conditon eto de miala le tabbar
-  if (routeName === 'Search' || routeName === "Product" || routeName ==="Sell") return null;
+  if (routeName === 'Search' || routeName === "Product" || routeName ==="Sell" || routeName ==="Conversation") return null;
 
   return (
     <View className="  h-[11%] absolute bottom-0 w-[100%] justify-center items-center ">

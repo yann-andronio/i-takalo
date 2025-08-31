@@ -4,6 +4,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import "./global.css"; // NativeWind
 import { LogBox } from 'react-native';
 import 'react-native-gesture-handler';
+import { ProductProvider } from './src/context/ProductContext';
 // Masque le warning de SafeAreaView
 LogBox.ignoreLogs([
   'SafeAreaView has been deprecated',
@@ -12,7 +13,9 @@ LogBox.ignoreLogs([
 const App: React.FC = () => {
   return (
     <AuthProvider>
+       <ProductProvider>  
       <AppNavigator />
+      </ProductProvider>
     </AuthProvider>
   );
 };

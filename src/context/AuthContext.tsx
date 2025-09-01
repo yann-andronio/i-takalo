@@ -3,11 +3,13 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import API from '../api/Api';
 
  export interface UserI {
-  id: number;
+   id: number;
   first_name: string;
   last_name: string;
   email: string;
   type: 'USER' | 'ADMIN';
+  image?: string; 
+  telnumber?: string; 
 }
 
 interface AuthContextProps {

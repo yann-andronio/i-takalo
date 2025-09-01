@@ -15,7 +15,6 @@ export default function HomeScreen() {
     useContext(ProductContext);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const { logout } = useContext(AuthContext);
   const [filterproductjiaby, setfilterproductjiaby] = useState<any>(null);
   const [isselectfilterDonation, setIsSelectfilterDonation] =useState<string>('all');
 
@@ -32,7 +31,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white p-6">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
-      <Text onPress={logout}>se deconnecter</Text>
 
       <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
 

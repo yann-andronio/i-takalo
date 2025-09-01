@@ -1,10 +1,23 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Dimensions, ImageBackground,} from 'react-native';
-import { HouseIcon, ChatIcon, WalletIcon, UserIcon, PlusIcon,} from 'phosphor-react-native';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ImageBackground,
+} from 'react-native';
+import {
+  HouseIcon,
+  ChatIcon,
+  WalletIcon,
+  UserIcon,
+  PlusIcon,
+} from 'phosphor-react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
-const HEIGHT_SIZE = width * 0.17; 
+const HEIGHT_SIZE = width * 0.17;
 const BAR_WIDTH = width * 0.9;
 
 interface Props {
@@ -13,15 +26,21 @@ interface Props {
   navigation: any;
 }
 
-
 const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
-
-
   const route = state.routes[state.index];
   const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
 
   // raha anaty screen de conditon eto de miala le tabbar
-  if (routeName === 'Search' || routeName === "Product" || routeName ==="Sell" || routeName ==="Conversation") return null;
+  if (
+    routeName === 'Search' ||
+    routeName === 'Product' ||
+    routeName === 'Sell' ||
+    routeName === 'Conversation' ||
+    routeName === 'ProfilMain' ||
+    routeName === 'ConfidentialityScreen' ||
+    routeName === "TrueProfilUserAccess"
+  )
+    return null;
 
   return (
     <View className="  h-[11%] absolute bottom-0 w-[100%] justify-center items-center ">
@@ -36,7 +55,7 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
           const isFocused = state.index === index;
 
           const onPress = () => {
-            if (route.name === 'Home' ) {
+            if (route.name === 'Home') {
               // Si on clique sur Home, réinitialiser le stack Home à HomeMain
               navigation.navigate('Home', { screen: 'HomeMain' });
             } else if (!isFocused) {

@@ -22,7 +22,7 @@ const ValidationSchema = yup.object({
 });
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-  const { login  , loading } = useContext(AuthContext);
+  const { login, loading } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<LoginFormData>({
@@ -104,7 +104,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               {errors.password && <Text className="text-sm text-red-400 mt-1">{errors.password.message}</Text>}
             </View>
 
-             <TouchableOpacity className={stylebtn} onPress={handleSubmit(onSubmit)} disabled={loading}>
+            <TouchableOpacity className={stylebtn} onPress={handleSubmit(onSubmit)} disabled={loading}>
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (

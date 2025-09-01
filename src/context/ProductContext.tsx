@@ -4,7 +4,7 @@ import { ImageSourcePropType } from 'react-native';
 
 export interface ProductDataI {
   id: number;
-  title?: string; 
+  title: string; 
   image: string;
   type: 'SALE' | 'DONATION';
   description?: string;

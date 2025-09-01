@@ -10,13 +10,15 @@ import { RootStackParamListMainNavigatorTab } from '../types/Types';
 import API from '../api/Api';
 
 type FormData = {
-  category: string;
-  description?: string;
-  adresse: string;
-  telphone: string;
+  title:string
+  category: string
+  description?: string
+  adresse: string
+  telphone: string
 };
 
 const ValidationSchema: yup.ObjectSchema<FormData> = yup.object({
+  title: yup.string().required('La catégorie est requise.'),
   category: yup.string().required('La catégorie est requise.'),
   description: yup.string().optional(),
   adresse: yup.string().required("L'adresse est requise."),
@@ -82,6 +84,24 @@ export default function DonationAdForm() {
         <PlusIcon size={30} color="#666" weight="bold" />
         <Text className="mt-2 text-gray-600">Ajouter photo</Text>
       </View>
+
+      {/* Title */}
+      <Text className="text-base font-bold mb-2">Titre<Text className="text-red-500">*</Text></Text>
+
+      <Controller
+        control={control}
+        name="title"
+        render={({ field: { onChange, value } }) => (
+          <TextInput
+            className={`border rounded-lg p-3 mb-5 text-black ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Titre de l'article"
+            placeholderTextColor="#6B7280"
+            onChangeText={onChange}
+            value={value}
+          />
+        )}
+      />
+      {errors.title && <Text className="text-red-500 mt-1">{errors.title.message}</Text>}
 
       {/* cat */}
       <Text className="text-base font-bold mb-2">Catégorie<Text className="text-red-500">*</Text></Text>

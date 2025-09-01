@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,7 @@ import {
   Linking,
 } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { ProductDataI } from '../data/ProductData';
-import { UserData } from '../data/UserData';
+import { ProductDataI } from '../context/ProductContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeftIcon,
@@ -22,6 +21,7 @@ import {
   CubeTransparentIcon,
   ClockCounterClockwiseIcon,
 } from 'phosphor-react-native';
+import { AuthContext } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -34,30 +34,38 @@ export default function ProductScreen() {
   const navigation = useNavigation();
   const route = useRoute<ProductScreenRouteProp>();
   const { item } = route.params;
-  const user = UserData.find(u => u.id === item.userId);
+  const { user } = useContext(AuthContext);
+  /*   const user = UserData.find(u => u.id === item.userId);*/
+  const isAuthor = user && item.author === user.id;
+  /* const profileImageSource = user && user.profileImage ? { uri: user.profileImage } : ''; */
+  /*  console.log("ITEM ===>", item) */
 
-  const handlePhonePress = () => {
+  /* const handlePhonePress = () => {
     Linking.openURL(`tel:${item.telphone}`);
-  };
+  }; */
 
   const handleARPress = () => {
     console.log(
       'Activation de la réalité augmentée pour le produit :',
-      item.titre,
+      item.title,
     );
   };
 
   const handleMessagePress = () => {
-    console.log("Envoi d'un message au vendeur :", user?.username);
+    console.log("Envoi d'un message au vendeur :", user?.first_name);
   };
 
- 
   const [showFullDescription, setShowFullDescription] = useState(false);
   const descriptionLimit = 100;
 
   const toggleDescription = () => setShowFullDescription(!showFullDescription);
 
-  const displayedDescription = showFullDescription? item.description: item.description?.slice(0, descriptionLimit) + (item.description && item.description.length > descriptionLimit ? '...' : '');
+  const displayedDescription = showFullDescription
+    ? item.description
+    : item.description?.slice(0, descriptionLimit) +
+      (item.description && item.description.length > descriptionLimit
+        ? '...'
+        : '');
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -65,7 +73,7 @@ export default function ProductScreen() {
         {/* Product Image Section */}
         <View className="w-full h-[400px] relative">
           <Image
-            source={item.image}
+            source={{ uri: item.image }}
             style={{ width: width, height: '100%' }}
             resizeMode="cover"
             className="rounded-b-3xl"
@@ -92,16 +100,18 @@ export default function ProductScreen() {
           <View className="flex-row justify-between items-start mb-4">
             <View className="flex-1">
               <Text className="text-3xl font-extrabold text-gray-900 mb-1">
-                {item.titre}
+                {item.title}
               </Text>
               <Text className="text-xl font-semibold text-gray-700">
-                {item.price}
+                {/*   {item.price} */}
+                Prix
               </Text>
             </View>
             <View className="flex-row items-center bg-gray-100 p-2 rounded-lg">
               <TagIcon size={18} color="#4B5563" weight="bold" />
               <Text className="text-sm text-gray-600 ml-1 font-medium">
-                {item.category}
+                {/*  {item.category} */}
+                category
               </Text>
             </View>
           </View>
@@ -109,12 +119,15 @@ export default function ProductScreen() {
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
               <MapPinIcon size={16} color="#4b5563" />
-              <Text className="text-sm text-gray-600 ml-2">{item.adresse}</Text>
+              <Text className="text-sm text-gray-600 ml-2">
+                {/* {  item.adresse} */}
+                adresse
+              </Text>
             </View>
             <View className="flex-row items-center">
               <ClockCounterClockwiseIcon size={16} color="#4b5563" />
               <Text className="text-sm text-gray-600 ml-2">
-                Publié le 25 Août 2025
+                Publié le {(item.created_at)}
               </Text>
             </View>
           </View>
@@ -126,20 +139,20 @@ export default function ProductScreen() {
             </Text>
           </View>
 
-          {user && (
+          {isAuthor && (
             <View className="flex-row items-center mb-6 p-4 bg-gray-100 rounded-xl">
               <Image
-                source={user.profileImage}
+                /* source={{ uri: user.profileImage }} */
                 className="w-14 h-14 rounded-full mr-4 border-2 border-white"
               />
               <View className="flex-1">
                 <Text className="text-lg font-bold text-gray-800">
-                  {user.username}
+                  {user.first_name}
                 </Text>
                 <Text className="text-sm text-gray-500">{user.email}</Text>
               </View>
               <TouchableOpacity
-                onPress={handlePhonePress}
+                /*  onPress={handlePhonePress} */
                 className="p-3 bg-gray-200 rounded-full"
               >
                 <PhoneIcon size={20} color="#000" weight="bold" />
@@ -147,7 +160,7 @@ export default function ProductScreen() {
             </View>
           )}
 
-          {/* Description Section avec "Voir plus / Voir moins" */}
+          {/* Description Section avec VP / VM" */}
           <View className="mb-6">
             <Text className="text-xl font-bold text-gray-800 mb-2">
               Description
@@ -166,7 +179,7 @@ export default function ProductScreen() {
             )}
           </View>
 
-          {/* Call to Action Buttons */}
+          {/*  Buttons  principale*/}
           <View className="flex-row items-center justify-between gap-4">
             <TouchableOpacity
               className="flex-1 flex-row items-center justify-center p-4 bg-gray-200 rounded-xl"

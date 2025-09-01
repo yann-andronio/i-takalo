@@ -1,83 +1,83 @@
 // src/data/UserData.ts
-export interface UserDataI {
-  id: string;
-  username: string;
+export interface UserI {
+  id: number;
+  first_name: string;
+  last_name: string;
   email: string;
-  profileImage: any;
-  followers: number;
+  type: 'USER' | 'ADMIN';
+  // Note: 'followers' n'est pas dans l'interface UserI, il a donc été retiré du tableau
+  // Note: 'profileImage' n'est pas dans l'interface UserI, il a donc été retiré du tableau
 }
 
-const defaultProfileImage = require('../assets/images/HeroSectionImage/p1.png');
-
-export const UserData: UserDataI[] = [
+export const UserData: UserI[] = [
   {
-    id: '1',
-    username: 'JohnDoe',
+    id: 1,
+    first_name: 'John',
+    last_name: 'Doe',
     email: 'john@example.com',
-    profileImage: defaultProfileImage,
-    followers: 120,
+    type: 'USER',
   },
   {
-    id: '2',
-    username: 'JaneSmith',
+    id: 2,
+    first_name: 'Jane',
+    last_name: 'Smith',
     email: 'jane@example.com',
-    profileImage: defaultProfileImage,
-    followers: 95,
+    type: 'USER',
   },
   {
-    id: '3',
-    username: 'Alex92',
+    id: 3,
+    first_name: 'Alex',
+    last_name: 'Jackson',
     email: 'alex92@example.com',
-    profileImage: defaultProfileImage,
-    followers: 80,
+    type: 'USER',
   },
   {
-    id: '4',
-    username: 'Lila_M',
+    id: 4,
+    first_name: 'Lila',
+    last_name: 'M',
     email: 'lila.m@example.com',
-    profileImage: defaultProfileImage,
-    followers: 45,
+    type: 'USER',
   },
   {
-    id: '5',
-    username: 'Tommy77',
+    id: 5,
+    first_name: 'Tommy',
+    last_name: 'Finch',
     email: 'tommy77@example.com',
-    profileImage: defaultProfileImage,
-    followers: 200,
+    type: 'USER',
   },
   {
-    id: '6',
-    username: 'SophiaK',
+    id: 6,
+    first_name: 'Sophia',
+    last_name: 'K',
     email: 'sophia.k@example.com',
-    profileImage: defaultProfileImage,
-    followers: 150,
+    type: 'USER',
   },
   {
-    id: '7',
-    username: 'Mike_L',
+    id: 7,
+    first_name: 'Mike',
+    last_name: 'Lee',
     email: 'mike.l@example.com',
-    profileImage: defaultProfileImage,
-    followers: 65,
+    type: 'USER',
   },
   {
-    id: '8',
-    username: 'EmmaStar',
+    id: 8,
+    first_name: 'Emma',
+    last_name: 'Star',
     email: 'emma.star@example.com',
-    profileImage: defaultProfileImage,
-    followers: 310,
+    type: 'USER',
   },
   {
-    id: '9',
-    username: 'ChrisB',
+    id: 9,
+    first_name: 'Chris',
+    last_name: 'Brown',
     email: 'chris.b@example.com',
-    profileImage: defaultProfileImage,
-    followers: 72,
+    type: 'USER',
   },
   {
-    id: '10',
-    username: 'Nina_Dev',
+    id: 10,
+    first_name: 'Nina',
+    last_name: 'Dev',
     email: 'nina.dev@example.com',
-    profileImage: defaultProfileImage,
-    followers: 185,
+    type: 'USER',
   },
 ];

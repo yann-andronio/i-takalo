@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, use } from 'react';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import API from '../api/Api';
 
-interface User {
+ export interface UserI {
   id: number;
   first_name: string;
   last_name: string;
@@ -11,7 +11,7 @@ interface User {
 }
 
 interface AuthContextProps {
-  user: User | null;
+  user: UserI | null;
   loading: boolean;
   loadingtoken: boolean
   login: (email: string, password: string) => Promise<boolean>;
@@ -26,7 +26,7 @@ export const AuthContext = createContext<AuthContextProps>(
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserI | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingtoken, setloadingtoken] = useState(true);
 

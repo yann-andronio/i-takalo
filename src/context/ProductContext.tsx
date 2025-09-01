@@ -12,6 +12,11 @@ export interface ProductDataI {
   description?: string;
   author?: number;
   likes: number[];
+  category:string
+  price:number
+  created_at: string;
+  adresse?: string; 
+  updated_at: string; 
 }
 
 interface ProductContextType {

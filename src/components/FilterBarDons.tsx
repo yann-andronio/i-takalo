@@ -30,12 +30,10 @@ const FilterButton = ({ label, icon, active, onPress }: FilterButtonProps) => {
 
 export default function FilterBarDons({ onApplyFilters, isselectfilterDonation }: FilterBarDonsProps) {
   const getFilterData = (value: string) => {
-    if (value === isselectfilterDonation) {
-      return { types: "Donation", category: "all", genre: "all", style: "all", saison: "all", minPrice: "", maxPrice: "" };
-    }
+   
 
     const baseFilters = {
-      types: "Donation",
+      types: "DONATION",
       category: "all",
       genre: "all",
       style: "all",

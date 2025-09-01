@@ -20,8 +20,10 @@ import {
   HeartIcon,
   CubeTransparentIcon,
   ClockCounterClockwiseIcon,
+  UserIcon,
 } from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
+import { UserContext } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
 
@@ -34,11 +36,12 @@ export default function ProductScreen() {
   const navigation = useNavigation();
   const route = useRoute<ProductScreenRouteProp>();
   const { item } = route.params;
-  const { user } = useContext(AuthContext);
-  /*   const user = UserData.find(u => u.id === item.userId);*/
-  const isAuthor = user && item.author === user.id;
-  /* const profileImageSource = user && user.profileImage ? { uri: user.profileImage } : ''; */
-  /*  console.log("ITEM ===>", item) */
+  const { users } = useContext(UserContext); 
+  const { user } = useContext(AuthContext); 
+
+  const author = users.find(i => i.id === item.author);
+  const profileImageSource = author?.image ? { uri: author.image } : null;
+ 
 
   /* const handlePhonePress = () => {
     Linking.openURL(`tel:${item.telphone}`);
@@ -51,8 +54,9 @@ export default function ProductScreen() {
     );
   };
 
+
   const handleMessagePress = () => {
-    console.log("Envoi d'un message au vendeur :", user?.first_name);
+    console.log("Envoi d'un message au vendeur :", author);
   };
 
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -66,6 +70,15 @@ export default function ProductScreen() {
       (item.description && item.description.length > descriptionLimit
         ? '...'
         : '');
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -103,15 +116,13 @@ export default function ProductScreen() {
                 {item.title}
               </Text>
               <Text className="text-xl font-semibold text-gray-700">
-                {/*   {item.price} */}
-                Prix
+                {item.price} Ar
               </Text>
             </View>
             <View className="flex-row items-center bg-gray-100 p-2 rounded-lg">
               <TagIcon size={18} color="#4B5563" weight="bold" />
               <Text className="text-sm text-gray-600 ml-1 font-medium">
-                {/*  {item.category} */}
-                category
+                {item.category}
               </Text>
             </View>
           </View>
@@ -120,14 +131,14 @@ export default function ProductScreen() {
             <View className="flex-row items-center">
               <MapPinIcon size={16} color="#4b5563" />
               <Text className="text-sm text-gray-600 ml-2">
-                {/* {  item.adresse} */}
+                {item.adresse}
                 adresse
               </Text>
             </View>
             <View className="flex-row items-center">
               <ClockCounterClockwiseIcon size={16} color="#4b5563" />
               <Text className="text-sm text-gray-600 ml-2">
-                Publié le {(item.created_at)}
+                Publié le {formatDate(item.created_at)}
               </Text>
             </View>
           </View>
@@ -139,20 +150,28 @@ export default function ProductScreen() {
             </Text>
           </View>
 
-          {isAuthor && (
+          {author && (
             <View className="flex-row items-center mb-6 p-4 bg-gray-100 rounded-xl">
-              <Image
-                /* source={{ uri: user.profileImage }} */
-                className="w-14 h-14 rounded-full mr-4 border-2 border-white"
-              />
+          
+              {profileImageSource ? (
+                <Image
+                  source={profileImageSource}
+                  className="w-14 h-14 rounded-full mr-4 border-2 border-white"
+                />
+              ) : (
+                <View className="w-14 h-14 rounded-full mr-4 border-2 border-white bg-gray-300 justify-center items-center">
+                  <UserIcon size={32} color="white" weight="bold" />
+                </View>
+              )}
+
               <View className="flex-1">
                 <Text className="text-lg font-bold text-gray-800">
-                  {user.first_name}
+                  {author?.first_name}
                 </Text>
-                <Text className="text-sm text-gray-500">{user.email}</Text>
+                <Text className="text-sm text-gray-500">{author?.email}</Text>
               </View>
               <TouchableOpacity
-                /*  onPress={handlePhonePress} */
+                /* onPress={handlePhonePress} */
                 className="p-3 bg-gray-200 rounded-full"
               >
                 <PhoneIcon size={20} color="#000" weight="bold" />

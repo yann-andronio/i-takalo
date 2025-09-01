@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListHomenavigatorScreen } from '../types/Types';
 import { AuthContext } from '../context/AuthContext';
-import { UserContext } from '../context/UserContext'; 
+import { UserContext } from '../context/UserContext';
 
 interface ProductCardProps {
   item: ProductDataI;
@@ -26,9 +26,9 @@ type ProductCardNavigationProp = NativeStackNavigationProp<
 export default function ProductCard({ item }: ProductCardProps) {
   const navigation = useNavigation<ProductCardNavigationProp>();
   const { users } = useContext(UserContext);
+  const [isImageLoading, setIsImageLoading] = useState(true);
 
   const author = users.find(user => user.id === item.author);
-
   const profileImageSource = author?.image ? { uri: author.image } : null;
 
   return (
@@ -38,11 +38,12 @@ export default function ProductCard({ item }: ProductCardProps) {
       activeOpacity={0.8}
     >
       <ImageBackground
-        source={{ uri: item.image }}
+        source={isImageLoading ? require('../assets/images/productCardImage/linear.png') : { uri: item.image }}
         className="w-full h-72 justify-between"
         resizeMode="cover"
+        onLoadEnd={() => setIsImageLoading(false)}
       >
-        {/* affiche image selon type ngiah si pdp */}
+        {/* Affich profil na icône */}
         {item.type === 'SALE' ? (
           <View className="absolute top-4 left-4 w-11 h-11 rounded-full border-2 border-white overflow-hidden items-center justify-center">
             {profileImageSource ? (
@@ -53,24 +54,24 @@ export default function ProductCard({ item }: ProductCardProps) {
               />
             ) : (
               <View className="w-full h-full bg-gray-100 items-center justify-center">
-                 <UserIcon size={22} color="gray" weight="light" />
+                <UserIcon size={22} color="gray" weight="light" />
               </View>
             )}
           </View>
         ) : (
           <View className="absolute top-4 left-4 w-11 h-11 rounded-full border-2 border-white overflow-hidden items-center justify-center bg-[#E5B891]">
-             <HandHeartIcon size={28} color="white" weight="bold" />
+            <HandHeartIcon size={28} color="white" weight="bold" />
           </View>
         )}
 
+        {/* Superposition dégradée fond t@ mario */}
         <Image
           source={require('../assets/images/productCardImage/linear.png')}
           resizeMode="cover"
           className="absolute w-full h-full z-10"
         />
 
-        
-
+       
         <View className="absolute inset-x-0 bottom-0 p-4 z-20">
           <View className="flex-row items-end justify-between ">
             <View className="flex-1">

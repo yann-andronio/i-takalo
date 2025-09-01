@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProductData, ProductDataI } from '../data/ProductData';
 import ProductCard from '../components/ProductCard';
-import { UserData, UserDataI } from '../data/UserData';
 import UserCard from '../components/UserCard';
 import SearchBar from '../components/SearchBar';
 import { SearchUtils } from '../utils/SearchUtils';

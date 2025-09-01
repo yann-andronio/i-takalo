@@ -11,13 +11,13 @@ import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
 
 export default function HomeScreen() {
+  const { products, fetchFilteredProductsDonation, donationProducts } =
+    useContext(ProductContext);
+
   const [modalVisible, setModalVisible] = useState(false);
   const { logout } = useContext(AuthContext);
   const [filterproductjiaby, setfilterproductjiaby] = useState<any>(null);
-  const [filterproductdonation, setfilterfilterproductdonation] =
-    useState<any>(null);
-  const [isselectfilterDonation, setIsSelectfilterDonation] =
-    useState<string>('all');
+  const [isselectfilterDonation, setIsSelectfilterDonation] =useState<string>('all');
 
   const handleApplyFilters = (filters: any) => {
     console.log('Filtres vente reçus par HomeScren:', filters);
@@ -25,12 +25,9 @@ export default function HomeScreen() {
   };
   const handleApplyFiltersBarDonation = (filters: any) => {
     console.log('Filtres de donation reçus par HomeScren:', filters);
-    setfilterfilterproductdonation(filters);
     setIsSelectfilterDonation(filters.category);
+    fetchFilteredProductsDonation(filters);
   };
-
-
-  const {products} = useContext( ProductContext)
 
   return (
     <SafeAreaView className="flex-1 bg-white p-6">
@@ -40,7 +37,6 @@ export default function HomeScreen() {
       <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
 
       <View className="flex-1 rounded-2xl overflow-hidden">
-        
         {/* FlatList verticale principale */}
         <FlatList
           data={products}
@@ -68,17 +64,25 @@ export default function HomeScreen() {
                 Produit de Dons
               </Text>
 
-              <FlatList
-                data={products.filter(p => p.type === 'DONATION')}
-                keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => <ProductCard item={item} />}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  gap: 10,
-                  marginBottom: 20,
-                }}
-              />
+              {donationProducts.length > 0 ? (
+                <FlatList
+                  data={donationProducts}
+                  keyExtractor={item => item.id.toString()}
+                  renderItem={({ item }) => <ProductCard item={item} />}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    gap: 10,
+                    marginBottom: 20,
+                  }}
+                />
+              ) : (
+                <View className="items-center justify-center p-4">
+                  <Text className="text-lg text-gray-500 text-center">
+                    Aucun produit trouvé pour cette catégorie.
+                  </Text>
+                </View>
+              )}
 
               <Text className="text-xl font-bold text-gray-800 mb-2">
                 Produit en vente

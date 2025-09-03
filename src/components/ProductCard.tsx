@@ -59,8 +59,8 @@ export default function ProductCard({ item }: ProductCardProps) {
             )}
           </View>
         ) : (
-          <View className="absolute top-4 left-4 w-11 h-11 rounded-full border-2 border-white overflow-hidden items-center justify-center bg-[#E5B891]">
-            <HandHeartIcon size={28} color="white" weight="bold" />
+          <View className="absolute top-4 left-4 w-11 h-11 rounded-full border-2 border-white overflow-hidden items-center justify-center bg-[#03233A]">
+            <HandHeartIcon size={28} color="white" weight="light" />
           </View>
         )}
 

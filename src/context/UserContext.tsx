@@ -16,12 +16,14 @@ interface UserContextType {
   users: UserI[];
   loadingUsers: boolean;
   fetchUsers: () => void;
+  updateUserInList: (updatedUser: UserI) => void;
 }
 
 export const UserContext = createContext<UserContextType>({
   users: [],
   loadingUsers: false,
   fetchUsers: () => {},
+  updateUserInList: () => {},
 });
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -43,12 +45,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  //  fonction qui met à jour un utilisateur dans le tableau "users" mampiactualise donne jiaby any a l'instant
+  const updateUserInList = (updatedUser: UserI) => {
+    setUsers(prevUsers =>
+      prevUsers.map(u => (u.id === updatedUser.id ? updatedUser : u))
+    );
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   return (
-    <UserContext.Provider value={{ users, loadingUsers, fetchUsers }}>
+    <UserContext.Provider value={{ users, loadingUsers, fetchUsers, updateUserInList }}>
       {children}
     </UserContext.Provider>
   );

@@ -1,29 +1,12 @@
 import React, { useContext, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  Dimensions,
-  TouchableOpacity,
-  Linking,
-} from 'react-native';
+import { View, Text, Image, ScrollView, Dimensions, TouchableOpacity, Linking } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ProductDataI } from '../context/ProductContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  ArrowLeftIcon,
-  MapPinIcon,
-  PhoneIcon,
-  TagIcon,
-  ChatTeardropTextIcon,
-  HeartIcon,
-  CubeTransparentIcon,
-  ClockCounterClockwiseIcon,
-  UserIcon,
-} from 'phosphor-react-native';
+import { ArrowLeftIcon, MapPinIcon, PhoneIcon, TagIcon, ChatTeardropTextIcon, HeartIcon, CubeTransparentIcon, ClockCounterClockwiseIcon, UserIcon, DotsThreeVerticalIcon, } from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext } from '../context/UserContext';
+import PopUpProduct from '../components/popup/PopUpProduct';
 
 const { width } = Dimensions.get('window');
 
@@ -36,16 +19,20 @@ export default function ProductScreen() {
   const navigation = useNavigation();
   const route = useRoute<ProductScreenRouteProp>();
   const { item } = route.params;
-  const { users } = useContext(UserContext); 
-  const { user } = useContext(AuthContext); 
+  const { users } = useContext(UserContext);
+  const { user } = useContext(AuthContext);
 
   const author = users.find(i => i.id === item.author);
   const profileImageSource = author?.image ? { uri: author.image } : null;
- 
+   const handlePhonePress = () => {
+    Linking.openURL(`tel:${author?.telnumber || "0342290407"}`);
+  };
 
-  /* const handlePhonePress = () => {
-    Linking.openURL(`tel:${item.telphone}`);
-  }; */
+  const [showPopup, setShowPopup] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const descriptionLimit = 100;
+
+  const isTomponProduct = user?.id === item.author;
 
   const handleARPress = () => {
     console.log(
@@ -54,13 +41,9 @@ export default function ProductScreen() {
     );
   };
 
-
   const handleMessagePress = () => {
     console.log("Envoi d'un message au vendeur :", author);
   };
-
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const descriptionLimit = 100;
 
   const toggleDescription = () => setShowFullDescription(!showFullDescription);
 
@@ -94,17 +77,34 @@ export default function ProductScreen() {
 
           <View className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/60 to-transparent" />
 
-          <View className="absolute top-6 left-6 right-6 flex-row justify-between items-center z-10">
+          <View className="absolute top-6 left-6 right-6 flex-row  justify-between items-center z-10">
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              className="p-3 rounded-full bg-white/30 backdrop-blur-sm shadow"
+              onPress={() => {navigation.goBack() } }
+              className="p-3 rounded-full bg-gray-100 backdrop-blur-sm shadow"
             >
-              <ArrowLeftIcon size={24} color="white" weight="bold" />
+              <ArrowLeftIcon size={24} color="black" weight="bold" />
             </TouchableOpacity>
 
-            <TouchableOpacity className="p-3 rounded-full bg-white/30 backdrop-blur-sm shadow">
-              <HeartIcon size={24} color="#EF4444" weight="bold" />
-            </TouchableOpacity>
+            <View className="flex-row items-center space-x-2">
+              {isTomponProduct ? (
+                <View className="relative">
+                  <TouchableOpacity
+                    className="p-3 rounded-full bg-gray-100 backdrop-blur-sm shadow"
+                    onPress={() => setShowPopup(!showPopup)}
+                  >
+                    <DotsThreeVerticalIcon size={24} color="black" weight="bold" />
+                  </TouchableOpacity>
+
+                
+                  {showPopup && (
+                      <PopUpProduct setShowPopup={setShowPopup} productId={item.id} />                  )}
+                </View>
+              ) : (<TouchableOpacity className="p-3 rounded-full bg-white/30 backdrop-blur-sm shadow">
+                <HeartIcon size={24} color="#EF4444" weight="bold" />
+              </TouchableOpacity>)}
+
+              
+            </View>
           </View>
         </View>
 
@@ -152,7 +152,6 @@ export default function ProductScreen() {
 
           {author && (
             <View className="flex-row items-center mb-6 p-4 bg-gray-100 rounded-xl">
-          
               {profileImageSource ? (
                 <Image
                   source={profileImageSource}
@@ -171,7 +170,7 @@ export default function ProductScreen() {
                 <Text className="text-sm text-gray-500">{author?.email}</Text>
               </View>
               <TouchableOpacity
-                /* onPress={handlePhonePress} */
+                onPress={handlePhonePress}
                 className="p-3 bg-gray-200 rounded-full"
               >
                 <PhoneIcon size={20} color="#000" weight="bold" />
@@ -198,7 +197,7 @@ export default function ProductScreen() {
             )}
           </View>
 
-          {/*  Buttons  principale*/}
+          {/* Buttons  principale*/}
           <View className="flex-row items-center justify-between gap-4">
             <TouchableOpacity
               className="flex-1 flex-row items-center justify-center p-4 bg-gray-200 rounded-xl"

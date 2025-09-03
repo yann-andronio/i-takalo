@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, FlatList, StatusBar } from 'react-native';
+import { View, Text, FlatList, StatusBar, ScrollView } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeroSection from '../components/HeroSection';
@@ -11,7 +11,7 @@ import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
 
 export default function HomeScreen() {
-  const { products, fetchFilteredProductsDonation, donationProducts } =
+  const { allProducts, fetchFilteredProductsDonation, donationProducts , saleProducts } =
     useContext(ProductContext);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -29,66 +29,70 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white p-6">
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
 
-      <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
-
-      <View className="flex-1 rounded-2xl overflow-hidden">
-        {/* FlatList verticale principale */}
-        <FlatList
-          data={products}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => <ProductCard item={item} />}
-          showsVerticalScrollIndicator={false}
-          numColumns={2}
-          columnWrapperStyle={{
-            justifyContent: 'space-between',
-            marginBottom: 12,
-          }}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          ListHeaderComponent={() => (
-            <View>
-              <HeroSection />
-
-              <View className="mb-4">
-                <FilterBarDons
-                  isselectfilterDonation={isselectfilterDonation}
-                  onApplyFilters={handleApplyFiltersBarDonation}
-                />
-              </View>
-
-              <Text className="text-xl font-bold text-gray-800 mb-2">
-                Produit de Dons
-              </Text>
-
-              {donationProducts.length > 0 ? (
-                <FlatList
-                  data={donationProducts}
-                  keyExtractor={item => item.id.toString()}
-                  renderItem={({ item }) => <ProductCard item={item} />}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{
-                    gap: 10,
-                    marginBottom: 20,
-                  }}
-                />
-              ) : (
-                <View className="items-center justify-center p-4">
-                  <Text className="text-lg text-gray-500 text-center">
-                    Aucun produit trouvé pour cette catégorie.
-                  </Text>
-                </View>
-              )}
-
-              <Text className="text-xl font-bold text-gray-800 mb-2">
-                Produit en vente
-              </Text>
-            </View>
-          )}
-        />
+      <View className="p-6">
+        <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
       </View>
+
+      <ScrollView className="flex-1">
+        <View className="px-6 ">
+          <HeroSection />
+        </View>
+
+        <View className="mb-4 px-6">
+          <FilterBarDons
+            isselectfilterDonation={isselectfilterDonation}
+            onApplyFilters={handleApplyFiltersBarDonation}
+          />
+        </View>
+
+        <Text className="text-xl font-bold text-gray-800 mb-2 px-6">
+          Produits de Dons
+        </Text>
+
+        {donationProducts.length > 0 ? (
+          <FlatList
+            data={donationProducts}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => <ProductCard item={item} />}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              gap: 10,
+              marginBottom: 20,
+            }}
+          />
+        ) : (
+          <View className="items-center justify-center p-4">
+            <Text className="text-lg text-gray-500 text-center">
+              Aucun produit trouvé pour cette catégorie.
+            </Text>
+          </View>
+        )}
+
+        <Text className="text-xl font-bold text-gray-800 mb-2 px-6">
+          Produits en vente
+        </Text>
+
+        <View className="px-6">
+          <FlatList
+            data={saleProducts}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => <ProductCard item={item} />}
+            showsVerticalScrollIndicator={false}
+            numColumns={2}
+            columnWrapperStyle={{
+              justifyContent: 'space-between',
+              marginBottom: 12,
+            }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            scrollEnabled={false} 
+          />
+        </View>
+      </ScrollView>
 
       <FilterModalForm
         visible={modalVisible}

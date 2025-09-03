@@ -15,9 +15,9 @@ export default function TrueProfilUserAccess() {
   );
   const navigation = useNavigation<ProfilStackNavigation>();
   const { user } = useContext(AuthContext);
-  const { products } = useContext(ProductContext);
-  const userProducts = products.filter(product => product.author === user?.id);
-  const Nbpub = userProducts.length;
+  const { allProducts } = useContext(ProductContext);
+  const userallProducts = allProducts.filter(product => product.author === user?.id);
+  const Nbpub = userallProducts.length;
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -80,7 +80,7 @@ export default function TrueProfilUserAccess() {
 
      
       {selecttype === 'Annonces' ? (
-        <AnnoncesByUser userProducts={userProducts} />
+        <AnnoncesByUser userallProducts={userallProducts} />
       ) : (
         <InformationUser />
       )}

@@ -16,10 +16,10 @@ export default function SearchScreen() {
   const [searchType, setSearchType] = useState<'article' | 'user'>('article');
   const navigation = useNavigation();
 
-  const { products } = useContext(ProductContext);
+  const { allProducts } = useContext(ProductContext);
   const { users } = useContext(UserContext); 
 
-  const filteredArticles = SearchUtils<ProductDataI>(products, search, ['title' , 'category']);
+  const filteredArticles = SearchUtils<ProductDataI>(allProducts, search, ['title' , 'category']);
   const filteredUsers = SearchUtils<UserI>(users, search, ['first_name', 'email']);
 
   const resultCount = searchType === 'article' ? filteredArticles.length : filteredUsers.length;

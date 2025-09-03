@@ -9,7 +9,7 @@ export default function HeroSection() {
   const [heroItems, setHeroItems] = useState(HeroData);
 
   return (
-    <View className="mt-5">
+    <View className="mt-5 ">
       <Carousel
         loop
         width={width * 0.9}

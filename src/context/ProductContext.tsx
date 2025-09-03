@@ -4,41 +4,46 @@ import { ImageSourcePropType } from 'react-native';
 
 export interface ProductDataI {
   id: number;
-  title: string; 
+  title: string;
   image: string;
   type: 'SALE' | 'DONATION';
   description?: string;
   author?: number;
   likes: number[];
   category: string;
-  price?: number; 
+  price?: number;
   created_at: string;
   adresse?: string;
   updated_at: string;
 }
 
 interface ProductContextType {
-  products: ProductDataI[];
+  allProducts: ProductDataI[];
+  saleProducts: ProductDataI[];
   donationProducts: ProductDataI[];
   loading: boolean;
   fetchProducts: () => void;
   fetchFilteredProductsDonation: (filters: any) => void;
   addProduct: (newProduct: ProductDataI) => void;
+  deleteProduct: (id: number) => void;
 }
 
 export const ProductContext = createContext<ProductContextType>({
-  products: [],
+  allProducts: [],
+  saleProducts: [],
   donationProducts: [],
   loading: false,
   fetchProducts: () => {},
   fetchFilteredProductsDonation: () => {},
-  addProduct: () => {}, 
+  addProduct: () => {},
+  deleteProduct: () => {},
 });
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [products, setProducts] = useState<ProductDataI[]>([]);
+  const [allProducts, setAllProducts] = useState<ProductDataI[]>([]);
+  const [saleProducts, setsaleProducts] = useState<ProductDataI[]>([]);
   const [donationProducts, setDonationProducts] = useState<ProductDataI[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -50,9 +55,9 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const sales = fetchedProducts.filter(i => i.type === 'SALE');
       const donations = fetchedProducts.filter(i => i.type === 'DONATION');
-
-      setProducts(sales);
+      setAllProducts(fetchedProducts);
       setDonationProducts(donations);
+      setsaleProducts(sales)
     } catch (err) {
       console.error('Erreur lors du chargement des produits:', err);
     } finally {
@@ -78,12 +83,29 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-
   const addProduct = (newProduct: ProductDataI) => {
     if (newProduct.type === 'SALE') {
-      setProducts(prevProducts => [newProduct, ...prevProducts]);
+      setsaleProducts(prevProducts => [newProduct, ...prevProducts]);
     } else if (newProduct.type === 'DONATION') {
       setDonationProducts(prevDonations => [newProduct, ...prevDonations]);
+    }
+    setAllProducts(prevProducts => [newProduct, ...prevProducts]);
+  };
+
+  const deleteProduct = async (id: number) => {
+    setLoading(true);
+    try {
+      await API.delete(`/api/v1/products/${id}/`);
+
+      setAllProducts(prev => prev.filter(p => p.id !== id));
+      setsaleProducts(prev => prev.filter(p => p.id !== id));
+      setDonationProducts(prev => prev.filter(p => p.id !== id));
+
+      console.log(`Produit ${id} supprimé avec succès`);
+    } catch (err) {
+      console.error(`Erreur lors de la suppression du produit ${id}:`, err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,12 +116,14 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <ProductContext.Provider
       value={{
+        allProducts,
         donationProducts,
-        products,
+        saleProducts,
         loading,
         fetchFilteredProductsDonation,
         fetchProducts,
-        addProduct, 
+        addProduct,
+        deleteProduct,
       }}
     >
       {children}

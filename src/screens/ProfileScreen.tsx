@@ -1,13 +1,32 @@
-import { View, Text, TouchableOpacity, StatusBar, Image, FlatList, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StatusBar,
+  Image,
+  FlatList,
+  ScrollView,
+} from 'react-native';
 import React, { useContext } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeftIcon, CaretRightIcon, UserIcon, IconProps, SignOutIcon,} from 'phosphor-react-native';
+import {
+  ArrowLeftIcon,
+  CaretRightIcon,
+  UserIcon,
+  IconProps,
+  SignOutIcon,
+} from 'phosphor-react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamListProfilnavigatorScreen } from '../types/Types';
 import { AuthContext } from '../context/AuthContext';
-import { mainMenuItems, otherMenuItems, MenuItemData } from '../data/MenuProfilData'
+import {
+  mainMenuItems,
+  otherMenuItems,
+  MenuItemData,
+} from '../data/MenuProfilData';
 
-export type ProfilStackNavigation = NavigationProp<RootStackParamListProfilnavigatorScreen>;
+export type ProfilStackNavigation =
+  NavigationProp<RootStackParamListProfilnavigatorScreen>;
 
 interface MenuItemProps {
   title: string;
@@ -34,25 +53,36 @@ export default function ProfileScreen() {
   const hasProfilimage = user?.image && user.image.length > 0;
 
   const renderMenuItem = ({ item }: { item: MenuItemData }) => (
-    <MenuItem title={item.title} icon={item.icon} onPress={() => item.onPress(navigation)} />
+    <MenuItem
+      title={item.title}
+      icon={item.icon}
+      onPress={() => item.onPress(navigation)}
+    />
   );
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent
+      />
 
-        <View className="flex-row items-center px-6 mt-4 mb-5 ">
-          <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 rounded-full bg-gray-100">
-            <ArrowLeftIcon size={24} color="black" weight="bold" />
-          </TouchableOpacity>
-          <Text className="text-lg font-bold ml-5">Profil</Text>
-        </View>
+      <View className="flex-row items-center px-6 mt-4 mb-5 ">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="p-2 rounded-full bg-gray-100"
+        >
+          <ArrowLeftIcon size={24} color="black" weight="bold" />
+        </TouchableOpacity>
+        <Text className="text-lg font-bold ml-5">Profil</Text>
+      </View>
 
       <ScrollView className="flex-1 px-6">
-
-
-      
-        <TouchableOpacity className="bg-white flex-row items-center rounded-2xl w-full  shadow-md mb-8" onPress={() => navigation.navigate("TrueProfilUserAccess")}>
+        <TouchableOpacity
+          className="bg-white flex-row items-center rounded-2xl w-full  shadow-md mb-8"
+          onPress={() => navigation.navigate('TrueProfilUserAccess')}
+        >
           {hasProfilimage ? (
             <Image
               source={{ uri: user.image }}
@@ -82,12 +112,11 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          <TouchableOpacity >
+          <TouchableOpacity>
             <CaretRightIcon size={25} color="black" weight="bold" />
           </TouchableOpacity>
         </TouchableOpacity>
 
-      
         <FlatList
           data={mainMenuItems}
           renderItem={renderMenuItem}
@@ -96,8 +125,9 @@ export default function ProfileScreen() {
           scrollEnabled={false}
         />
 
-     
-        <Text className="text-base font-bold text-gray-500 mt-4 mb-2">Autres</Text>
+        <Text className="text-base font-bold text-gray-500 mt-4 mb-2">
+          Autres
+        </Text>
 
         <FlatList
           data={otherMenuItems}
@@ -106,15 +136,19 @@ export default function ProfileScreen() {
           className="mb-4"
           scrollEnabled={false}
         />
+
         
-        <TouchableOpacity
-          className="flex-row bg-[#FEF094] w-full flex items-center px-6 py-3 rounded-full justify-center gap-3"
-          onPress={logout}
-        >
-          <SignOutIcon size={24} color="#000" weight="bold" />
-          <Text className="text-lg font-bold text-black">Déconnexion</Text>
-        </TouchableOpacity>
       </ScrollView>
+
+
+      <TouchableOpacity
+        className="flex-row bg-[#FEF094] w-full flex items-center px-6 py-3   justify-center gap-3"
+        onPress={logout}
+      >
+        <SignOutIcon size={24} color="#000" weight="bold" />
+        <Text className="text-lg font-bold text-black">Déconnexion</Text>
+      </TouchableOpacity>
+      
     </SafeAreaView>
   );
 }

@@ -4,7 +4,7 @@ export type CarouselItem = {
   title: string;
   subtitle: string;
   background?: string;
-  image: ImageSourcePropType; // ✅ correcte
+  image: ImageSourcePropType; 
 };
 
 export const HeroSectionData: CarouselItem[] = [

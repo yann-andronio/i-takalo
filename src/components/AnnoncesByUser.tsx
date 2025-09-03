@@ -4,17 +4,17 @@ import ProductCard from './ProductCard';
 import { ProductDataI } from '../context/ProductContext'; // Import du type
 
 interface AnnoncesByUserProps {
-    userProducts: ProductDataI[];
+    userallProducts: ProductDataI[];
 }
 
-export default function AnnoncesByUser({ userProducts }: AnnoncesByUserProps) {
+export default function AnnoncesByUser({ userallProducts }: AnnoncesByUserProps) {
 
     return (
         <View className="flex-1 bg-white px-6">
             <View className="flex-1 rounded-2xl overflow-hidden">
-                {userProducts.length > 0 ? (
+                {userallProducts.length > 0 ? (
                     <FlatList
-                        data={userProducts}
+                        data={userallProducts}
                         keyExtractor={item => item.id.toString()}
                         renderItem={({ item }) => <ProductCard item={item} />}
                         showsVerticalScrollIndicator={false}

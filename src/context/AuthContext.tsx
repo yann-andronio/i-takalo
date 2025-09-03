@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, use } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import API from '../api/Api';
 
@@ -19,11 +19,19 @@ interface AuthContextProps {
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: any) => Promise<boolean>;
   logout: () => Promise<void>;
+  updateUser: (data: UserI) => void; 
 }
 
-export const AuthContext = createContext<AuthContextProps>(
-  {} as AuthContextProps,
-);
+
+export const AuthContext = createContext<AuthContextProps>({
+  user: null,
+  loading: false,
+  loadingtoken: false,
+  login: async () => false,
+  register: async () => false,
+  logout: async () => {},
+  updateUser: () => {}, 
+});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -32,30 +40,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(false);
   const [loadingtoken, setloadingtoken] = useState(true);
 
+  
+ 
 
+  useEffect(() => {
+    const loadUserFromStorageByToken = async () => {
+      try {
+        const token = await EncryptedStorage.getItem('accessToken');
+        const userData = await EncryptedStorage.getItem('user');
 
-useEffect(() => {
-  const loadUserFromStorageByToken = async () => {
-    try {
-      const token = await EncryptedStorage.getItem('accessToken');
-      const userData = await EncryptedStorage.getItem('user');
+        if (token && userData) {
+          setUser(JSON.parse(userData));
+        } else {
+          await logout();
+        }
 
-      if (token && userData) {
-        setUser(JSON.parse(userData));
-      } else {
-        await logout();
+      } catch (error) {
+        console.error('Erreur de loading de data for utilisateur :', error);
+        setloadingtoken(false); 
+      } finally {
+        setloadingtoken(false)
       }
+    };
 
-    } catch (error) {
-      console.error('Erreur de loading de data for utilisateur :', error);
-      setloadingtoken(false); 
-    }finally{
-      setloadingtoken(false)
-    }
-  };
-
-  loadUserFromStorageByToken();
-}, []);
+    loadUserFromStorageByToken();
+  }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -101,8 +110,22 @@ useEffect(() => {
     setUser(null);
   };
 
+   const updateUser = (data: UserI) => {
+    setUser(data);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, loadingtoken, login, register, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        loading, 
+        loadingtoken, 
+        login, 
+        register, 
+        logout,
+        updateUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

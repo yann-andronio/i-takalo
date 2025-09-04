@@ -29,7 +29,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white font-jakarta">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
 
       <View className="p-6">
@@ -48,7 +48,7 @@ export default function HomeScreen() {
           />
         </View>
 
-        <Text className="text-xl font-bold text-gray-800 mb-2 px-6">
+        <Text className="text-xl font-bold font-jakarta text-gray-800 mb-2 px-6">
           Produits de Dons
         </Text>
 

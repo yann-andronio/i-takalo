@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeftIcon } from 'phosphor-react-native';
+import { ArrowLeftIcon, UserIcon } from 'phosphor-react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import ChatCard from '../components/ChatCard';
-import { RootStackParamListChatnavigatorScreen, RootStackParamListMainNavigatorTab } from '../types/Types';
+import { RootStackParamListChatnavigatorScreen } from '../types/Types';
+import { UserContext } from '../context/UserContext';
+import { ProductContext } from '../context/ProductContext';
+import { UserI } from '../context/UserContext';
 
 export interface ChatUserI {
   id: string;
@@ -12,67 +15,62 @@ export interface ChatUserI {
   lastMessage: string;
   time: string;
   islu: boolean;
-  avatar: any;
+  image: string;
 }
 
-const chatUsersData: ChatUserI[] = [
+const staticConversations = [
   {
-    id: '1',
-    name: 'Martin RAKOTONANDRASANA',
-    lastMessage: 'Afaka miady varotra tsara ianao. Teneno ny vidiny dia mirampirahaharaha isika.',
-    time: '12:30',
-    islu: false,
-    avatar: require('../assets/images/productCardImage/1.png'),
-  },
-  {
-    id: '2',
-    name: 'Gilbert RASOANATROANDRO',
-    lastMessage: 'Mbola misy maromararo raha mbola haka ianao...',
-    time: 'Hier',
-    islu: true,
-    avatar: require('../assets/images/productCardImage/1.png'),
-  },
-  {
-    id: '3',
-    name: 'Clara Boutique',
+    olonahiresahanaId: 14,
+    productId: 46,
     lastMessage: 'Efa iany tompoho fa mbola miandry arrivage manaraka indray vao misy...',
     time: '2 jours',
     islu: false,
-    avatar: require('../assets/images/productCardImage/1.png'),
   },
   {
-    id: '4',
-    name: 'Sophie DUPONT',
-    lastMessage: 'Je suis intéressée par votre article.',
-    time: '1h',
-    islu: false,
-    avatar: require('../assets/images/productCardImage/1.png'),
-  },
-  {
-    id: '5',
-    name: 'Marc ANTOINE',
-    lastMessage: 'Ok, je prends.',
-    time: '30 min',
+    olonahiresahanaId: 15,
+    productId: 34,
+    lastMessage: 'Mbola misy maromararo raha mbola haka ianao...',
+    time: 'Hier',
     islu: true,
-    avatar: require('../assets/images/productCardImage/1.png'),
   },
 ];
 
 type ChatStackNavigation = NavigationProp<RootStackParamListChatnavigatorScreen>;
+
 export default function ChatScreen() {
   const navigation = useNavigation<ChatStackNavigation>();
-  const [users, setUsers] = useState<ChatUserI[]>(chatUsersData);
+  const { users } = useContext(UserContext);
+  const { allProducts } = useContext(ProductContext);
+
+  // mirenvoyer et modification donne nle olona hiresahana 
+  const initialConversations: ChatUserI[] = staticConversations.map((conv, index) => {
+    const olonahiresahana = users.find(u => u.id === conv.olonahiresahanaId);
+    return {
+      id: `${conv.olonahiresahanaId}-${index}`,
+      name: olonahiresahana?.last_name || 'Utilisateur inconnu',
+      lastMessage: conv.lastMessage,
+      time: conv.time,
+      islu: conv.islu,
+      image: olonahiresahana?.image || '',
+    };
+  });
+
+ 
+  const [conversations, setConversations] = useState<ChatUserI[]>(initialConversations);
   const [filter, setFilter] = useState<'nonlus' | 'lus'>('nonlus');
 
-  const filteredUsers = users.filter(user =>
+  const filteredUsers = conversations.filter(user =>
     filter === 'lus' ? user.islu : !user.islu
   );
 
-  const handleOpenConversation = (userId: string) => {
-    console.log(`misokatra ny firesahana amin i ${userId}`);
-    setUsers(prev =>
-      prev.map(u => u.id === userId ? { ...u, islu: true } : u)
+  const handleOpenConversation = (conversationId: string) => {
+   
+    setConversations(prevConversations =>
+      prevConversations.map(conv =>
+        conv.id === conversationId ? { ...conv, islu: true } : conv
+      )
     );
+    navigation.navigate("Conversation");
   };
 
   return (
@@ -92,7 +90,7 @@ export default function ChatScreen() {
           onPress={() => setFilter('lus')}
         >
           <Text className={`${filter === 'lus' ? 'text-white' : 'text-[#03233A]'} font-normal `}>
-            lus
+            Lus
           </Text>
         </TouchableOpacity>
 
@@ -101,7 +99,7 @@ export default function ChatScreen() {
           onPress={() => setFilter('nonlus')}
         >
           <Text className={`${filter === 'nonlus' ? 'text-white' : 'text-[#03233A]'} font-normal`} >
-            non lus
+            Non lus
           </Text>
         </TouchableOpacity>
       </View>
@@ -112,10 +110,7 @@ export default function ChatScreen() {
         renderItem={({ item }) => (
           <ChatCard
             item={item}
-            onPress={() => {
-              handleOpenConversation(item.id);
-              navigation.navigate("Conversation"); 
-            }}
+            onPress={() => handleOpenConversation(item.id)}
           />
         )}
         contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10 }}

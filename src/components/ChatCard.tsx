@@ -19,7 +19,7 @@ export default function ChatCard({ item, onPress }: ChatItemProps) {
     >
       <View className="relative mr-3">
         <Image
-          source={item.avatar}
+          source={{uri : item?.image}}
           className="w-12 h-12 rounded-full"
         />
       </View>

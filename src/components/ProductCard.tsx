@@ -5,9 +5,10 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  ActivityIndicator, // Importez ActivityIndicator
 } from 'react-native';
 import { ProductDataI } from '../context/ProductContext';
-import { HeartIcon, HandHeartIcon, UserIcon } from 'phosphor-react-native'; 
+import { HeartIcon, HandHeartIcon, UserIcon } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListHomenavigatorScreen } from '../types/Types';
@@ -38,11 +39,18 @@ export default function ProductCard({ item }: ProductCardProps) {
       activeOpacity={0.8}
     >
       <ImageBackground
-        source={isImageLoading ? require('../assets/images/productCardImage/linear.png') : { uri: item.image }}
+        source={ { uri: item.image }}
         className="w-full h-72 justify-between"
         resizeMode="cover"
         onLoadEnd={() => setIsImageLoading(false)}
       >
+        {/* loading na img en cours de chargement  */}
+        {isImageLoading && (
+          <View className="absolute inset-0 items-center justify-center">
+            <ActivityIndicator size="large" color="#03233A" />
+          </View>
+        )}
+        
         {/* Affich profil na icône */}
         {item.type === 'SALE' ? (
           <View className="absolute top-4 left-4 w-11 h-11 rounded-full border-2 border-white overflow-hidden items-center justify-center">

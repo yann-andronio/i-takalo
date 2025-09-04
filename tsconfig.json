@@ -4,7 +4,7 @@
     "**/*.ts",
     "**/*.tsx",
     "nativewind-env.d.ts"
-, "src/auth/RegisterScreen.tsx"  ],
+, "src/auth/RegisterScreen.tsx", "react-native.config.js"  ],
   "exclude": [
     "**/node_modules",
     "**/Pods"

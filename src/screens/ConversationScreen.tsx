@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -19,9 +18,8 @@ import {
   PaperPlaneRightIcon,
 } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ProductData } from '../data/ProductData';
-import { UserData } from '../data/UserData';
-import { textinput } from '../styles/Styles';
+import { UserContext } from '../context/UserContext';
+import { ProductContext } from '../context/ProductContext';
 
 interface MessageI {
   id: string;
@@ -62,30 +60,33 @@ const conversationData: MessageI[] = [
   },
 ];
 
-const interlocutorData = UserData.find(u => u.id === '3');
-const productDetails = ProductData.find(p => p.userId === '3');
-
 export default function ConversationScreen() {
   const navigation = useNavigation();
   const [messages, setMessages] = useState<MessageI[]>(conversationData);
   const [inputText, setInputText] = useState('');
-  const [inputHeight, setInputHeight] = useState(40); 
+  const [inputHeight, setInputHeight] = useState(40);
+
+  const { users } = useContext(UserContext);
+  const { allProducts } = useContext(ProductContext);
+
+  const interlocutorData = users.find(u => u.id === 14);
+  const productDetails = allProducts.find(p => p.id === 49);
 
   const renderMessage = ({ item }: { item: MessageI }) => {
     const isCurrentUser = item.isCurrentUser;
     const messageBubbleClass = isCurrentUser ? 'bg-[#FEF094] rounded-t-xl rounded-bl-xl ml-auto' : 'bg-[#03233A] rounded-t-xl rounded-br-xl mr-auto';
     const messageTextClass = isCurrentUser ? 'text-[#03233A]' : 'text-white';
-    const avatar = isCurrentUser ? UserData.find(u => u.id === '1')?.profileImage : interlocutorData?.profileImage;
+    const avatar = isCurrentUser ? users.find(u => u.id === 15)?.image : interlocutorData?.image;
     return (
       <View className="flex-row my-1 items-end">
         {!isCurrentUser && avatar && (
-          <Image source={avatar} className="w-8 h-8 rounded-full mr-2" />
+          <Image source={{ uri: avatar }} className="w-8 h-8 rounded-full mr-2" />
         )}
         <View className={`p-3 max-w-[75%] ${messageBubbleClass}`}>
           <Text className={messageTextClass}>{item.text}</Text>
         </View>
         {isCurrentUser && avatar && (
-          <Image source={avatar} className="w-8 h-8 rounded-full ml-2" />
+          <Image source={{ uri: avatar }} className="w-8 h-8 rounded-full ml-2" />
         )}
       </View>
     );
@@ -105,12 +106,12 @@ export default function ConversationScreen() {
           <View className="flex-row items-center gap-2">
             {interlocutorData && (
               <Image
-                source={interlocutorData.profileImage}
+                source={{ uri: interlocutorData.image }}
                 className="w-10 h-10 rounded-full ml-2"
               />
             )}
             <Text className="text-lg font-bold ml-3 text-[#03233A]">
-              {interlocutorData?.username || 'Utilisateur'}
+              {interlocutorData?.last_name || 'Utilisateur'}
             </Text>
           </View>
         </View>
@@ -120,13 +121,13 @@ export default function ConversationScreen() {
       <View className="flex-row items-center justify-between p-4 m-4 rounded-xl border border-gray-200">
         {productDetails && (
           <Image
-            source={productDetails.image}
+            source={{ uri: productDetails.image }}
             className="w-16 h-16 rounded-lg mr-3"
           />
         )}
         <View className="flex-1">
           <Text className="text-base font-bold text-gray-800">
-            {productDetails?.titre || 'Article'}
+            {productDetails?.title || 'Article'}
           </Text>
           <Text className="text-sm text-gray-500 mt-1">
             {productDetails?.price || 'Ar 0'}
@@ -146,10 +147,9 @@ export default function ConversationScreen() {
         contentContainerStyle={{ paddingBottom: 10 }}
       />
 
-      {/*  clavier*/}
+      {/* clavier*/}
       <KeyboardAvoidingView keyboardVerticalOffset={80}>
         <View className="flex-row items-end p-4 bg-white justify-center border-t border-gray-100">
-
           <View className="flex-row items-end gap-2 mr-2">
             <TouchableOpacity>
               <PaperclipIcon size={24} color="gray" />
@@ -159,7 +159,7 @@ export default function ConversationScreen() {
             </TouchableOpacity>
           </View>
 
-          <View className={`flex-row flex-1  items-end  px-4 w-full  rounded-xl bg-gray-100 text-black`}>
+          <View className={`flex-row flex-1 items-end px-4 w-full rounded-xl bg-gray-100 text-black`}>
             <TextInput
               placeholder="Écrire un message..."
               placeholderTextColor="#6B7280"
@@ -169,7 +169,7 @@ export default function ConversationScreen() {
               onContentSizeChange={e =>
                 setInputHeight(e.nativeEvent.contentSize.height)
               }
-              className={` flex-1  text-base   text-gray-800 min-h-[40px]  max-h-[120px]  text-top`}
+              className={`flex-1 text-base text-gray-800 min-h-[40px] max-h-[120px] text-top`}
               style={{ height: inputHeight }}
             />
             <TouchableOpacity className="ml-2 self-end pb-1">
@@ -180,7 +180,6 @@ export default function ConversationScreen() {
           <TouchableOpacity className="ml-2 p-2 bg-[#03233A] rounded-full self-end">
             <PaperPlaneRightIcon size={19} color="white" weight="bold" />
           </TouchableOpacity>
-          
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

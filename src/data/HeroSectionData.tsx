@@ -2,28 +2,28 @@ import { ImageSourcePropType } from 'react-native';
 
 export type CarouselItem = {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   background?: string;
   image: ImageSourcePropType; 
 };
 
 export const HeroSectionData: CarouselItem[] = [
   {
-    title: 'Promo 1',
-    subtitle: 'Les tendances du moment',
+    title: `Mode éthique`,
+    subtitle: 'Échange & don de vêtements',
     background: '#E02222',
-   image: require('../assets/images/productCardImage/1.png'),
+    image: require('../assets/images/banner/1t.png'), 
   },
   {
-    title: 'Promo 2',
-    subtitle: 'Nouveautés à découvrir',
+    title: 'Électronique responsable',
+    subtitle: 'Réparé, recyclé, réutilisé',
     background: 'blue',
-   image: require('../assets/images/productCardImage/2.png'),
+    image: require('../assets/images/banner/2t.png'), 
   },
   {
-    title: 'Promo 3',
+    title: 'Maison durable',
+    subtitle: 'Appareils réutilisés',
     background: 'grey',
-    subtitle: 'Offres spéciales',
-   image: require('../assets/images/productCardImage/3.png'),
+    image: require('../assets/images/banner/3t.png'), 
   },
 ];

@@ -1,4 +1,3 @@
-// src/navigation/AppNavigator.tsx
 import React, { useContext, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AuthNavigator from './AuthNavigator';
@@ -36,7 +35,7 @@ if (loadingtoken) {
   return (
     /*     mila averina avadika aveo
      */ <NavigationContainer>
-      {user ? <MainNavigator /> : <AuthNavigator /> }
+      {user ? <MainNavigator  /> : <AuthNavigator /> }
     </NavigationContainer>
   );
 };

@@ -37,6 +37,7 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
     routeName === 'Sell' ||
     routeName === 'Conversation' ||
     routeName === 'Profile' ||
+    routeName === 'ProfilMain' ||
     routeName === 'Chat' ||
     routeName === 'ConfidentialityScreen' ||
     routeName === "TrueProfilUserAccess"

@@ -20,7 +20,7 @@ const FilterButton = ({ label, icon, active, onPress }: FilterButtonProps) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`flex-row items-center px-4 py-2 rounded-xl mr-3 ${active ? "bg-black" : "border border-gray-300"}`}
+      className={`flex-row items-center px-4 py-2 rounded-xl mr-3 ${active ? "bg-[#03233A]" : "border border-gray-300"}`}
     >
       {icon(active)}
       <Text className={`ml-2 text-base font-medium ${active ? "text-white" : "text-gray-700"}`}>{label}</Text>

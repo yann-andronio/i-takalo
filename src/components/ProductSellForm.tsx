@@ -123,8 +123,8 @@ export default function ProductSellForm() {
                         onPress: () => {
                             reset();
                             setSelectedImage(null);
-                            navigation.navigate('Home', {
-                                screen: 'HomeMain',
+                            navigation.navigate('Accueil', {
+                                screen: 'AccueilMain',
                             });
                         },
                     },
@@ -146,19 +146,23 @@ export default function ProductSellForm() {
             className="flex-1 bg-white p-5"
         >
             {/* Zone de sélection d'image */}
-            <TouchableOpacity
-                onPress={handleImagePicker}
-                className="h-[150] bg-gray-100 rounded-lg justify-center items-center border border-dashed border-gray-300 mb-5 overflow-hidden"
-            >
-                {selectedImage ? (
-                    <Image source={{ uri: selectedImage }} className="w-full h-full rounded-lg" resizeMode="cover" />
-                ) : (
-                    <>
-                        <PlusIcon size={30} color="#666" weight="bold" />
-                        <Text className="mt-2 text-gray-600">Ajouter photo</Text>
-                    </>
-                )}
-            </TouchableOpacity>
+          <TouchableOpacity
+                 onPress={handleImagePicker}
+                 className=" h-[250] bg-gray-100 rounded-lg justify-center items-center border border-dashed border-gray-300 mb-5 overflow-hidden"
+               >
+                 {selectedImage ? (
+                   <Image
+                     source={{ uri: selectedImage }}
+                     className="w-full h-full rounded-lg"
+                     resizeMode="contain"
+                   />
+                 ) : (
+                   <>
+                     <PlusIcon size={30} color="#666" weight="bold" />
+                     <Text className="mt-2 text-gray-600">Ajouter photo</Text>
+                   </>
+                 )}
+               </TouchableOpacity>
 
             <View className="mb-5">
                 {/* Titre */}

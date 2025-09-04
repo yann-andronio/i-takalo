@@ -144,7 +144,7 @@ export default function DonationAdForm() {
           onPress: () => {
             reset();
             setSelectedImage(null);
-            navigation.navigate('Home', { screen: 'HomeMain' });
+            navigation.navigate('Accueil', { screen: 'AccueilMain' });
           },
         },
       ]);
@@ -167,13 +167,13 @@ export default function DonationAdForm() {
     >
       <TouchableOpacity
         onPress={handleImagePicker}
-        className=" max-h-[65%] min-h-[150] bg-gray-100 rounded-lg justify-center items-center border border-dashed border-gray-300 mb-5 overflow-hidden"
+        className=" h-[250] bg-gray-100 rounded-lg justify-center items-center border border-dashed border-gray-300 mb-5 overflow-hidden"
       >
         {selectedImage ? (
           <Image
             source={{ uri: selectedImage }}
             className="w-full h-full rounded-lg"
-            resizeMode="cover"
+            resizeMode="contain"
           />
         ) : (
           <>

@@ -6,13 +6,14 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Image,
 } from 'react-native';
 import {
   HouseIcon,
-  ChatIcon,
-  WalletIcon,
   UserIcon,
   PlusIcon,
+  BellIcon,
+  ChatCircleIcon,
 } from 'phosphor-react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
@@ -30,8 +31,23 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
   const route = state.routes[state.index];
   const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
 
+   const hiddenRoutes = [
+    'Search',
+    'Product',
+    'Sell',
+    'Conversation',
+    'Profile',
+    'ProfilMain',
+    'Message',
+    'ConfidentialityScreen',
+    'TrueProfilUserAccess',
+    'Notification',
+    'MessageMain'
+  ];
+    if (hiddenRoutes.includes(routeName)) return null;
+
   // raha anaty screen de conditon eto de miala le tabbar
-  if (
+ /*  if (
     routeName === 'Search' ||
     routeName === 'Product' ||
     routeName === 'Sell' ||
@@ -40,9 +56,9 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
     routeName === 'ProfilMain' ||
     routeName === 'Chat' ||
     routeName === 'ConfidentialityScreen' ||
-    routeName === "TrueProfilUserAccess"
+    routeName === 'TrueProfilUserAccess'
   )
-    return null;
+    return null; */
 
   return (
     <View className="  h-[11%] absolute bottom-0 w-[100%] justify-center items-center ">
@@ -76,7 +92,7 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
                     marginTop: 25,
                   }}
                 >
-                  Sell
+                  {/* Sell */}
                 </Text>
               </View>
             );
@@ -84,17 +100,17 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
 
           const renderIcon = () => {
             switch (label) {
-              case 'Home':
+              case 'Accueil':
                 return (
                   <HouseIcon size={28} color={isFocused ? '#FEF094' : '#fff'} />
                 );
-              case 'Chat':
+              case 'Message':
                 return (
-                  <ChatIcon size={28} color={isFocused ? '#FEF094' : '#fff'} />
+                  <ChatCircleIcon size={28} color={isFocused ? '#FEF094' : '#fff'} />
                 );
-              case 'Wallet':
+              case 'Notification':
                 return (
-                  <WalletIcon
+                  <BellIcon
                     size={28}
                     color={isFocused ? '#FEF094' : '#fff'}
                   />
@@ -123,7 +139,14 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
             </TouchableOpacity>
           );
         })}
+
+        
       </ImageBackground>
+
+      <Image
+        source={require('../assets/images/HomeScreenImage/fotsybar.png')}
+        className="absolute z-0"
+      />
       {/* icon btn sell izay ivelany  ImageBackground*/}
       {state.routes.map((route: any, index: number) => {
         if (route.name === 'Sell') {
@@ -157,6 +180,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     overflow: 'hidden',
+     zIndex: 1,
   },
   imageBackground: {
     borderRadius: 500,

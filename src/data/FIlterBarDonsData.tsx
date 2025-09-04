@@ -22,32 +22,32 @@ const filtersBarDonDataCategirue: FilterItem[] = [
   {
     label: "Tous",
     value: "all",
-    icon: (active: boolean) => <HouseIcon size={18} color={active ? "white" : "black"} />,
+    icon: (active: boolean) => <HouseIcon size={18} color={active ? "#03233A" : "black"} />,
   },
   {
     label: "T-shirts",
     value: "T_SHIRT", 
-    icon: (active: boolean) => <TShirtIcon size={18} color={active ? "white" : "black"} />,
+    icon: (active: boolean) => <TShirtIcon size={18} color={active ? "#03233A" : "black"} />,
   },
   {
     label: "Robes",
     value: "ROBE",
-    icon: (active: boolean) => <DressIcon size={18} color={active ? "white" : "black"} />,
+    icon: (active: boolean) => <DressIcon size={18} color={active ? "#03233A" : "black"} />,
   },
   {
     label: "Pantalons",
     value: "PANTALON",
-    icon: (active: boolean) => <PantsIcon size={18} color={active ? "white" : "black"} />,
+    icon: (active: boolean) => <PantsIcon size={18} color={active ? "#03233A" : "black"} />,
   },
   {
     label: "Chaussures",
     value: "CHAUSSURE",
-    icon: (active: boolean) => <SneakerIcon size={18} color={active ? "white" : "black"} />,
+    icon: (active: boolean) => <SneakerIcon size={18} color={active ? "#03233A" : "black"} />,
   },
   {
     label: "Vestes",
     value: "VESTE",
-    icon: (active: boolean) => <ChairIcon size={18} color={active ? "white" : "black"} />, 
+    icon: (active: boolean) => <ChairIcon size={18} color={active ? "#03233A" : "black"} />, 
   },
 ];
 

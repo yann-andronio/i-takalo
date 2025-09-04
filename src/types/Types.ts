@@ -2,13 +2,13 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 import { ProductDataI } from '../data/ProductData';
 
 export type RootStackParamListHomenavigatorScreen= {
-  HomeMain: undefined;
+  AccueilMain: undefined;
   Search: undefined;
   Product: { item: ProductDataI };
 };
 
 export type RootStackParamListChatnavigatorScreen = {
-  ChatMain: undefined;
+  MessageMain: undefined;
   Conversation: undefined;
 };
 export type RootStackParamListProfilnavigatorScreen = {
@@ -24,9 +24,9 @@ export type RootStackParamListProfilnavigatorScreen = {
 
 // Types hoan  MainNavigatorTab
 export type RootStackParamListMainNavigatorTab = {
-  Home: NavigatorScreenParams<RootStackParamListHomenavigatorScreen>;
-  Chat: NavigatorScreenParams<RootStackParamListChatnavigatorScreen>;
+  Accueil: NavigatorScreenParams<RootStackParamListHomenavigatorScreen>;
+  Message: NavigatorScreenParams<RootStackParamListChatnavigatorScreen>;
   Sell: undefined;
-  Wallet: undefined;
+  Notification: undefined;
   Profile: undefined;
 };

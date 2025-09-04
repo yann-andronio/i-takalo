@@ -39,7 +39,7 @@ export default function ProductCard({ item }: ProductCardProps) {
       activeOpacity={0.8}
     >
       <ImageBackground
-        source={ { uri: item.image }}
+        source={{ uri: item.image }}
         className="w-full h-72 justify-between"
         resizeMode="cover"
         onLoadEnd={() => setIsImageLoading(false)}
@@ -50,7 +50,7 @@ export default function ProductCard({ item }: ProductCardProps) {
             <ActivityIndicator size="large" color="#03233A" />
           </View>
         )}
-        
+
         {/* Affich profil na icône */}
         {item.type === 'SALE' ? (
           <View className="absolute top-4 left-4 w-11 h-11 rounded-full border-2 border-white overflow-hidden items-center justify-center">
@@ -74,12 +74,12 @@ export default function ProductCard({ item }: ProductCardProps) {
 
         {/* Superposition dégradée fond t@ mario */}
         <Image
-          source={require('../assets/images/productCardImage/linear.png')}
+          source={require('../assets/images/productCardImage/linear2.png')}
           resizeMode="cover"
-          className="absolute w-full h-full z-10"
+          className="absolute bottom-0 w-full h-full z-10"
         />
 
-       
+
         <View className="absolute inset-x-0 bottom-0 p-4 z-20">
           <View className="flex-row items-end justify-between ">
             <View className="flex-1">
@@ -93,10 +93,10 @@ export default function ProductCard({ item }: ProductCardProps) {
           </View>
 
           <View className="flex-row justify-between items-center mt-2">
-            <Text className="text-lg font-bold text-white">{item.price} Ar</Text>
+              {item.type === 'DONATION' ? (<Text className='text-base font-normal text-yellow-200'>Donation</Text>) :(  <Text className="text-lg font-bold text-white">{item.price} Ar</Text>) }
 
-            <TouchableOpacity className="flex-row items-center bg-white rounded-md p-[2px]">
-              <HeartIcon size={16} color="#ef4444" />
+            <TouchableOpacity className="flex-row items-center bg-white rounded-md p-[5px]">
+              <HeartIcon size={20} color="#03233A" />
               <Text className="text-xs text-black ml-1">{item.likes.length}</Text>
             </TouchableOpacity>
           </View>

@@ -1,32 +1,26 @@
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { PencilSimpleLineIcon,CheckCircleIcon, ShareNetworkIcon, TrashIcon } from 'phosphor-react-native';
-import React, { useContext } from 'react';
-import { ProductContext } from '../../context/ProductContext';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamListMainNavigatorTab } from '../../types/Types'; 
+import { PencilSimpleLineIcon, ShareNetworkIcon, TrashIcon } from 'phosphor-react-native';
+import React from 'react';
 
-interface PopUpProductProps {
+interface PopUpNotificationsProps {
   setShowPopup: (val: boolean) => void;
-  productId: number; 
+  notificationId: number;
 }
 
-export default function PopUpProduct({ setShowPopup, productId }: PopUpProductProps) {
-  const { deleteProduct } = useContext(ProductContext);
-  const navigation = useNavigation<NavigationProp<RootStackParamListMainNavigatorTab>>();
+export default function PopUpNotifications({ setShowPopup, notificationId }: PopUpNotificationsProps) {
 
   const handleDelete = () => {
     Alert.alert(
       "Confirmer la suppression",
-      "Voulez-vous vraiment supprimer ce produit ?",
+      "Voulez-vous vraiment supprimer cette notification ?",
       [
         { text: "Annuler" },
         { 
           text: "Supprimer", 
           style: "destructive",
-          onPress: async () => {
-            deleteProduct(productId);
+          onPress: () => {
+            console.log("Suppression notif ID :", notificationId);
             setShowPopup(false);
-            navigation.navigate("Accueil", { screen: "AccueilMain" });
           } 
         },
       ]
@@ -39,7 +33,6 @@ export default function PopUpProduct({ setShowPopup, productId }: PopUpProductPr
       icon: <PencilSimpleLineIcon size={20} color="#4B5563" weight="bold" />,
       onPress: () => {
         setShowPopup(false);
-     
       },
       textClass: 'text-gray-700',
       bgHover: 'hover:bg-gray-100'
@@ -49,20 +42,9 @@ export default function PopUpProduct({ setShowPopup, productId }: PopUpProductPr
       icon: <ShareNetworkIcon size={20} color="#4B5563" weight="bold" />,
       onPress: () => {
         setShowPopup(false);
-     
       },
       textClass: 'text-gray-700',
       bgHover: 'hover:bg-gray-100'
-    },
-    {
-      title: 'Marquer comme vendu',
-      icon: <CheckCircleIcon size={20} color="#10B981" weight="bold" />,
-      onPress: () => {
-        setShowPopup(false);
-        console.log('Marquer comme vendu'); 
-      },
-      textClass: 'text-green-600',
-      bgHover: 'hover:bg-green-50'
     },
     {
       title: 'Supprimer',
@@ -74,7 +56,7 @@ export default function PopUpProduct({ setShowPopup, productId }: PopUpProductPr
   ];
 
   return (
-    <View className="absolute right-0 top-14 bg-white rounded-xl shadow-lg py-2 z-30 w-44 border border-gray-200">
+    <View className="absolute right-5 bottom-20 bg-white rounded-xl shadow-lg py-2 z-30 w-44 border border-gray-200">
       {actions.map((action, index) => (
         <TouchableOpacity
           key={index}

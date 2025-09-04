@@ -1,4 +1,3 @@
-// context/UserContext.tsx
 import React, { createContext, useState, useEffect } from 'react';
 import API from '../api/Api';
 
@@ -36,8 +35,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     setLoadingUsers(true);
     try {
       const res = await API.get("/api/v1/members/");
-      const fetchedUsers = res.data.dataset as UserI[];
-      setUsers(fetchedUsers);
+      const fetchedUsers = res.data.dataset as UserI[];  /* mifetch user jiaby */
+      const regularUsers = fetchedUsers.filter(user => user.type === 'USER');
+      setUsers(regularUsers);
     } catch (err) {
       console.error("Erreur lors du chargement des utilisateurs:", err);
     } finally {

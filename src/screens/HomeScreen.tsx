@@ -1,9 +1,7 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, FlatList, StatusBar, ScrollView } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
+import { View, Text, FlatList, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeroSection from '../components/HeroSection';
-import { ProductData, ProductDataI } from '../data/ProductData';
 import ProductCard from '../components/ProductCard';
 import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
@@ -11,17 +9,15 @@ import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
 
 export default function HomeScreen() {
-  const { allProducts, fetchFilteredProductsDonation, donationProducts , saleProducts } =
-    useContext(ProductContext);
+  const { allProducts, fetchFilteredProductsDonation, donationProducts , loading } = useContext(ProductContext);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [filterproductjiaby, setfilterproductjiaby] = useState<any>(null);
-  const [isselectfilterDonation, setIsSelectfilterDonation] =useState<string>('all');
+  const [isselectfilterDonation, setIsSelectfilterDonation] = useState<string>('all');
 
   const handleApplyFilters = (filters: any) => {
     console.log('Filtres vente reçus par HomeScren:', filters);
-    setfilterproductjiaby(filters);
   };
+
   const handleApplyFiltersBarDonation = (filters: any) => {
     console.log('Filtres de donation reçus par HomeScren:', filters);
     setIsSelectfilterDonation(filters.category);
@@ -52,7 +48,12 @@ export default function HomeScreen() {
           Produits de Dons
         </Text>
 
-        {donationProducts.length > 0 ? (
+        {loading ? (
+          <View className="items-center justify-center p-6">
+            <ActivityIndicator size="large" color="#03233A" />
+            <Text className="mt-2 text-gray-500">Chargement...</Text>
+          </View>
+        ) : donationProducts.length > 0 ? (
           <FlatList
             data={donationProducts}
             keyExtractor={item => item.id.toString()}
@@ -77,9 +78,9 @@ export default function HomeScreen() {
           Produits en vente
         </Text>
 
-        <View className="px-6">
+        <View className="px-6 mb-24">
           <FlatList
-            data={saleProducts}
+            data={allProducts}
             keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => <ProductCard item={item} />}
             showsVerticalScrollIndicator={false}
@@ -89,7 +90,7 @@ export default function HomeScreen() {
               marginBottom: 12,
             }}
             contentContainerStyle={{ paddingBottom: 20 }}
-            scrollEnabled={false} 
+            scrollEnabled={false}
           />
         </View>
       </ScrollView>

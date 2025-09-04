@@ -55,7 +55,7 @@ export default function ChatScreen() {
     };
   });
 
- 
+
   const [conversations, setConversations] = useState<ChatUserI[]>(initialConversations);
   const [filter, setFilter] = useState<'nonlus' | 'lus'>('nonlus');
 
@@ -64,7 +64,7 @@ export default function ChatScreen() {
   );
 
   const handleOpenConversation = (conversationId: string) => {
-   
+
     setConversations(prevConversations =>
       prevConversations.map(conv =>
         conv.id === conversationId ? { ...conv, islu: true } : conv
@@ -85,6 +85,16 @@ export default function ChatScreen() {
       </View>
 
       <View className="flex-row justify-center mb-5 mt-2 gap-5 px-5 ">
+        
+        <TouchableOpacity
+          className={`py-3 rounded-full flex-1 items-center justify-center  ${filter === 'nonlus' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
+          onPress={() => setFilter('nonlus')}
+        >
+          <Text className={`${filter === 'nonlus' ? 'text-white' : 'text-[#03233A]'} font-normal`} >
+            Non lus
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           className={`py-3 rounded-full flex-1 items-center justify-center ${filter === 'lus' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
           onPress={() => setFilter('lus')}
@@ -94,14 +104,7 @@ export default function ChatScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          className={`py-3 rounded-full flex-1 items-center justify-center  ${filter === 'nonlus' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
-          onPress={() => setFilter('nonlus')}
-        >
-          <Text className={`${filter === 'nonlus' ? 'text-white' : 'text-[#03233A]'} font-normal`} >
-            Non lus
-          </Text>
-        </TouchableOpacity>
+
       </View>
 
       <FlatList

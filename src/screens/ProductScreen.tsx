@@ -1,9 +1,29 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, Image, ScrollView, Dimensions, TouchableOpacity, Linking } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Dimensions,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ProductDataI } from '../context/ProductContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeftIcon, MapPinIcon, PhoneIcon, TagIcon, ChatTeardropTextIcon, HeartIcon, CubeTransparentIcon, ClockCounterClockwiseIcon, UserIcon, DotsThreeVerticalIcon, } from 'phosphor-react-native';
+import {
+  ArrowLeftIcon,
+  MapPinIcon,
+  PhoneIcon,
+  TagIcon,
+  ChatTeardropTextIcon,
+  HeartIcon,
+  CubeTransparentIcon,
+  ClockCounterClockwiseIcon,
+  UserIcon,
+  DotsThreeVerticalIcon,
+  DotsThreeIcon,
+} from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext } from '../context/UserContext';
 import PopUpProduct from '../components/popup/PopUpProduct';
@@ -24,8 +44,8 @@ export default function ProductScreen() {
 
   const author = users.find(i => i.id === item.author);
   const profileImageSource = author?.image ? { uri: author.image } : null;
-   const handlePhonePress = () => {
-    Linking.openURL(`tel:${author?.telnumber || "0342290407"}`);
+  const handlePhonePress = () => {
+    Linking.openURL(`tel:${author?.telnumber || '0342290407'}`);
   };
 
   const [showPopup, setShowPopup] = useState(false);
@@ -79,7 +99,9 @@ export default function ProductScreen() {
 
           <View className="absolute top-6 left-6 right-6 flex-row  justify-between items-center z-10">
             <TouchableOpacity
-              onPress={() => {navigation.goBack() } }
+              onPress={() => {
+                navigation.goBack();
+              }}
               className="p-3 rounded-full bg-gray-100 backdrop-blur-sm shadow"
             >
               <ArrowLeftIcon size={24} color="black" weight="bold" />
@@ -92,18 +114,21 @@ export default function ProductScreen() {
                     className="p-3 rounded-full bg-gray-100 backdrop-blur-sm shadow"
                     onPress={() => setShowPopup(!showPopup)}
                   >
-                    <DotsThreeVerticalIcon size={24} color="black" weight="bold" />
+                    <DotsThreeIcon size={24} color="black" weight="bold" />
                   </TouchableOpacity>
 
-                
                   {showPopup && (
-                      <PopUpProduct setShowPopup={setShowPopup} productId={item.id} />                  )}
+                    <PopUpProduct
+                      setShowPopup={setShowPopup}
+                      productId={item.id}
+                    />
+                  )}
                 </View>
-              ) : (<TouchableOpacity className="p-3 rounded-full bg-white/30 backdrop-blur-sm shadow">
-                <HeartIcon size={24} color="#EF4444" weight="bold" />
-              </TouchableOpacity>)}
-
-              
+              ) : (
+                <TouchableOpacity className="p-3 rounded-full bg-white/30 backdrop-blur-sm shadow">
+                  <HeartIcon size={24} color="#EF4444" weight="bold" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>

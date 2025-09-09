@@ -1,4 +1,4 @@
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, verticalScale } from "../utils/styling";
 
 export const colors = {
   primary: "#0ea5e9",

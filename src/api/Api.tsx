@@ -2,7 +2,7 @@ import axios from "axios";
 import EncryptedStorage from "react-native-encrypted-storage";
 
 const API = axios.create({
-  baseURL: "https://ant-stewart-want-yang.trycloudflare.com/", 
+  baseURL: "https://vegetarian-rehabilitation-turn-load.trycloudflare.com/", 
   timeout: 10000,
 });
 

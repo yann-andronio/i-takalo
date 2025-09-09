@@ -1,5 +1,13 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, FlatList, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StatusBar,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeroSection from '../components/HeroSection';
 import ProductCard from '../components/ProductCard';
@@ -9,10 +17,17 @@ import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
 
 export default function HomeScreen() {
-  const { allProducts, fetchFilteredProductsDonation, donationProducts , loading } = useContext(ProductContext);
+  const {
+    allProducts,
+    fetchFilteredProductsDonation,
+    donationProducts,
+    loading,
+    fetchProducts,
+  } = useContext(ProductContext);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [isselectfilterDonation, setIsSelectfilterDonation] = useState<string>('all');
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleApplyFilters = (filters: any) => {
     console.log('Filtres vente reçus par HomeScren:', filters);
@@ -24,6 +39,12 @@ export default function HomeScreen() {
     fetchFilteredProductsDonation(filters);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchProducts(); // recharge les produits
+    setRefreshing(false);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white font-jakarta">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
@@ -32,7 +53,12 @@ export default function HomeScreen() {
         <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
       </View>
 
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#03233A']} />
+        }
+      >
         <View className="px-6 ">
           <HeroSection />
         </View>
@@ -45,7 +71,7 @@ export default function HomeScreen() {
         </View>
 
         <Text className="text-xl font-bold font-jakarta text-gray-800 mb-2 px-6">
-          Produits de Dons
+          Produits de Dons teste
         </Text>
 
         {loading ? (
@@ -56,7 +82,7 @@ export default function HomeScreen() {
         ) : donationProducts.length > 0 ? (
           <FlatList
             data={donationProducts}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => <ProductCard item={item} />}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -81,7 +107,7 @@ export default function HomeScreen() {
         <View className="px-6 mb-24">
           <FlatList
             data={allProducts}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => <ProductCard item={item} />}
             showsVerticalScrollIndicator={false}
             numColumns={2}

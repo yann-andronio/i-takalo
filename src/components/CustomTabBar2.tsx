@@ -15,7 +15,7 @@ const CustomTabBar2: React.FC<Props> = ({ state, descriptors, navigation }) => {
 
  
   const hiddenRoutes = [
-     'Search',
+    'Search',
     'Product',
     'Sell',
     'Conversation',
@@ -24,6 +24,9 @@ const CustomTabBar2: React.FC<Props> = ({ state, descriptors, navigation }) => {
     'Message',
     'ConfidentialityScreen',
     'TrueProfilUserAccess',
+    'Notification',
+    'MessageMain',
+    'Chat'
   ];
   if (hiddenRoutes.includes(routeName)) return null;
 

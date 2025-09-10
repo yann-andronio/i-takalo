@@ -2,76 +2,26 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   FlatList,
-  TouchableOpacity,
-  Image,
   RefreshControl,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState, useRef, useContext } from "react";
-// import {
-//   MagnifyingGlass,
-//   NotePencil,
-// } from "phosphor-react-native";
 import { colors } from "../constants/theme";
-import { getFriendsOnlineData, getConversations } from "../services/fetchData";
-import FriendsConnectedItem from "../components/messages/FriendsConnectedItem";
+import { getConversations } from "../services/fetchData";
 import ConversationItem from "../components/messages/ConversationItem";
 import WebSocketService from "../services/websocket";
-// import { useSession } from "../context/AuthContext";
 import { AuthContext } from '../context/AuthContext';
 
-import EncryptedStorage from "react-native-encrypted-storage";
-
-export interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  is_active: boolean;
-  avatar_url: string;
-  status: boolean;
-}
-
-export interface Conversation {
-  id: string;
-  participants: User[];
-  created_at: string;
-  updated_at: string;
-  messages: Message[];
-}
-
-export interface Message {
-  id: string;
-  conversation: string;
-  sender: User;
-  content: string;
-  timestamp: string;
-  is_read: boolean;
-}
+import { User, Conversation, Message } from "../types/ModelTypes";
 
 
 const ChatScreen = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [friendsOnline, setFriendsOnline] = useState<User[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
   const wsRef = useRef<WebSocketService | null>(null);
 
-  const fetchFriends = async () => {
-    await getFriendsOnlineData()
-      .then((data) => {
-        const onlineFriends = data.filter((friend) => friend.status === true);
-        setFriendsOnline(onlineFriends);
-      })
-      .catch((err) =>
-        console.error("Erreur lors du chargement des amis :", err)
-      );
-  };
 
   const fetchConversations = async () => {
     await getConversations()
@@ -82,15 +32,10 @@ const ChatScreen = () => {
   };
 
   useEffect(() => {
-    fetchFriends();
     fetchConversations();
   }, []);
   
 
-  // const getToken = async () => {
-  //   return await EncryptedStorage.getItem("accessToken");
-
-  // }
   useEffect(() => {
     // if (!session?.access) {
     //   console.error("Pas de token d'authentification disponible");
@@ -98,7 +43,7 @@ const ChatScreen = () => {
     // }
     const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
 
-    const wsUrl = `wss://vegetarian-rehabilitation-turn-load.trycloudflare.com/ws/notifications/?token=${token}`;
+    const wsUrl = `wss://ultimately-computing-earned-attendance.trycloudflare.com/ws/notifications/?token=${token}`;
     console.log("Connexion WebSocket de notifications avec URL:", wsUrl);
 
     wsRef.current = new WebSocketService(wsUrl);
@@ -183,45 +128,9 @@ const ChatScreen = () => {
   };
 
 
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.black }}>
       <View style={styles.contentContainer}>
-        {/* Barre de recherche */}
-        <View style={styles.searchContainer}>
-          {/* <MagnifyingGlass
-            size={20}
-            color={colors.neutral400}
-            style={styles.searchIcon}
-          /> */}
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Rechercher..."
-            placeholderTextColor={colors.neutral400}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-        <View>
-          {friendsOnline.length > 0 ? (
-            <FlatList
-              data={friendsOnline}
-              keyExtractor={(item) => item.id}
-              initialNumToRender={10}
-              maxToRenderPerBatch={10}
-              renderItem={({ item, index }) => {
-                return <FriendsConnectedItem friend={item} index={index} />;
-              }}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 15, paddingHorizontal: 12 }}
-            />
-          ) : (
-            <Text style={styles.emptyListText}>
-              Aucun ami en ligne pour le moment
-            </Text>
-          )}
-        </View>
         <View
           style={{
             flexDirection: "row",
@@ -233,7 +142,6 @@ const ChatScreen = () => {
           }}
         >
           <Text style={styles.sectionTitle}>Conversations</Text>
-          {/* <NotePencil size={24} color={colors.neutral200} /> */}
         </View>
 
         <FlatList
@@ -266,25 +174,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingTop: 16,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.neutral700,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    marginBottom: 20,
-    height: 48,
-    marginHorizontal: 12,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    height: "100%",
-    fontSize: 16,
-    color: colors.neutral200,
   },
   sectionTitle: {
     fontSize: 15,

@@ -2,11 +2,27 @@ import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import React, { memo, useContext } from "react";
 import { colors } from "../../constants/theme";
 import Animated, { FadeInRight } from "react-native-reanimated";
-// import { useSession } from "../../context/AuthContext";
 import { AuthContext } from '../../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamListChatnavigatorScreen } from "../../types/Types";
+import { Conversation } from "../../types/ModelTypes";
 
-const ConversationItem = ({ conversation, index }) => {
-  // const { user } = useSession();
+type ChatNavigationProp = NativeStackNavigationProp<
+  RootStackParamListChatnavigatorScreen,
+  "Chat"
+>;
+
+
+const ConversationItem = ({
+  conversation,
+  index,
+}: {
+  conversation: Conversation;
+  index: number;
+}) => {
+  const navigation = useNavigation<ChatNavigationProp>();
+
   const { user } = useContext(AuthContext);
 
   if (!conversation) {
@@ -16,7 +32,7 @@ const ConversationItem = ({ conversation, index }) => {
 
   // Trouver le participant qui n'est pas l'utilisateur connecté
   const participant =
-    conversation.participants?.find((p) => p?.id !== user?.id) ||
+    conversation.participants?.find((p) => p?.id !== String(user?.id)) ||
     conversation.participants?.[0] ||
     {};
 
@@ -28,7 +44,7 @@ const ConversationItem = ({ conversation, index }) => {
 
   // Vérifier si le dernier message est non lu et n'est pas de l'utilisateur connecté
   const isUnread = lastMessage
-    ? !lastMessage.is_read && lastMessage.sender?.id !== user?.id
+    ? !lastMessage.is_read && lastMessage.sender?.id !== String(user?.id)
     : false;
 
   // Déterminer le message à afficher
@@ -37,7 +53,7 @@ const ConversationItem = ({ conversation, index }) => {
 
     for (let i = conversation.messages.length - 1; i >= 0; i--) {
       const msg = conversation.messages[i];
-      if (msg?.sender?.id !== user?.id) {
+      if (msg?.sender?.id !== String(user?.id)) {
         return msg?.content || "Message vide";
       }
     }
@@ -52,7 +68,7 @@ const ConversationItem = ({ conversation, index }) => {
   const displayMessage = getDisplayMessage();
 
   // Calculer l'heure relative
-  const getRelativeTime = (timestamp) => {
+  const getRelativeTime = (timestamp: string) => {
     if (!timestamp) return "";
     const messageTime = new Date(timestamp);
     const now = new Date();
@@ -72,8 +88,10 @@ const ConversationItem = ({ conversation, index }) => {
     : "";
 
   const handlePress = () => {
-    // Ici tu peux activer la navigation
-    // router.push({ pathname: "/chat", params: { ... } });
+    navigation.navigate("Chat", {
+      conversationId: conversation.id,
+      participant: participant,
+    });
     console.log("👉 Conversation ouverte avec:", participant);
   };
 
@@ -88,9 +106,9 @@ const ConversationItem = ({ conversation, index }) => {
         <View style={styles.avatarContainer}>
           <Image
             source={
-              participant?.avatar_url
-                ? { uri: participant.avatar_url }
-                : require("../../assets/images/HeroSectionImage/p1.png") // fallback si pas d’avatar
+              participant?.image
+                ? { uri: participant.image }
+                : require("../../assets/images/ProfileScreenImage/undefined.jpeg")
             }
             style={styles.avatar}
           />

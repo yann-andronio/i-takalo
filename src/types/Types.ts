@@ -10,6 +10,7 @@ export type RootStackParamListHomenavigatorScreen= {
 export type RootStackParamListChatnavigatorScreen = {
   MessageMain: undefined;
   Conversation: undefined;
+  Chat: { conversationId: string; participant: any };
 };
 export type RootStackParamListProfilnavigatorScreen = {
   ProfilMain: undefined;

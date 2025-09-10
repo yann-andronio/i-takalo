@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { colors } from "../../constants/theme";
-import { useSession } from "@/context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 
 const MessageContainer = ({
   item,
@@ -12,7 +12,7 @@ const MessageContainer = ({
   index: number;
   onMessageAppear?: (messageId: string) => void;
 }) => {
-  const { user } = useSession();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     if (item.sender.id !== user?.id && !item.is_read && onMessageAppear) {

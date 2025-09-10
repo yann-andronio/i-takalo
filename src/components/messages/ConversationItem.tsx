@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: "500",
-    color: colors.neutral200,
+    color: colors.neutral500,
     flex: 1,
     marginRight: 8,
   },
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 14,
-    color: colors.neutral400,
+    color: colors.neutral500,
     flex: 1,
     marginRight: 8,
   },

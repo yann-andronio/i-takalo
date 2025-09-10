@@ -4,6 +4,8 @@ import {
   View,
   FlatList,
   RefreshControl,
+  TouchableOpacity,
+  StatusBar
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState, useRef, useContext } from "react";
@@ -14,9 +16,13 @@ import WebSocketService from "../services/websocket";
 import { AuthContext } from '../context/AuthContext';
 
 import { User, Conversation, Message } from "../types/ModelTypes";
-
+import { useNavigation } from '@react-navigation/native';
+import { ArrowLeftIcon, UserIcon } from 'phosphor-react-native';
 
 const ChatScreen = () => {
+  const navigation = useNavigation();
+
+  const [filter, setFilter] = useState<'nonlus' | 'lus'>('nonlus');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
@@ -43,7 +49,7 @@ const ChatScreen = () => {
     // }
     const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
 
-    const wsUrl = `wss://ultimately-computing-earned-attendance.trycloudflare.com/ws/notifications/?token=${token}`;
+    const wsUrl = `wss://revelation-hewlett-weight-rome.trycloudflare.com/ws/notifications/?token=${token}`;
     console.log("Connexion WebSocket de notifications avec URL:", wsUrl);
 
     wsRef.current = new WebSocketService(wsUrl);
@@ -129,9 +135,41 @@ const ChatScreen = () => {
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.black }}>
+    <SafeAreaView className="flex-1 bg-white py-5">
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+
+      <View className="flex-row items-center mb-5 px-6">
+        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 rounded-full bg-gray-100">
+          <ArrowLeftIcon size={24} color="black" weight="bold" />
+        </TouchableOpacity>
+        <Text className="text-lg font-bold ml-5">Message</Text>
+      </View>
+
+      <View className="flex-row justify-center mb-5 mt-2 gap-5 px-5 ">
+        
+        <TouchableOpacity
+          className={`py-3 rounded-full flex-1 items-center justify-center  ${filter === 'nonlus' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
+          onPress={() => setFilter('nonlus')}
+        >
+          <Text className={`${filter === 'nonlus' ? 'text-white' : 'text-[#03233A]'} font-normal`} >
+            Non lus
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className={`py-3 rounded-full flex-1 items-center justify-center ${filter === 'lus' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
+          onPress={() => setFilter('lus')}
+        >
+          <Text className={`${filter === 'lus' ? 'text-white' : 'text-[#03233A]'} font-normal `}>
+            Lus
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+
+
       <View style={styles.contentContainer}>
-        <View
+        {/* <View
           style={{
             flexDirection: "row",
             alignItems: "center",
@@ -142,7 +180,7 @@ const ChatScreen = () => {
           }}
         >
           <Text style={styles.sectionTitle}>Conversations</Text>
-        </View>
+        </View> */}
 
         <FlatList
           data={conversations}

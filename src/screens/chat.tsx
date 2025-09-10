@@ -106,7 +106,7 @@ const ChatScreen = () => {
     if (conversation?.id) {
       const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
 
-      const wsUrl = `wss://ultimately-computing-earned-attendance.trycloudflare.com/ws/chat/${conversation.id}/?token=${token}`;
+      const wsUrl = `wss://revelation-hewlett-weight-rome.trycloudflare.com/ws/chat/${conversation.id}/?token=${token}`;
       console.log("Connexion WebSocket avec URL:", wsUrl);
 
       wsRef.current = new WebSocketService(wsUrl);

@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
-import { ArrowLeft } from "phosphor-react-native";
+import { ArrowLeftIcon, ArrowLeft } from "phosphor-react-native";
 import { colors } from "../constants/theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WebSocketService from "../services/websocket";
@@ -307,14 +307,20 @@ const ChatScreen = () => {
   }, [isRecording]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       {/* En-tête du chat */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <ArrowLeft size={24} color={colors.neutral200} />
+        {/* <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="p-2 rounded-full bg-gray-100"
+          >
+            <ArrowLeftIcon size={24} color="black" weight="bold" />
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <ArrowLeft size={24} color="black" weight="bold" />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <Image
@@ -324,7 +330,7 @@ const ChatScreen = () => {
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.headerName}>
+            <Text className="text-lg font-bold ml-3 text-[#03233A]">
               {first_name} {last_name}
             </Text>
           </View>
@@ -421,7 +427,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral800,
+    borderBottomColor: colors.neutral200,
   },
   backButton: {
     marginRight: 20,
@@ -449,9 +455,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     left: 30,
-    backgroundColor: colors.black,
+    backgroundColor: colors.white,
     borderRadius: 10,
-    padding: 2,
+    padding: 1,
   },
   statusDot: {
     width: 12,

@@ -35,9 +35,15 @@ const MessageContainer = ({
         item.sender.id === user?.id ? styles.myMessage : styles.friendMessage,
       ]}
     >
-      <Text style={styles.messageText}>{item.content}</Text>
+      <Text style={[
+        item.sender.id === user?.id ? styles.myMessageText : styles.friendMessageText,
+      ]}>{item.content}</Text>
       <View style={styles.messageFooter}>
-        <Text style={styles.messageTime}>{formatTime(item.timestamp)}</Text>
+        <Text style={[
+          item.sender.id === user?.id ? styles.myMessageTime : styles.friendMessageTime,
+        ]}>
+          {formatTime(item.timestamp)}
+        </Text>
         {item.sender.id === user?.id && (
           <View style={styles.readStatusContainer}>
             <Text style={styles.readStatusText}>
@@ -64,22 +70,26 @@ const styles = StyleSheet.create({
   messageContainer: {
     maxWidth: "80%",
     padding: 12,
-    borderRadius: 18,
-    marginBottom: 8,
+    borderRadius: 12,
+    marginBottom: 3,
   },
   myMessage: {
-    backgroundColor: colors.primary,
+    backgroundColor: "#FEF094",
     alignSelf: "flex-end",
     borderBottomRightRadius: 4,
   },
   friendMessage: {
-    backgroundColor: colors.neutral700,
+    backgroundColor: "#03233A",
     alignSelf: "flex-start",
     borderBottomLeftRadius: 4,
   },
-  messageText: {
+  myMessageText: {
     fontSize: 16,
-    color: colors.neutral200,
+    color: "#03233A",
+  },
+  friendMessageText: {
+    fontSize: 16,
+    color: colors.white,
   },
   messageFooter: {
     flexDirection: "row",
@@ -87,11 +97,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
-  messageTime: {
+  myMessageTime: {
     fontSize: 12,
-    color: colors.neutral200,
+    color: "#03233A",
   },
-
+  friendMessageTime: {
+    fontSize: 12,
+    color: colors.white,
+  },
   readStatusContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -99,7 +112,7 @@ const styles = StyleSheet.create({
   },
   readStatusText: {
     fontSize: 12,
-    color: colors.neutral200,
+    color: "#03233A",
     marginRight: 4,
   },
   readStatusDot: {

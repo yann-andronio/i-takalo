@@ -12,6 +12,10 @@ import {
   Microphone,
   PaperPlaneRight,
   Image,
+  CameraIcon,
+  SmileyIcon,
+  PaperclipIcon,
+  PaperPlaneRightIcon
 } from "phosphor-react-native";
 
 interface MessageInputProps {
@@ -20,7 +24,6 @@ interface MessageInputProps {
   isButtonDisabled: boolean;
   onSendMessage: () => void;
   onTakePicture: () => void;
-  onPickImage: () => void;
   onRecordPress: () => void;
   value?: string;
 }
@@ -29,7 +32,6 @@ const MessageInput = ({
   isButtonDisabled,
   onSendMessage,
   onTakePicture,
-  onPickImage,
   onRecordPress,
   onChangeText,
   messageInputRef,
@@ -37,41 +39,60 @@ const MessageInput = ({
 }: MessageInputProps) => {
   // Ne re-render que si ces props changent
   return (
-    <View style={styles.inputContainer}>
-      <TouchableOpacity style={styles.sendButton} onPress={onTakePicture}>
-        <Camera size={24} color={colors.white} weight="fill" />
-      </TouchableOpacity>
-      <TextInput
-        ref={messageInputRef}
-        style={styles.textInput}
-        placeholder="Écrivez un message..."
-        onChangeText={onChangeText}
-        value={value}
-        multiline
-        placeholderTextColor={colors.neutral400}
-      />
+    <View className="flex-row items-end p-4 bg-white justify-center border-t border-gray-200">
+      
+      <View className="flex-row items-end gap-2 mr-3 mb-2">
+        <TouchableOpacity>
+          <PaperclipIcon size={24} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <CameraIcon size={24} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      <View className={`flex-row flex-1 items-end px-4 w-full rounded-xl bg-gray-100 text-black`}>
+        <TextInput
+          ref={messageInputRef}
+          // style={styles.textInput}
+          placeholder="Écrivez un message..."
+          onChangeText={onChangeText}
+          value={value}
+          multiline
+          placeholderTextColor={colors.neutral400}
+          className={`flex-1 text-base text-gray-800 min-h-[40px] max-h-[120px] text-top`}
+        />
+        <TouchableOpacity className="ml-2 mb-1 self-end pb-1">
+          <SmileyIcon size={24} color="gray" />
+        </TouchableOpacity>
+      </View>
+      
       {value.trim() ? (
+        // <TouchableOpacity
+        //   style={[
+        //     styles.sendButton,
+        //     isButtonDisabled ? styles.sendButtonDisabled : {},
+        //   ]}
+        //   onPress={onSendMessage}
+        //   disabled={isButtonDisabled}
+        // >
+        //   <PaperPlaneRight
+        //     size={24}
+        //     color={isButtonDisabled ? colors.neutral400 : colors.white}
+        //     weight="fill"
+        //   />
+        // </TouchableOpacity>
+
         <TouchableOpacity
-          style={[
-            styles.sendButton,
-            isButtonDisabled ? styles.sendButtonDisabled : {},
-          ]}
           onPress={onSendMessage}
           disabled={isButtonDisabled}
+          className="ml-2  p-3 bg-[#03233A] rounded-full self-end"
         >
-          <PaperPlaneRight
-            size={24}
-            color={isButtonDisabled ? colors.neutral400 : colors.white}
-            weight="fill"
-          />
+            <PaperPlaneRightIcon size={19} color="white" weight="bold" />
         </TouchableOpacity>
       ) : (
         <>
           <TouchableOpacity style={styles.emojiButton} onPress={onRecordPress}>
             <Microphone size={24} color={colors.neutral500} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.emojiButton} onPress={onPickImage}>
-            <Image size={24} color={colors.neutral500} />
           </TouchableOpacity>
         </>
       )}

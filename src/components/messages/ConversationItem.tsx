@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: "500",
-    color: colors.neutral500,
+    color: colors.neutral400,
     flex: 1,
     marginRight: 8,
   },
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   unreadText: {
-    color: colors.neutral100,
+    color: colors.neutral800,
     fontWeight: "600",
   },
   unreadIndicator: {

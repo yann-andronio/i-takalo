@@ -25,7 +25,7 @@ const ChatScreen = () => {
   const [filter, setFilter] = useState<'nonlus' | 'lus'>('nonlus');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const wsRef = useRef<WebSocketService | null>(null);
 
 
@@ -47,9 +47,12 @@ const ChatScreen = () => {
     //   console.error("Pas de token d'authentification disponible");
     //   return;
     // }
-    const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
+    // Julio
+    // const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
+    // keni
+    // const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiZW1haWwiOiJrZW5pQGdtYWlsLmNvbSIsInR5cGUiOiJVU0VSIiwiZmlyc3RfbmFtZSI6IktlbmkiLCJsYXN0X25hbWUiOiJXaWxsc29uIiwidGVsbnVtYmVyIjpudWxsLCJpbWFnZSI6Imh0dHBzOi8vcHlucWR1b2JlcGF3aml3ZW1nYm0uc3VwYWJhc2UuY28vc3RvcmFnZS92MS9vYmplY3QvcHVibGljL3Byb2R1Y3RfaW1hZ2VzLzg4YzkyYmM0LTNhY2YtNGZjNC05NGE0LThiNzIxYjJkYTQ1OF9ybl9pbWFnZV9waWNrZXJfbGliX3RlbXBfZTk3MWRmYjYtOGQ0ZS00ZmMyLTllMzYtZDk4MjY4ZDYyMDM3LnBuZz8iLCJleHAiOjE3NTc4NDYyODgsIm9yaWdfaWF0IjoxNzU3NTg3MDg4fQ.yOZBPJPif5tCQVX247HahRE3BlghmgV1iZXODAcLaWg"
 
-    const wsUrl = `wss://revelation-hewlett-weight-rome.trycloudflare.com/ws/notifications/?token=${token}`;
+    const wsUrl = `wss://surfing-sku-despite-beijing.trycloudflare.com/ws/notifications/?token=${token}`;
     console.log("Connexion WebSocket de notifications avec URL:", wsUrl);
 
     wsRef.current = new WebSocketService(wsUrl);

@@ -2,8 +2,8 @@ import React, { createContext, useState, useEffect } from 'react';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import API from '../api/Api';
 
- export interface UserI {
-   id: number;
+export interface UserI {
+  id: number;
   first_name: string;
   last_name: string;
   email: string;
@@ -14,17 +14,18 @@ import API from '../api/Api';
 
 interface AuthContextProps {
   user: UserI | null;
+  token: string | null;
   loading: boolean;
-  loadingtoken: boolean
+  loadingtoken: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: any) => Promise<boolean>;
   logout: () => Promise<void>;
   updateUser: (data: UserI) => void; 
 }
 
-
 export const AuthContext = createContext<AuthContextProps>({
   user: null,
+  token: null,
   loading: false,
   loadingtoken: false,
   login: async () => false,
@@ -33,23 +34,20 @@ export const AuthContext = createContext<AuthContextProps>({
   updateUser: () => {}, 
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserI | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingtoken, setloadingtoken] = useState(true);
-
-  
- 
 
   useEffect(() => {
     const loadUserFromStorageByToken = async () => {
       try {
-        const token = await EncryptedStorage.getItem('accessToken');
+        const storedToken = await EncryptedStorage.getItem('accessToken');
         const userData = await EncryptedStorage.getItem('user');
 
-        if (token && userData) {
+        if (storedToken && userData) {
+          setToken(storedToken);
           setUser(JSON.parse(userData));
         } else {
           await logout();
@@ -59,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         console.error('Erreur de loading de data for utilisateur :', error);
         setloadingtoken(false); 
       } finally {
-        setloadingtoken(false)
+        setloadingtoken(false);
       }
     };
 
@@ -71,10 +69,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const res = await API.post('/api/v1/auth/login/', { email, password });
       const { token, member } = res.data;
+
       await EncryptedStorage.setItem('accessToken', token);
       await EncryptedStorage.setItem('user', JSON.stringify(member));
+
+      setToken(token);
       setUser(member);
-      console.log('connexion réussi  !', member);
+
+      console.log('connexion réussi !', member);
       return true;
     } catch (error: any) {
       console.log('Erreur login :', error || 'Erreur réseau');
@@ -94,10 +96,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         password: data.password,
         type: 'USER',
       });
-      console.log('vita inscription !');
+      console.log('Inscription réussie !');
       return true;
     } catch (error: any) {
-      console.log('Erreur login :', error || 'Erreur réseau');
+      console.log('Erreur register :', error || 'Erreur réseau');
       return false;
     } finally {
       setLoading(false);
@@ -107,10 +109,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async () => {
     await EncryptedStorage.removeItem('accessToken');
     await EncryptedStorage.removeItem('refreshToken');
+    await EncryptedStorage.removeItem('user');
+    setToken(null);
     setUser(null);
   };
 
-   const updateUser = (data: UserI) => {
+  const updateUser = (data: UserI) => {
     setUser(data);
   };
 
@@ -118,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider 
       value={{ 
         user, 
+        token,
         loading, 
         loadingtoken, 
         login, 

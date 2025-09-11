@@ -2,7 +2,7 @@ import axios from "axios";
 import EncryptedStorage from "react-native-encrypted-storage";
 
 const API = axios.create({
-  baseURL: "https://revelation-hewlett-weight-rome.trycloudflare.com/", 
+  baseURL: "https://surfing-sku-despite-beijing.trycloudflare.com/", 
   timeout: 10000,
 });
 

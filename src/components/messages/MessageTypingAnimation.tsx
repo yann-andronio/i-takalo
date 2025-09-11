@@ -19,7 +19,8 @@ interface Props {
 
 const MessageTypingAnimation: React.FC<Props> = ({
   dotColor = colors.neutral600,
-  backgroundColor = colors.neutral200,
+  // backgroundColor = colors.neutral200,
+  backgroundColor = "#03233A",
 }) => {
   // Créer 3 valeurs animées pour les 3 points
   const dot1TranslateY = useSharedValue(0);

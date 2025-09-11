@@ -62,7 +62,7 @@ const ChatScreen = () => {
   const flatListRef = useRef<FlashList<any>>(null);
   const [loading, setLoading] = useState(true);
   // const { session, user } = useSession();
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
 
   const [authError, setAuthError] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -104,9 +104,12 @@ const ChatScreen = () => {
     // }
 
     if (conversation?.id) {
-      const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
+      // Julio
+      // const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
+      // keni
+      // const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiZW1haWwiOiJrZW5pQGdtYWlsLmNvbSIsInR5cGUiOiJVU0VSIiwiZmlyc3RfbmFtZSI6IktlbmkiLCJsYXN0X25hbWUiOiJXaWxsc29uIiwidGVsbnVtYmVyIjpudWxsLCJpbWFnZSI6Imh0dHBzOi8vcHlucWR1b2JlcGF3aml3ZW1nYm0uc3VwYWJhc2UuY28vc3RvcmFnZS92MS9vYmplY3QvcHVibGljL3Byb2R1Y3RfaW1hZ2VzLzg4YzkyYmM0LTNhY2YtNGZjNC05NGE0LThiNzIxYjJkYTQ1OF9ybl9pbWFnZV9waWNrZXJfbGliX3RlbXBfZTk3MWRmYjYtOGQ0ZS00ZmMyLTllMzYtZDk4MjY4ZDYyMDM3LnBuZz8iLCJleHAiOjE3NTc4NDYyODgsIm9yaWdfaWF0IjoxNzU3NTg3MDg4fQ.yOZBPJPif5tCQVX247HahRE3BlghmgV1iZXODAcLaWg"
 
-      const wsUrl = `wss://revelation-hewlett-weight-rome.trycloudflare.com/ws/chat/${conversation.id}/?token=${token}`;
+      const wsUrl = `wss://surfing-sku-despite-beijing.trycloudflare.com/ws/chat/${conversation.id}/?token=${token}`;
       console.log("Connexion WebSocket avec URL:", wsUrl);
 
       wsRef.current = new WebSocketService(wsUrl);
@@ -281,17 +284,6 @@ const ChatScreen = () => {
 
       if (uri) {
         console.log("URI de l'enregistrement:", uri);
-        // Ici vous pouvez traiter l'audio (l'envoyer via WebSocket, etc.)
-
-        // Si vous voulez envoyer l'audio via WebSocket:
-        // if (isConnected && wsRef.current) {
-        //   wsRef.current.sendMessage(
-        //     JSON.stringify({
-        //       type: "audio",
-        //       audio_uri: uri
-        //     })
-        //   );
-        // }
       }
     },
     [isConnected]
@@ -308,14 +300,7 @@ const ChatScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* En-tête du chat */}
       <View style={styles.header}>
-        {/* <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="p-2 rounded-full bg-gray-100"
-          >
-            <ArrowLeftIcon size={24} color="black" weight="bold" />
-          </TouchableOpacity> */}
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.backButton}
@@ -354,7 +339,7 @@ const ChatScreen = () => {
         </View>
       ) : (
         <View style={{ flex: 1 }}>
-          <FlashList
+          {/* <FlashList
             ref={flatListRef}
             // data={[...messages].reverse()}
             data={[...messages]}
@@ -363,6 +348,7 @@ const ChatScreen = () => {
               <MessageContainer
                 item={item}
                 index={messages.length - 1 - index}
+                previousSenderId={index > 0 ? messages[index - 1].sender.id : null}
                 onMessageAppear={(messageId) => {
                   // Envoyer l'accusé de lecture quand un message non lu apparaît
                   if (!item.is_read && item.sender.id !== String(user?.id)) {
@@ -380,11 +366,38 @@ const ChatScreen = () => {
               console.log("Charger des messages plus anciens");
             }}
             onEndReachedThreshold={0.1}
+          /> */}
+          <FlashList
+            ref={flatListRef}
+            data={[...messages]}
+            renderItem={({ item, index }) => (
+              <MessageContainer
+                item={item}
+                index={index}
+                previousMessage={index > 0 ? messages[index - 1] : null}
+                lastMessage={messages.length > 0 ? messages[messages.length - 1] : null}
+                onMessageAppear={(messageId) => {
+                  if (!item.is_read && item.sender.id !== String(user?.id)) {
+                    sendReadReceipt(messageId);
+                  }
+                }}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.messagesContainer}
+            estimatedItemSize={200}
+            automaticallyAdjustKeyboardInsets={true}
+            onEndReached={() => {
+              console.log("Charger des messages plus anciens");
+            }}
+            onEndReachedThreshold={0.1}
           />
+
           {peerIsTyping && (
             <MessageTypingAnimation
-              dotColor={colors.neutral500}
-              backgroundColor={colors.neutral800}
+              dotColor={colors.neutral300}
+              backgroundColor="#03233A"
             />
           )}
         </View>
@@ -520,5 +533,16 @@ const styles = StyleSheet.create({
     color: colors.neutral800,
     fontSize: 12,
     fontWeight: "600",
+  },
+
+  timestamp: {
+    alignSelf: "center",
+    backgroundColor: "#e0e0e0",
+    color: "#333",
+    fontSize: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    marginVertical: 10,
   },
 });

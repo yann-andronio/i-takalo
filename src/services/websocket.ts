@@ -19,10 +19,18 @@ export default class WebSocketService {
         if (this.onOpenCallback) this.onOpenCallback();
       };
 
+      // this.socket.onmessage = (event) => {
+      //   console.log("Message reçu:", event.data);
+      //   if (this.onMessageCallback) this.onMessageCallback(event.data);
+      // };
       this.socket.onmessage = (event) => {
-        console.log("Message reçu:", event.data);
-        if (this.onMessageCallback) this.onMessageCallback(event.data);
+        console.log("📩 [WebSocketService] Message brut reçu:", event.data);
+        if (this.onMessageCallback) {
+          console.log("➡️ [WebSocketService] Transmission du message au callback");
+          this.onMessageCallback(event.data);
+        }
       };
+      
 
       this.socket.onclose = (event) => {
         console.log(
@@ -32,7 +40,7 @@ export default class WebSocketService {
           event.reason
         );
 
-        if (event.code === 4001 || event.reason.includes("auth")) {
+        if (event.code == 4001 || event.reason.includes("auth")) {
           console.error(
             "Erreur d'authentification WebSocket. Reconnexion avec un nouveau token..."
           );
@@ -58,7 +66,7 @@ export default class WebSocketService {
   }
 
   sendMessage(data: string) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+    if (this.socket && this.socket.readyState == WebSocket.OPEN) {
       console.log("Message envoyé:", data);
       this.socket.send(data);
     } else {

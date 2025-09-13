@@ -1,12 +1,18 @@
 import axios from "axios";
 import EncryptedStorage from "react-native-encrypted-storage";
+import { API_BASE_URL } from '@env';
+
+// const API_BASE_URL = "https://discounts-batteries-scratch-guarantees.trycloudflare.com"
+console.log("API URL:", API_BASE_URL);
 
 const API = axios.create({
-  baseURL: "https://surfing-sku-despite-beijing.trycloudflare.com/", 
+  baseURL: `${API_BASE_URL}/`, 
   timeout: 10000,
 });
 
 API.interceptors.request.use(async (config) => {
+  console.log("API URL:", API_BASE_URL);
+
   const token = await EncryptedStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

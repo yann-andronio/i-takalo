@@ -32,9 +32,11 @@ const ConversationItem = ({
 
   // Trouver le participant qui n'est pas l'utilisateur connecté
   const participant =
-    conversation.participants?.find((p) => p?.id !== String(user?.id)) ||
-    conversation.participants?.[0] ||
-    {};
+    conversation.participants?.find((p) => p?.id != String(user?.id))
+
+    console.log("conversation.participants", conversation.participants)
+    console.log("user?.id", user?.id)
+    console.log("participant", participant)
 
   // Obtenir le dernier message de la conversation
   const lastMessage =

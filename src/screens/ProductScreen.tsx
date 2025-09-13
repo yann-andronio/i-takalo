@@ -27,6 +27,8 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import { UserContext } from '../context/UserContext';
 import PopUpProduct from '../components/popup/PopUpProduct';
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamListChatnavigatorScreen } from "../types/Types";
 
 const { width } = Dimensions.get('window');
 
@@ -35,8 +37,13 @@ type ProductScreenRouteProp = RouteProp<
   'Product'
 >;
 
+type ChatNavigationProp = NativeStackNavigationProp<
+  RootStackParamListChatnavigatorScreen,
+  "Chat"
+>;
+
 export default function ProductScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ChatNavigationProp>();
   const route = useRoute<ProductScreenRouteProp>();
   const { item } = route.params;
   const { users } = useContext(UserContext);
@@ -81,6 +88,13 @@ export default function ProductScreen() {
     const year = date.getFullYear();
 
     return `${day}/${month}/${year}`;
+  };
+
+  const handlePressMessage = () => {
+    navigation.navigate("Chat", {
+      conversationId: "1",
+      participant: author,
+    });
   };
 
   return (
@@ -235,7 +249,7 @@ export default function ProductScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               className="flex-1 flex-row items-center justify-center p-4 bg-[#FEF094] rounded-xl"
-              onPress={handleMessagePress}
+              onPress={handlePressMessage}
             >
               <ChatTeardropTextIcon size={20} color="#000" weight="bold" />
               <Text className="text-base font-bold text-black ml-2">

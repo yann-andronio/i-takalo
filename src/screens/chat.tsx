@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
-import { ArrowLeftIcon, ArrowLeft } from "phosphor-react-native";
+import { ArrowLeft } from "phosphor-react-native";
 import { colors } from "../constants/theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WebSocketService from "../services/websocket";
@@ -19,32 +19,25 @@ import {
   getConversationMessages,
   getOrCreateConversation,
 } from "../services/fetchData";
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from "../context/AuthContext";
 import MessageTypingAnimation from "../components/messages/MessageTypingAnimation";
 import { FlashList } from "@shopify/flash-list";
 import MessageInput from "../components/messages/MessageInput";
 import MessageContainer from "../components/messages/MessageContainer";
 import MessageVocal from "../components/messages/MessageVocal";
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-
+import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
+import { API_SOCKET_URL } from "@env";
 
 type ChatScreenRouteProp = RouteProp<
   { Chat: { conversationId: string; participant: any } },
-  'Chat'
+  "Chat"
 >;
-
 
 const ChatScreen = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation();
 
-  const { conversationId, participant } = route.params;
-  // const params = useLocalSearchParams();
-  // const id = params.id as string;
-  // const first_name = params.first_name as string;
-  // const last_name = params.last_name as string;
-  // const image = params.image as string;
-  // const status = params.status === "true";
+  const { participant } = route.params;
 
   const id = participant?.id;
   const first_name = participant?.first_name;
@@ -52,16 +45,15 @@ const ChatScreen = () => {
   const image = participant?.image;
   const status = true;
 
-
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const messageInputRef = useRef<TextInput>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocketService | null>(null);
-  const flatListRef = useRef<FlashList<any>>(null);
+  const flatListRef = useRef<FlashList<any>>(null); // ✅ ref pour FlashList
   const [loading, setLoading] = useState(true);
-  // const { session, user } = useSession();
+
   const { user, token } = useContext(AuthContext);
 
   const [authError, setAuthError] = useState(false);
@@ -76,12 +68,9 @@ const ChatScreen = () => {
   const fetchPreviousMessages = async () => {
     setLoading(true);
     try {
-      // Obtenir ou créer la conversation
-      // const conv = await getOrCreateConversation(id as string);
       const conv = await getOrCreateConversation(String(id));
       setConversation(conv);
 
-      // Charger les messages
       if (conv && conv.id) {
         const msgs = await getConversationMessages(conv.id);
         setMessages(msgs);
@@ -98,18 +87,13 @@ const ChatScreen = () => {
   }, [id]);
 
   useEffect(() => {
-    // if (!session?.access) {
-    //   console.error("Pas de token d'authentification disponible");
-    //   return;
-    // }
+    if (!token) {
+      console.error("Pas de token d'authentification disponible");
+      return;
+    }
 
     if (conversation?.id) {
-      // Julio
-      // const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZW1haWwiOiJqdWxpb2ZhcmFsYWh5MjNAZ21haWwuY29tIiwidHlwZSI6IlVTRVIiLCJmaXJzdF9uYW1lIjoiSnVsaW8iLCJsYXN0X25hbWUiOiJsYXN0X25hbWUiLCJ0ZWxudW1iZXIiOm51bGwsImltYWdlIjoiaHR0cHM6Ly9weW5xZHVvYmVwYXdqaXdlbWdibS5zdXBhYmFzZS5jby9zdG9yYWdlL3YxL29iamVjdC9wdWJsaWMvcHJvZmlsX3VzZXJzLzczYzFmNmRlLWEyNjQtNDVjNS1hZDJkLTMxMGE1YjNjY2QwZV9sb2cucG5nPyIsImV4cCI6MTc1NzY3NjcxMiwib3JpZ19pYXQiOjE3NTc0MTc1MTJ9.a9-9mfwqY_phe1cFcY0VkyZkvv8LKqh5RueFjMM-54s"
-      // keni
-      // const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiZW1haWwiOiJrZW5pQGdtYWlsLmNvbSIsInR5cGUiOiJVU0VSIiwiZmlyc3RfbmFtZSI6IktlbmkiLCJsYXN0X25hbWUiOiJXaWxsc29uIiwidGVsbnVtYmVyIjpudWxsLCJpbWFnZSI6Imh0dHBzOi8vcHlucWR1b2JlcGF3aml3ZW1nYm0uc3VwYWJhc2UuY28vc3RvcmFnZS92MS9vYmplY3QvcHVibGljL3Byb2R1Y3RfaW1hZ2VzLzg4YzkyYmM0LTNhY2YtNGZjNC05NGE0LThiNzIxYjJkYTQ1OF9ybl9pbWFnZV9waWNrZXJfbGliX3RlbXBfZTk3MWRmYjYtOGQ0ZS00ZmMyLTllMzYtZDk4MjY4ZDYyMDM3LnBuZz8iLCJleHAiOjE3NTc4NDYyODgsIm9yaWdfaWF0IjoxNzU3NTg3MDg4fQ.yOZBPJPif5tCQVX247HahRE3BlghmgV1iZXODAcLaWg"
-
-      const wsUrl = `wss://surfing-sku-despite-beijing.trycloudflare.com/ws/chat/${conversation.id}/?token=${token}`;
+      const wsUrl = `${API_SOCKET_URL}/ws/chat/${conversation.id}/?token=${token}`;
       console.log("Connexion WebSocket avec URL:", wsUrl);
 
       wsRef.current = new WebSocketService(wsUrl);
@@ -126,18 +110,15 @@ const ChatScreen = () => {
       wsRef.current.setOnMessageCallback((data) => {
         const parsedData = JSON.parse(data);
 
-        // Gérer les différents types de messages
-        if (parsedData.type === "typing_status") {
+        if (parsedData.type == "typing_status") {
           setPeerIsTyping(parsedData.is_typing);
           return;
         }
 
-        // Gérer les accusés de lecture
-        if (parsedData.type === "read_receipt") {
-          // Mettre à jour le statut de lecture du message correspondant
+        if (parsedData.type == "read_receipt") {
           setMessages((prev) =>
             prev.map((message) =>
-              message.id === parsedData.message_id
+              message.id == parsedData.message_id
                 ? { ...message, is_read: true }
                 : message
             )
@@ -145,12 +126,11 @@ const ChatScreen = () => {
           return;
         }
 
-        // Gérer les messages normaux (code existant)
         const newMessage: Message = {
           id: parsedData.message_id || Date.now().toString(),
           conversation: conversation.id,
           sender: conversation.participants.find(
-            (p) => p.id === parsedData.sender_id
+            (p) => p.id == parsedData.sender_id
           ) as User,
           content: parsedData.message,
           timestamp: parsedData.timestamp,
@@ -159,8 +139,7 @@ const ChatScreen = () => {
 
         setMessages((prev) => [...prev, newMessage]);
 
-        // Si nous sommes le destinataire, envoyer immédiatement un accusé de lecture
-        if (parsedData.sender_id !== user?.id) {
+        if (parsedData.sender_id != user?.id) {
           sendReadReceipt(parsedData.message_id);
         }
       });
@@ -171,10 +150,18 @@ const ChatScreen = () => {
         wsRef.current?.disconnect();
       };
     }
-  // }, [conversation, session?.access, user?.id]);
-}, [conversation, user?.id]);
+  }, [conversation, user?.id, token]);
 
-  // Nouvelle fonction pour envoyer un accusé de lecture
+  // ✅ scroll auto vers le bas quand un message arrive
+  useEffect(() => {
+    if (messages.length > 0) {
+      flatListRef.current?.scrollToIndex({
+        index: messages.length - 1,
+        animated: true,
+      });
+    }
+  }, [messages]);
+
   const sendReadReceipt = useCallback(
     (messageId: string) => {
       if (isConnected && wsRef.current && messageId) {
@@ -189,30 +176,24 @@ const ChatScreen = () => {
     [isConnected]
   );
 
-  // Fonction pour marquer tous les messages non lus comme lus lorsque l'utilisateur consulte la conversation
   const markAllMessagesAsRead = useCallback(() => {
     if (!isConnected || !wsRef.current) return;
 
-    // Trouver les messages non lus qui ne sont pas de nous
     const unreadMessages = messages.filter(
-      (msg) => !msg.is_read && msg.sender.id !== String(user?.id)
-      
+      (msg) => !msg.is_read && msg.sender.id != String(user?.id)
     );
 
-    // Envoyer un accusé de lecture pour chaque message
     unreadMessages.forEach((msg) => {
       sendReadReceipt(msg.id);
     });
   }, [messages, user?.id, isConnected, sendReadReceipt]);
 
-  // Appeler cette fonction lorsque l'utilisateur consulte activement la conversation
   useEffect(() => {
     if (isConnected && !loading) {
       markAllMessagesAsRead();
     }
   }, [isConnected, loading, markAllMessagesAsRead]);
 
-  // Fonction pour envoyer l'état de saisie, maintenant statique
   const sendTypingStatus = useCallback(
     (typing: boolean) => {
       if (isConnected && wsRef.current) {
@@ -224,17 +205,15 @@ const ChatScreen = () => {
         );
       }
     },
-    [isConnected] // Dépend uniquement de isConnected
+    [isConnected]
   );
 
-  // Gérer le changement du texte de message
   const handleMessageChange = useCallback(
     (text: string) => {
-      // Stocker le texte dans l'état
       setMessageText(text);
 
-      const shouldDisable = text.trim() === "";
-      if (shouldDisable !== isButtonDisabled) {
+      const shouldDisable = text.trim() == "";
+      if (shouldDisable != isButtonDisabled) {
         setIsButtonDisabled(shouldDisable);
       }
 
@@ -257,7 +236,7 @@ const ChatScreen = () => {
 
   const sendMessage = useCallback(() => {
     const trimmedMessage = messageText.trim();
-    if (trimmedMessage === "") return;
+    if (trimmedMessage == "") return;
 
     setIsTyping(false);
     sendTypingStatus(false);
@@ -268,32 +247,20 @@ const ChatScreen = () => {
       })
     );
 
-    // Réinitialiser le texte
     setMessageText("");
     setIsButtonDisabled(true);
   }, [messageText, sendTypingStatus]);
 
-  console.log("RENDU");
+  const handleStopRecording = useCallback((uri: string | null) => {
+    setIsRecording(false);
 
-  
+    if (uri) {
+      console.log("URI de l'enregistrement:", uri);
+    }
+  }, []);
 
-  // Gérer la fin de l'enregistrement
-  const handleStopRecording = useCallback(
-    (uri: string | null) => {
-      setIsRecording(false);
-
-      if (uri) {
-        console.log("URI de l'enregistrement:", uri);
-      }
-    },
-    [isConnected]
-  );
-
-  // Toggle enregistrement - version simplifiée
   const handleRecordingPress = useCallback(() => {
-    if (isRecording) {
-      // Ne fait rien ici, car l'arrêt est géré par le composant MessageVocal
-    } else {
+    if (!isRecording) {
       setIsRecording(true);
     }
   }, [isRecording]);
@@ -301,11 +268,11 @@ const ChatScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <ArrowLeft size={24} color="black" weight="bold" />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <ArrowLeft size={24} color="black" weight="bold" />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <Image
@@ -332,52 +299,25 @@ const ChatScreen = () => {
         </View>
       </View>
 
-      {/* Zone des messages avec indicateur de chargement */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.neutral800} />
         </View>
       ) : (
         <View style={{ flex: 1 }}>
-          {/* <FlashList
-            ref={flatListRef}
-            // data={[...messages].reverse()}
-            data={[...messages]}
-            // inverted={true}
-            renderItem={({ item, index }) => (
-              <MessageContainer
-                item={item}
-                index={messages.length - 1 - index}
-                previousSenderId={index > 0 ? messages[index - 1].sender.id : null}
-                onMessageAppear={(messageId) => {
-                  // Envoyer l'accusé de lecture quand un message non lu apparaît
-                  if (!item.is_read && item.sender.id !== String(user?.id)) {
-                    sendReadReceipt(messageId);
-                  }
-                }}
-              />
-            )}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.messagesContainer}
-            estimatedItemSize={200}
-            automaticallyAdjustKeyboardInsets={true}
-            onEndReached={() => {
-              console.log("Charger des messages plus anciens");
-            }}
-            onEndReachedThreshold={0.1}
-          /> */}
           <FlashList
-            ref={flatListRef}
+            ref={flatListRef} // ✅ ref ici
             data={[...messages]}
             renderItem={({ item, index }) => (
               <MessageContainer
                 item={item}
                 index={index}
                 previousMessage={index > 0 ? messages[index - 1] : null}
-                lastMessage={messages.length > 0 ? messages[messages.length - 1] : null}
+                lastMessage={
+                  messages.length > 0 ? messages[messages.length - 1] : null
+                }
                 onMessageAppear={(messageId) => {
-                  if (!item.is_read && item.sender.id !== String(user?.id)) {
+                  if (!item.is_read && item.sender.id != String(user?.id)) {
                     sendReadReceipt(messageId);
                   }
                 }}
@@ -388,10 +328,6 @@ const ChatScreen = () => {
             contentContainerStyle={styles.messagesContainer}
             estimatedItemSize={200}
             automaticallyAdjustKeyboardInsets={true}
-            onEndReached={() => {
-              console.log("Charger des messages plus anciens");
-            }}
-            onEndReachedThreshold={0.1}
           />
 
           {peerIsTyping && (
@@ -403,10 +339,9 @@ const ChatScreen = () => {
         </View>
       )}
 
-      {/* Zone de saisie */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 70}
+        behavior={Platform.OS == "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS == "ios" ? 90 : 70}
       >
         {isRecording ? (
           <MessageVocal onStopRecording={handleStopRecording} />
@@ -416,8 +351,8 @@ const ChatScreen = () => {
             onChangeText={handleMessageChange}
             isButtonDisabled={isButtonDisabled}
             onSendMessage={sendMessage}
-            onTakePicture={()=>console.log("teste")}
-            onPickImage={()=>console.log("teste")}
+            onTakePicture={() => console.log("teste")}
+            onPickImage={() => console.log("teste")}
             onRecordPress={handleRecordingPress}
             value={messageText}
           />
@@ -455,15 +390,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 12,
   },
-  headerName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.neutral200,
-  },
-  headerStatus: {
-    fontSize: 14,
-    color: colors.neutral500,
-  },
   statusIndicator: {
     position: "absolute",
     bottom: 0,
@@ -480,69 +406,10 @@ const styles = StyleSheet.create({
   messagesContainer: {
     padding: 16,
   },
-
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-  },
-  loadingText: {
-    marginTop: 16,
-    color: colors.neutral600,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  authErrorContainer: {
-    backgroundColor: colors.rose,
-    padding: 10,
-    alignItems: "center",
-  },
-  authErrorText: {
-    color: colors.black,
-    fontWeight: "500",
-  },
-  recordingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.neutral200,
-    backgroundColor: colors.black,
-  },
-  recordingIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.rose,
-    marginRight: 8,
-  },
-  recordingText: {
-    flex: 1,
-    color: colors.neutral800,
-    fontSize: 14,
-  },
-  stopRecordingButton: {
-    backgroundColor: colors.neutral200,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  stopRecordingButtonText: {
-    color: colors.neutral800,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  timestamp: {
-    alignSelf: "center",
-    backgroundColor: "#e0e0e0",
-    color: "#333",
-    fontSize: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    marginVertical: 10,
   },
 });

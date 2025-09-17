@@ -109,7 +109,7 @@ const MessageContainer = ({
             isMyMessage ? styles.myMessage : styles.friendMessage,
             showTriangle && (isMyMessage ? {  borderTopRightRadius: 0}: {  borderTopLeftRadius: 0}),
             addSpacing && { marginTop: 12 },
-            { paddingRight: 55 }
+            isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 }
           ]}>
           
           <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>

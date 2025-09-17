@@ -50,10 +50,9 @@ const MessageInput = ({
         </TouchableOpacity>
       </View>
 
-      <View className={`flex-row flex-1 items-end px-4 w-full rounded-xl bg-gray-100 text-black`}>
+      <View style={styles.textContainer} className={`flex-row flex-1 items-end px-4 w-full rounded-xl text-black`}>
         <TextInput
           ref={messageInputRef}
-          // style={styles.textInput}
           placeholder="Écrivez un message..."
           onChangeText={onChangeText}
           value={value}
@@ -115,16 +114,6 @@ const styles = StyleSheet.create({
   emojiButton: {
     padding: 8,
   },
-  textInput: {
-    flex: 1,
-    backgroundColor: colors.neutral700,
-    color: colors.neutral300,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    maxHeight: 100,
-    marginHorizontal: 8,
-  },
   sendButton: {
     backgroundColor: colors.primary,
     width: 44,
@@ -136,4 +125,8 @@ const styles = StyleSheet.create({
   sendButtonDisabled: {
     backgroundColor: colors.neutral200,
   },
+  textContainer: {
+    backgroundColor: colors.gray,
+    borderRadius: 50
+  }
 });

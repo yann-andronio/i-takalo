@@ -135,7 +135,7 @@ const MessageContainer = ({
             >
               {
                 item.is_read ? 
-                  <Checks size={15} color={colors.blue} weight="bold" />
+                  <Checks size={15} color={colors.primary} weight="bold" />
                 : <Check size={13} color={colors.neutral500} weight="bold" />
               }
             </View>

@@ -151,7 +151,7 @@ export default memo(ConversationItem);
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    paddingVertical: 12,
+    paddingVertical: 1,
     paddingHorizontal: 10,
     borderRadius: 12,
     alignItems: "center",

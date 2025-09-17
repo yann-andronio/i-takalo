@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import React, { useEffect, useContext } from "react";
 import { colors } from "../../constants/theme";
 import { AuthContext } from "../../context/AuthContext";
+import { Check, Checks } from "phosphor-react-native";
 
 const MessageContainer = ({
   item,
@@ -93,6 +94,8 @@ const MessageContainer = ({
   const addSpacing =
   previousMessage && previousMessage.sender.id !== item.sender.id && !showTimestamp; 
 
+  const showTriangle = (addSpacing || showTimestamp);
+
   return (
     <View>
         {showTimestamp && (
@@ -101,39 +104,97 @@ const MessageContainer = ({
           </View>
         )}
 
-      <View
-        style={[
-          styles.messageContainer,
-          isMyMessage ? styles.myMessage : styles.friendMessage,
-          addSpacing && { marginTop: 12 },
-        ]}
-      >
-        <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
-          {item.content}
-        </Text>
-        <View style={styles.messageFooter}>
-          <Text style={isMyMessage ? styles.myMessageTime : styles.friendMessageTime}>
-            {formatTime(item.timestamp)}
+        <View style={[
+            styles.messageContainer,
+            isMyMessage ? styles.myMessage : styles.friendMessage,
+            showTriangle && (isMyMessage ? {  borderTopRightRadius: 0}: {  borderTopLeftRadius: 0}),
+            addSpacing && { marginTop: 12 },
+            { paddingRight: 55 }
+          ]}>
+          
+          <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
+            {item.content}
           </Text>
+
+          {
+            showTriangle && <View style={
+              isMyMessage ? styles.triangleRight : styles.triangleLeft
+            } />
+          }
+          
+          <View style={isMyMessage ? styles.myMessageFooter : styles.friendMessageFooter}>
+            <Text style={isMyMessage ? styles.myMessageTime : styles.friendMessageTime}>
+              {formatTime(item.timestamp)}
+            </Text>
+          </View>
+          {isMyMessage && (
+            <View
+              style={[
+                styles.readStatusDot,
+              ]}
+            >
+              {
+                item.is_read ? 
+                  <Checks size={15} color={colors.blue} weight="bold" />
+                : <Check size={13} color={colors.neutral500} weight="bold" />
+              }
+            </View>
+            // <View style={styles.readStatusContainer}>
+            //   <Text style={styles.readStatusText}>
+            //     {lastMessage.id === item.id && (item.is_read ? "Lu" : "Envoyé")}
+            //   </Text>
+            //   {lastMessage.id === item.id && (
+            //     <View
+            //       style={[
+            //         styles.readStatusDot,
+            //         item.is_read
+            //           ? styles.readStatusDotRead
+            //           : styles.readStatusDotUnread,
+            //       ]}
+            //     >
+            //       <Check size={15} color="black" weight="bold" />
+            //     </View>
+            //   {/* )} */}
+            
+            // </View>
+          )}
+        </View>
+        {/* <View
+          style={[
+            styles.messageContainer,
+            isMyMessage ? styles.myMessage : styles.friendMessage,
+            addSpacing && { marginTop: 12 },
+            { paddingRight: 45 }
+          ]}
+        >
+          <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
+            {item.content}
+          </Text>
+          <View style={styles.myMessageFooter}>
+            <Text style={isMyMessage ? styles.myMessageTime : styles.friendMessageTime}>
+              {formatTime(item.timestamp)}
+            </Text>
+          </View>
           {isMyMessage && (
             <View style={styles.readStatusContainer}>
               <Text style={styles.readStatusText}>
-                {
-                  lastMessage.id === item.id && (item.is_read ? "Lu" : "Envoyé")
-                }
+                {lastMessage.id === item.id && (item.is_read ? "Lu" : "Envoyé")}
               </Text>
-              <View
-                style={[
-                  styles.readStatusDot,
-                  item.is_read
-                    ? styles.readStatusDotRead
-                    : styles.readStatusDotUnread,
-                ]}
-              />
+              {lastMessage.id === item.id && (
+                <View
+                  style={[
+                    styles.readStatusDot,
+                    item.is_read
+                      ? styles.readStatusDotRead
+                      : styles.readStatusDotUnread,
+                  ]}
+                />
+              )}
             </View>
           )}
-        </View>
-      </View>
+        </View> */}
+
+
     </View>
   );
 };
@@ -142,61 +203,112 @@ const MessageContainer = ({
 export default MessageContainer;
 
 const styles = StyleSheet.create({
+  triangleRight: {
+    position: "absolute",
+    right: -6,   
+    top: 0,
+    width: 0,
+    height: 0,
+    // borderTopWidth: 8,
+    borderTopColor: "transparent",
+    borderLeftWidth: 10,
+    borderLeftColor: "#FEF094",
+    borderBottomWidth: 11,
+    borderBottomColor: "transparent",
+  },
+  triangleLeft: {
+    position: "absolute",
+    left: -6,
+    top: 0,
+    width: 0,
+    height: 0,
+    borderTopColor: "transparent",
+    borderRightWidth: 10,
+    borderRightColor: "#F5F5F5",
+    borderBottomWidth: 11,
+    borderBottomColor: "transparent",
+  },    
   messageContainer: {
     maxWidth: "80%",
-    padding: 12,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
     borderRadius: 12,
-    marginBottom: 3,
+    marginBottom: 2,
+  },
+  avatar: {
+    width: 14,
+    height: 14,
+    borderRadius: 20,
+    marginRight: 12,
+    position: "absolute",
+    right: -47,
+    bottom: -19
   },
   myMessage: {
     backgroundColor: "#FEF094",
     alignSelf: "flex-end",
-    borderBottomRightRadius: 4,
   },
   friendMessage: {
-    backgroundColor: "#03233A",
+    backgroundColor: colors.gray,
     alignSelf: "flex-start",
-    borderBottomLeftRadius: 4,
   },
   myMessageText: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#03233A",
   },
   friendMessageText: {
-    fontSize: 16,
-    color: colors.white,
+    fontSize: 15,
+    color: "#03233A",
   },
-  messageFooter: {
+  myMessageFooter: {
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
     marginTop: 4,
+    position: "absolute",
+    right: 25,
+    bottom: 5
+  },
+  friendMessageFooter: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 4,
+    position: "absolute",
+    right: 8,
+    bottom: 5
   },
   myMessageTime: {
-    fontSize: 12,
-    color: "#03233A",
+    fontSize: 10,
+    color: colors.neutral500,
   },
   friendMessageTime: {
-    fontSize: 12,
-    color: colors.white,
+    fontSize: 10,
+    color: colors.neutral500,
   },
-  readStatusContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 8,
+  timestamp: {
+    fontSize: 13,
+    color: colors.neutral600,
   },
-  readStatusText: {
-    fontSize: 12,
-    color: "#03233A",
-    // marginRight: 4,
-    position: "absolute",
-    bottom: -33,
-    right: -10
-  },
+  // readStatusContainer: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   marginLeft: 8,
+  // },
+  // readStatusText: {
+  //   fontSize: 12,
+  //   color: "#03233A",
+  //   position: "absolute",
+  //   bottom: -33,
+  //   right: -10
+  // },
   readStatusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 13,
+    height: 13,
+    borderRadius: 8,
+    position: "absolute",
+    right: 8,
+    bottom: 6
   },
   readStatusDotRead: {
     backgroundColor: colors.green,
@@ -205,10 +317,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral500,
   },
 
-  // 👇 style pour le séparateur d'heure
   timeSeparatorContainer: {
     alignSelf: "center",
-    marginVertical: 10,
+    marginVertical: 18,
     paddingHorizontal: 12,
     // paddingVertical: 15,
     // backgroundColor: colors.neutral200,

@@ -51,7 +51,7 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocketService | null>(null);
-  const flatListRef = useRef<FlashList<any>>(null); // ✅ ref pour FlashList
+  const flashListRef = useRef<FlashList<any>>(null); // ✅ ref pour FlashList
   const [loading, setLoading] = useState(true);
 
   const { user, token } = useContext(AuthContext);
@@ -152,15 +152,33 @@ const ChatScreen = () => {
     }
   }, [conversation, user?.id, token]);
 
-  // ✅ scroll auto vers le bas quand un message arrive
+
+  // useEffect(() => {
+  //   if (messages && flashListRef.current) {
+  //     setTimeout(() => {
+  //       flashListRef.current.scrollToEnd();
+  //     }, 0); 
+  //   }
+  // }, [messages]);
   useEffect(() => {
-    if (messages.length > 0) {
-      flatListRef.current?.scrollToIndex({
-        index: messages.length - 1,
-        animated: true,
-      });
+    if (messages.length > 0 && flashListRef.current) {
+      setTimeout(() => {
+        try {
+          flashListRef.current.scrollToIndex({
+            index: messages.length - 1,
+            animated: true,
+            viewPosition: 1,
+          });
+        } catch (error) {
+          console.log("Erreur scroll FlashList:", error);
+        }
+      }, 50); // délai très court
     }
   }, [messages]);
+  
+  
+  
+  
 
   const sendReadReceipt = useCallback(
     (messageId: string) => {
@@ -306,28 +324,36 @@ const ChatScreen = () => {
       ) : (
         <View style={{ flex: 1 }}>
           <FlashList
-            ref={flatListRef} // ✅ ref ici
+            ref={flashListRef}
             data={[...messages]}
-            renderItem={({ item, index }) => (
-              <MessageContainer
-                item={item}
-                index={index}
-                previousMessage={index > 0 ? messages[index - 1] : null}
-                lastMessage={
-                  messages.length > 0 ? messages[messages.length - 1] : null
-                }
-                onMessageAppear={(messageId) => {
-                  if (!item.is_read && item.sender.id != String(user?.id)) {
-                    sendReadReceipt(messageId);
+            renderItem={({ item, index }) => {
+                console.log("item_image_new", item.sender.image)
+                return (
+                <MessageContainer
+                  item={item}
+                  index={index}
+                  previousMessage={index > 0 ? messages[index - 1] : null}
+                  lastMessage={
+                    messages.length > 0 ? messages[messages.length - 1] : null
                   }
-                }}
-              />
-            )}
+                  onMessageAppear={(messageId) => {
+                    if (!item.is_read && item.sender.id != String(user?.id)) {
+                      sendReadReceipt(messageId);
+                    }
+                  }}
+                />
+              )
+              }
+            }
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.messagesContainer}
-            estimatedItemSize={200}
+            estimatedItemSize={30}
             automaticallyAdjustKeyboardInsets={true}
+            maintainVisibleContentPosition={{
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 0,
+            }}
           />
 
           {peerIsTyping && (

@@ -2,7 +2,7 @@ import axios from "axios";
 import EncryptedStorage from "react-native-encrypted-storage";
 
 const API = axios.create({
-  baseURL: "http://192.168.88.22:8000/", 
+  baseURL: "https://itakalo-back-fp5nc.sevalla.app/", 
   timeout: 10000,
 });
 

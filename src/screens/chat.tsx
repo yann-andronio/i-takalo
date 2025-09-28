@@ -8,29 +8,36 @@ import {
   Platform,
   ActivityIndicator,
   TextInput,
-} from "react-native";
-import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
-import { ArrowLeft } from "phosphor-react-native";
-import { colors } from "../constants/theme";
-import { SafeAreaView } from "react-native-safe-area-context";
-import WebSocketService from "../services/websocket";
-import { Message, Conversation, User } from "../types/ModelTypes";
+} from 'react-native';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useContext,
+} from 'react';
+import { ArrowLeft } from 'phosphor-react-native';
+import { colors } from '../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import WebSocketService from '../services/websocket';
+import { Message, Conversation, User } from '../types/ModelTypes';
 import {
   getConversationMessages,
   getOrCreateConversation,
-} from "../services/fetchData";
-import { AuthContext } from "../context/AuthContext";
-import MessageTypingAnimation from "../components/messages/MessageTypingAnimation";
-import { FlashList } from "@shopify/flash-list";
-import MessageInput from "../components/messages/MessageInput";
-import MessageContainer from "../components/messages/MessageContainer";
-import MessageVocal from "../components/messages/MessageVocal";
-import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
-import { API_SOCKET_URL } from "@env";
+} from '../services/fetchData';
+import { AuthContext } from '../context/AuthContext';
+import MessageTypingAnimation from '../components/messages/MessageTypingAnimation';
+import { FlashList } from '@shopify/flash-list';
+import MessageInput from '../components/messages/MessageInput';
+import MessageContainer from '../components/messages/MessageContainer';
+import MessageVocal from '../components/messages/MessageVocal';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { API_SOCKET_URL } from '@env';
+import ProductDetailsInMessage from '../components/ProductDetailsInMessage';
 
 type ChatScreenRouteProp = RouteProp<
-  { Chat: { conversationId: string; participant: any } },
-  "Chat"
+  { Chat: { conversationId: string; participant: any; produit: any } },
+  'Chat'
 >;
 
 const ChatScreen = () => {
@@ -38,6 +45,7 @@ const ChatScreen = () => {
   const navigation = useNavigation();
 
   const { participant } = route.params;
+  const { produit } = route.params;
 
   const id = participant?.id;
   const first_name = participant?.first_name;
@@ -63,7 +71,7 @@ const ChatScreen = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [messageText, setMessageText] = useState("");
+  const [messageText, setMessageText] = useState('');
 
   const fetchPreviousMessages = async () => {
     setLoading(true);
@@ -76,7 +84,7 @@ const ChatScreen = () => {
         setMessages(msgs);
       }
     } catch (error) {
-      console.error("Erreur lors du chargement de la conversation :", error);
+      console.error('Erreur lors du chargement de la conversation :', error);
     } finally {
       setLoading(false);
     }
@@ -94,34 +102,34 @@ const ChatScreen = () => {
 
     if (conversation?.id) {
       const wsUrl = `${API_SOCKET_URL}/ws/chat/${conversation.id}/?token=${token}`;
-      console.log("Connexion WebSocket avec URL:", wsUrl);
+      console.log('Connexion WebSocket avec URL:', wsUrl);
 
       wsRef.current = new WebSocketService(wsUrl);
       wsRef.current.setOnOpenCallback(() => {
         setIsConnected(true);
-        console.log("WebSocket connecté");
+        console.log('WebSocket connecté');
       });
 
       wsRef.current.setOnCloseCallback(() => {
         setIsConnected(false);
-        console.log("WebSocket déconnecté");
+        console.log('WebSocket déconnecté');
       });
 
-      wsRef.current.setOnMessageCallback((data) => {
+      wsRef.current.setOnMessageCallback(data => {
         const parsedData = JSON.parse(data);
 
-        if (parsedData.type == "typing_status") {
+        if (parsedData.type == 'typing_status') {
           setPeerIsTyping(parsedData.is_typing);
           return;
         }
 
-        if (parsedData.type == "read_receipt") {
-          setMessages((prev) =>
-            prev.map((message) =>
+        if (parsedData.type == 'read_receipt') {
+          setMessages(prev =>
+            prev.map(message =>
               message.id == parsedData.message_id
                 ? { ...message, is_read: true }
-                : message
-            )
+                : message,
+            ),
           );
           return;
         }
@@ -130,14 +138,14 @@ const ChatScreen = () => {
           id: parsedData.message_id || Date.now().toString(),
           conversation: conversation.id,
           sender: conversation.participants.find(
-            (p) => p.id == parsedData.sender_id
+            p => p.id == parsedData.sender_id,
           ) as User,
           content: parsedData.message,
           timestamp: parsedData.timestamp,
           is_read: false,
         };
 
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages(prev => [...prev, newMessage]);
 
         if (parsedData.sender_id != user?.id) {
           sendReadReceipt(parsedData.message_id);
@@ -152,12 +160,11 @@ const ChatScreen = () => {
     }
   }, [conversation, user?.id, token]);
 
-
   // useEffect(() => {
   //   if (messages && flashListRef.current) {
   //     setTimeout(() => {
   //       flashListRef.current.scrollToEnd();
-  //     }, 0); 
+  //     }, 0);
   //   }
   // }, [messages]);
   useEffect(() => {
@@ -170,38 +177,34 @@ const ChatScreen = () => {
             viewPosition: 1,
           });
         } catch (error) {
-          console.log("Erreur scroll FlashList:", error);
+          console.log('Erreur scroll FlashList:', error);
         }
       }, 50); // délai très court
     }
   }, [messages]);
-  
-  
-  
-  
 
   const sendReadReceipt = useCallback(
     (messageId: string) => {
       if (isConnected && wsRef.current && messageId) {
         wsRef.current.sendMessage(
           JSON.stringify({
-            type: "read_receipt",
+            type: 'read_receipt',
             message_id: messageId,
-          })
+          }),
         );
       }
     },
-    [isConnected]
+    [isConnected],
   );
 
   const markAllMessagesAsRead = useCallback(() => {
     if (!isConnected || !wsRef.current) return;
 
     const unreadMessages = messages.filter(
-      (msg) => !msg.is_read && msg.sender.id != String(user?.id)
+      msg => !msg.is_read && msg.sender.id != String(user?.id),
     );
 
-    unreadMessages.forEach((msg) => {
+    unreadMessages.forEach(msg => {
       sendReadReceipt(msg.id);
     });
   }, [messages, user?.id, isConnected, sendReadReceipt]);
@@ -217,20 +220,20 @@ const ChatScreen = () => {
       if (isConnected && wsRef.current) {
         wsRef.current.sendMessage(
           JSON.stringify({
-            type: "typing_status",
+            type: 'typing_status',
             is_typing: typing,
-          })
+          }),
         );
       }
     },
-    [isConnected]
+    [isConnected],
   );
 
   const handleMessageChange = useCallback(
     (text: string) => {
       setMessageText(text);
 
-      const shouldDisable = text.trim() == "";
+      const shouldDisable = text.trim() == '';
       if (shouldDisable != isButtonDisabled) {
         setIsButtonDisabled(shouldDisable);
       }
@@ -249,12 +252,12 @@ const ChatScreen = () => {
         sendTypingStatus(false);
       }, 2000);
     },
-    [isTyping, isButtonDisabled, sendTypingStatus]
+    [isTyping, isButtonDisabled, sendTypingStatus],
   );
 
   const sendMessage = useCallback(() => {
     const trimmedMessage = messageText.trim();
-    if (trimmedMessage == "") return;
+    if (trimmedMessage == '') return;
 
     setIsTyping(false);
     sendTypingStatus(false);
@@ -262,10 +265,10 @@ const ChatScreen = () => {
     wsRef.current?.sendMessage(
       JSON.stringify({
         message: trimmedMessage,
-      })
+      }),
     );
 
-    setMessageText("");
+    setMessageText('');
     setIsButtonDisabled(true);
   }, [messageText, sendTypingStatus]);
 
@@ -323,12 +326,13 @@ const ChatScreen = () => {
         </View>
       ) : (
         <View style={{ flex: 1 }}>
+        <ProductDetailsInMessage produits={produit} />
           <FlashList
             ref={flashListRef}
             data={[...messages]}
             renderItem={({ item, index }) => {
-                console.log("item_image_new", item.sender.image)
-                return (
+              console.log('item_image_new', item.sender.image);
+              return (
                 <MessageContainer
                   item={item}
                   index={index}
@@ -336,16 +340,15 @@ const ChatScreen = () => {
                   lastMessage={
                     messages.length > 0 ? messages[messages.length - 1] : null
                   }
-                  onMessageAppear={(messageId) => {
+                  onMessageAppear={messageId => {
                     if (!item.is_read && item.sender.id != String(user?.id)) {
                       sendReadReceipt(messageId);
                     }
                   }}
                 />
-              )
-              }
-            }
-            keyExtractor={(item) => item.id}
+              );
+            }}
+            keyExtractor={item => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.messagesContainer}
             estimatedItemSize={30}
@@ -366,8 +369,8 @@ const ChatScreen = () => {
       )}
 
       <KeyboardAvoidingView
-        behavior={Platform.OS == "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS == "ios" ? 90 : 70}
+        behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS == 'ios' ? 90 : 70}
       >
         {isRecording ? (
           <MessageVocal onStopRecording={handleStopRecording} />
@@ -377,8 +380,8 @@ const ChatScreen = () => {
             onChangeText={handleMessageChange}
             isButtonDisabled={isButtonDisabled}
             onSendMessage={sendMessage}
-            onTakePicture={() => console.log("teste")}
-            onPickImage={() => console.log("teste")}
+            onTakePicture={() => console.log('teste')}
+            onPickImage={() => console.log('teste')}
             onRecordPress={handleRecordingPress}
             value={messageText}
           />
@@ -396,8 +399,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.black,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -407,8 +410,8 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   headerInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   avatar: {
     width: 40,
@@ -417,7 +420,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   statusIndicator: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 30,
     backgroundColor: colors.white,
@@ -434,8 +437,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
   },
 });

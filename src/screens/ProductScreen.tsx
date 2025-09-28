@@ -125,6 +125,7 @@ export default function ProductScreen() {
     navigation.navigate('Chat', {
       conversationId: '1',
       participant: author,
+      produit : item
     });
   };
 

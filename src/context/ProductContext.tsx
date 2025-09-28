@@ -8,7 +8,7 @@ export interface ProductDataI {
   image: string;
   type: 'SALE' | 'DONATION';
   description?: string;
-  author?: number;
+  author?: number ;
   likes: number[];
   category: string;
   price?: number;

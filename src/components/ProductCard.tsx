@@ -28,7 +28,7 @@ type ProductCardNavigationProp = NativeStackNavigationProp<
 export default function ProductCard({ item }: ProductCardProps) {
   const navigation = useNavigation<ProductCardNavigationProp>();
 
-  const { fetchAuthorById } = useContext(UserContext);
+  const { users , fetchAuthorById } = useContext(UserContext);
   const [isImageLoading, setIsImageLoading] = useState(true);
 
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
@@ -49,7 +49,7 @@ export default function ProductCard({ item }: ProductCardProps) {
     };
     loadAuthor();
    
-  }, [item.author]);
+  }, [item.author , users]);
 
   const profileImageSource = author?.image ? { uri: author.image } : null;
   const isSaleProduct = item.type === 'SALE';

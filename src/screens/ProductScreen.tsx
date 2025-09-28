@@ -7,7 +7,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Linking,
-  ActivityIndicator, // Ajout de l'indicateur de chargement
+  ActivityIndicator,
 } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ProductDataI } from '../context/ProductContext';
@@ -48,6 +48,7 @@ export default function ProductScreen() {
   const route = useRoute<ProductScreenRouteProp>();
   const { item } = route.params;
   const { user } = useContext(AuthContext);
+
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const { fetchAuthorById } = useContext(UserContext);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
@@ -275,15 +276,17 @@ export default function ProductScreen() {
                 Voir en AR
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 flex-row items-center justify-center p-4 bg-[#FEF094] rounded-xl"
-              onPress={handlePressMessage}
-            >
-              <ChatTeardropTextIcon size={20} color="#000" weight="bold" />
-              <Text className="ml-2 text-base font-bold text-black">
-                Message
-              </Text>
-            </TouchableOpacity>
+            {!isTomponProduct && (
+              <TouchableOpacity
+                className="flex-1 flex-row items-center justify-center p-4 bg-[#FEF094] rounded-xl"
+                onPress={handlePressMessage}
+              >
+                <ChatTeardropTextIcon size={20} color="#000" weight="bold" />
+                <Text className="ml-2 text-base font-bold text-black">
+                  Message
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>

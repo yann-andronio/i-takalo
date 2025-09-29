@@ -11,7 +11,6 @@ export default function ChatStackNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MessageMain" component={ChatScreen} />
-      <Stack.Screen name="Conversation" component={ConversationScreen} />
       <Stack.Screen name="Chat" component={Chat} />
     </Stack.Navigator>
   );

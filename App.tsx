@@ -8,6 +8,7 @@ import { ProductProvider } from './src/context/ProductContext';
 import { UserProvider } from './src/context/UserContext';
 // Masque le warning de SafeAreaView
 LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
+import Toast from 'react-native-toast-message';
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
       <ProductProvider>
         <UserProvider>
           <AppNavigator />
+           <Toast />
         </UserProvider>
       </ProductProvider>
     </AuthProvider>

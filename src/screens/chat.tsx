@@ -296,16 +296,18 @@ const ChatScreen = () => {
           <ArrowLeft size={24} color="black" weight="bold" />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-         {image ? (
-           <Image
-            source={{
-              uri: image,
-            }}
-            style={styles.avatar}
-          />
-         ) : ( <View className="items-center justify-center mr-4 bg-gray-300 border-2 border-white rounded-full w-14 h-14">
-                  <UserIcon size={32} color="white" weight="bold" />
-                </View>)}
+          {image ? (
+            <Image
+              source={{
+                uri: image,
+              }}
+              style={styles.avatar}
+            />
+          ) : (
+            <View className="items-center justify-center mr-4 bg-gray-300 border-2 border-white rounded-full w-14 h-14">
+              <UserIcon size={32} color="white" weight="bold" />
+            </View>
+          )}
           <View>
             <Text className="text-lg font-bold ml-3 text-[#03233A]">
               {first_name} {last_name}
@@ -330,7 +332,9 @@ const ChatScreen = () => {
         </View>
       ) : (
         <View style={{ flex: 1 }}>
-        <ProductDetailsInMessage produits={produit} />
+          {/* modification de androinio************************************************************************************/}
+          <ProductDetailsInMessage produits={produit} />
+          {/* modification de androinio************************************************************************************/}
           <FlashList
             ref={flashListRef}
             data={[...messages]}

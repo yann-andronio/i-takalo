@@ -15,8 +15,6 @@ export default function ProductAdScreen() {
      const navigation = useNavigation();
      const [searchType, setSearchType] = useState<'donation' | 'vente'>('donation');
 
-
-
   return (
     <SafeAreaView className="flex-1 bg-white px-6 py-5">
         <View className="flex-row items-center mb-5">

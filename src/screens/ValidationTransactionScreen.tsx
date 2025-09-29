@@ -28,7 +28,7 @@ export default function ValidationTransactionScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
     
-      <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
+      <View className="flex-row items-center  gap-4 px-6 py-4 border-b border-gray-100">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-2 bg-gray-100 rounded-full"

@@ -4,7 +4,8 @@ import { PhoneIcon, UserIcon, HashIcon, CheckCircleIcon } from 'phosphor-react-n
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-
+import Toast from 'react-native-toast-message';
+import { useNavigation } from '@react-navigation/native';
 type Operator = 'telma' | 'airtel' | 'orange';
 
 type FormData = {
@@ -46,6 +47,7 @@ const InputField = ({ label, icon: Icon, control, name, placeholder, keyboardTyp
 export default function MobileMoneyPayment() {
   const [selectedOperator, setSelectedOperator] = useState<Operator | null>(null);
   const [errorOperator, setErrorOperator] = useState(false);
+  const navigation = useNavigation()
 
   const { control, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({
     resolver: yupResolver(validationSchema),
@@ -67,6 +69,15 @@ export default function MobileMoneyPayment() {
       return;
     }
     console.log('Formulaire valide  sady vita achat', { ...data, selectedOperator });
+    Toast.show({
+      type: 'success',
+      text1: 'Paiement en cours',
+      text2: `Veuillez confirmer la transaction sur votre téléphone (${selectedOperator.toUpperCase()}).`,
+      visibilityTime: 4000, 
+    });
+  setTimeout(() => {
+  navigation.goBack(); 
+}, 3000); 
   
   };
 

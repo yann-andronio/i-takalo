@@ -9,6 +9,7 @@ export interface ProductDataI {
   author?: number;
   likes: number[];
   created_at: String;
+  price?:number
 }
 
 export const ProductData: ProductDataI[] = [

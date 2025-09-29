@@ -1,14 +1,24 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { ProductDataI } from '../context/ProductContext'; 
+import { ProductDataI } from '../context/ProductContext';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamListChatnavigatorScreen } from '../types/Types';
 interface ProductDetailsInMessageProps {
-  produits: ProductDataI; 
+  produits: ProductDataI;
 }
 
-export default function ProductDetailsInMessage({ produits: produit }: ProductDetailsInMessageProps) {
-    
-    if (!produit) {
-    return null; 
+type ProductDetailNavigationProp = NativeStackNavigationProp<
+  RootStackParamListChatnavigatorScreen,
+  'ValidationTransaction'
+>;
+export default function ProductDetailsInMessage({
+  produits: produit,
+}: ProductDetailsInMessageProps) {
+  const navigation = useNavigation<ProductDetailNavigationProp>();
+
+  if (!produit) {
+    return null;
   }
 
   return (
@@ -17,7 +27,7 @@ export default function ProductDetailsInMessage({ produits: produit }: ProductDe
         source={{ uri: produit.image }}
         className="w-16 h-16 mr-3 rounded-lg"
       />
-      
+
       <View className="flex-1">
         <Text className="text-base font-bold text-gray-800">
           {produit.title || 'Article'}
@@ -26,7 +36,12 @@ export default function ProductDetailsInMessage({ produits: produit }: ProductDe
           {produit.price ? `Ar ${produit.price}` : 'Donation'}
         </Text>
       </View>
-      <TouchableOpacity className="py-2 px-4 rounded-full bg-[#03233A]">
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate('ValidationTransaction', { produit })
+        }
+        className="py-2 px-4 rounded-full bg-[#03233A]"
+      >
         <Text className="font-semibold text-white">Acheter</Text>
       </TouchableOpacity>
     </View>

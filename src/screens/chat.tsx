@@ -32,7 +32,8 @@ import MessageInput from '../components/messages/MessageInput';
 import MessageContainer from '../components/messages/MessageContainer';
 import MessageVocal from '../components/messages/MessageVocal';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-import { API_SOCKET_URL } from '@env';
+// import { API_SOCKET_URL } from '@env';
+const API_SOCKET_URL = "wss://automobiles-artists-hide-tender.trycloudflare.com"
 import ProductDetailsInMessage from '../components/ProductDetailsInMessage';
 
 type ChatScreenRouteProp = RouteProp<

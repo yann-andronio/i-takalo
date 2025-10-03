@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image } from "react-native";
-import React, { useEffect, useContext } from "react";
+import { StyleSheet, Text, View, Image, Pressable, Modal } from "react-native";
+import React, { useEffect, useContext, useState, useRef } from "react";
 import { colors } from "../../constants/theme";
 import { AuthContext } from "../../context/AuthContext";
 import { Check, Checks } from "phosphor-react-native";
@@ -18,6 +18,9 @@ const MessageContainer = ({
   onMessageAppear?: (messageId: string) => void;
 }) => {
   const { user } = useContext(AuthContext);
+  const [showReactions, setShowReactions] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const messageRef = useRef<View>(null);
 
   useEffect(() => {
     if (item.sender.id !== user?.id && !item.is_read && onMessageAppear) {
@@ -42,28 +45,37 @@ const MessageContainer = ({
     });
   };
 
+  const handleLongPress = () => {
+    messageRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      setMenuPosition({
+        top: pageY - 95,
+        left: isMyMessage ? pageX + 15 : pageX,
+      });
+      setShowReactions(true);
+    });
+  };
+
+  const handleReactionSelect = (reaction: string) => {
+    console.log("Réaction sélectionnée:", reaction);
+    setShowReactions(false);
+  };
 
   const isMyMessage = item.sender.id === user?.id;
-
 
   // --- Gestion du timestamp ---
   let showTimestamp = false;
   let timestampLabel = "";
 
   if (!previousMessage) {
-    // premier message => affiche date ou heure selon le jour
     showTimestamp = true;
-
     const currentTime = new Date(item.timestamp);
     const today = new Date();
 
     if (currentTime.toDateString() === today.toDateString()) {
-      // ✅ si c'est aujourd'hui, on affiche uniquement l'heure
       timestampLabel = formatTime(item.timestamp);
     } else {
       timestampLabel = formatDateTime(item.timestamp);
     }
-
   } else {
     const currentTime = new Date(item.timestamp);
     const prevTime = new Date(previousMessage.timestamp);
@@ -75,15 +87,12 @@ const MessageContainer = ({
 
     if (currentDay !== prevDay) {
       showTimestamp = true;
-      // ✅ si c'est aujourd'hui => affiche seulement l'heure
       timestampLabel =
         currentDay === today
           ? formatTime(item.timestamp)
           : formatDateTime(item.timestamp);
     } else if (timeDiff > 30 * 60 * 1000) {
-      // plus de 30 minutes
       showTimestamp = true;
-      // ✅ même logique ici
       timestampLabel =
         currentDay === today
           ? formatTime(item.timestamp)
@@ -92,124 +101,108 @@ const MessageContainer = ({
   }
   
   const addSpacing =
-  previousMessage && previousMessage.sender.id !== item.sender.id && !showTimestamp; 
+    previousMessage && previousMessage.sender.id !== item.sender.id && !showTimestamp; 
 
   const showTriangle = (addSpacing || showTimestamp);
 
+  const reactions = [
+    { emoji: "👍", name: "like" },
+    { emoji: "❤️", name: "heart" },
+    { emoji: "😂", name: "funny" },
+    { emoji: "😮", name: "wow" },
+    { emoji: "😢", name: "sad" },
+    { emoji: "🙏", name: "pray" },
+    { emoji: "👏", name: "clap" },
+  ];
+
   return (
     <View>
-        {showTimestamp && (
-          <View style={styles.timeSeparatorContainer}>
-            <Text style={styles.timestamp}>{timestampLabel}</Text>
-          </View>
-        )}
+      {showTimestamp && (
+        <View style={styles.timeSeparatorContainer}>
+          <Text style={styles.timestamp}>{timestampLabel}</Text>
+        </View>
+      )}
 
+      {/* Modal avec le menu de réactions */}
+      <Modal transparent visible={showReactions} animationType="fade" onRequestClose={() => setShowReactions(false)}>
+        <Pressable style={styles.overlay} onPress={() => setShowReactions(false)}>
+          <View 
+            style={[
+              styles.reactionMenu,
+              {
+                position: "absolute",
+                top: menuPosition.top,
+                left: menuPosition.left,
+              }
+            ]}
+          >
+            {reactions.map((reaction) => (
+              <Pressable
+                key={reaction.name}
+                style={styles.reactionButton}
+                onPress={() => handleReactionSelect(reaction.name)}
+              >
+                <Text style={styles.emojiText}>{reaction.emoji}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Pressable
+        ref={messageRef}
+        onLongPress={handleLongPress}
+        delayLongPress={300}
+      >
         <View style={[
-            styles.messageContainer,
-            isMyMessage ? styles.myMessage : styles.friendMessage,
-            showTriangle && (isMyMessage ? {  borderTopRightRadius: 0}: {  borderTopLeftRadius: 0}),
-            addSpacing && { marginTop: 12 },
-            isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 }
-          ]}>
+          styles.messageContainer,
+          isMyMessage ? styles.myMessage : styles.friendMessage,
+          showTriangle && (isMyMessage ? { borderTopRightRadius: 0 } : { borderTopLeftRadius: 0 }),
+          addSpacing && { marginTop: 12 },
+          isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 }
+        ]}>
           
           <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
             {item.content}
           </Text>
 
-          {
-            showTriangle && <View style={
-              isMyMessage ? styles.triangleRight : styles.triangleLeft
-            } />
-          }
+          {showTriangle && <View style={
+            isMyMessage ? styles.triangleRight : styles.triangleLeft
+          } />}
           
           <View style={isMyMessage ? styles.myMessageFooter : styles.friendMessageFooter}>
             <Text style={isMyMessage ? styles.myMessageTime : styles.friendMessageTime}>
               {formatTime(item.timestamp)}
             </Text>
           </View>
+
           {isMyMessage && (
-            <View
-              style={[
-                styles.readStatusDot,
-              ]}
-            >
-              {
-                item.is_read ? 
-                  <Checks size={15} color={colors.primary} weight="bold" />
+            <View style={[styles.readStatusDot]}>
+              {item.is_read ? 
+                <Checks size={15} color={colors.primary} weight="bold" />
                 : <Check size={13} color={colors.neutral500} weight="bold" />
               }
             </View>
-            // <View style={styles.readStatusContainer}>
-            //   <Text style={styles.readStatusText}>
-            //     {lastMessage.id === item.id && (item.is_read ? "Lu" : "Envoyé")}
-            //   </Text>
-            //   {lastMessage.id === item.id && (
-            //     <View
-            //       style={[
-            //         styles.readStatusDot,
-            //         item.is_read
-            //           ? styles.readStatusDotRead
-            //           : styles.readStatusDotUnread,
-            //       ]}
-            //     >
-            //       <Check size={15} color="black" weight="bold" />
-            //     </View>
-            //   {/* )} */}
-            
-            // </View>
           )}
         </View>
-        {/* <View
-          style={[
-            styles.messageContainer,
-            isMyMessage ? styles.myMessage : styles.friendMessage,
-            addSpacing && { marginTop: 12 },
-            { paddingRight: 45 }
-          ]}
-        >
-          <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
-            {item.content}
-          </Text>
-          <View style={styles.myMessageFooter}>
-            <Text style={isMyMessage ? styles.myMessageTime : styles.friendMessageTime}>
-              {formatTime(item.timestamp)}
-            </Text>
-          </View>
-          {isMyMessage && (
-            <View style={styles.readStatusContainer}>
-              <Text style={styles.readStatusText}>
-                {lastMessage.id === item.id && (item.is_read ? "Lu" : "Envoyé")}
-              </Text>
-              {lastMessage.id === item.id && (
-                <View
-                  style={[
-                    styles.readStatusDot,
-                    item.is_read
-                      ? styles.readStatusDotRead
-                      : styles.readStatusDotUnread,
-                  ]}
-                />
-              )}
-            </View>
-          )}
-        </View> */}
-
-
+      </Pressable>
     </View>
   );
 };
 
-
 export default MessageContainer;
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.1)",
+  },
   triangleRight: {
     position: "absolute",
     right: -6,   
     top: 0,
     width: 0,
     height: 0,
-    // borderTopWidth: 8,
     borderTopColor: "transparent",
     borderLeftWidth: 10,
     borderLeftColor: "#FEF094",
@@ -290,18 +283,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.neutral600,
   },
-  // readStatusContainer: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   marginLeft: 8,
-  // },
-  // readStatusText: {
-  //   fontSize: 12,
-  //   color: "#03233A",
-  //   position: "absolute",
-  //   bottom: -33,
-  //   right: -10
-  // },
   readStatusDot: {
     width: 13,
     height: 13,
@@ -316,17 +297,37 @@ const styles = StyleSheet.create({
   readStatusDotUnread: {
     backgroundColor: colors.neutral500,
   },
-
   timeSeparatorContainer: {
     alignSelf: "center",
     marginVertical: 18,
     paddingHorizontal: 12,
-    // paddingVertical: 15,
-    // backgroundColor: colors.neutral200,
     borderRadius: 12,
   },
   timeSeparatorText: {
     fontSize: 12,
     color: colors.neutral600,
+  },
+  reactionMenu: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderRadius: 30,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+    zIndex: 9999,
+  },
+  reactionButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  emojiText: {
+    fontSize: 25,
   },
 });

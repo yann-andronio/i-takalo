@@ -18,9 +18,9 @@ import { AuthContext } from '../context/AuthContext';
 import { User, Conversation, Message } from "../types/ModelTypes";
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeftIcon } from 'phosphor-react-native';
-import { API_SOCKET_URL } from '@env';
+// import { API_SOCKET_URL } from '@env';
 
-// const API_SOCKET_URL = "wss://discounts-batteries-scratch-guarantees.trycloudflare.com"
+const API_SOCKET_URL = "wss://automobiles-artists-hide-tender.trycloudflare.com"
 
 
 const ChatScreen = () => {

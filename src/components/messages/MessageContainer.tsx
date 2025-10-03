@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, Pressable, Modal, Vibration } from "react-native";
+import { StyleSheet, Text, View, Image, Pressable, Modal, Vibration, Animated } from "react-native";
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { colors } from "../../constants/theme";
 import { AuthContext } from "../../context/AuthContext";
@@ -27,11 +27,36 @@ const MessageContainer = ({
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const messageRef = useRef<View>(null);
 
+  // Animation refs pour chaque réaction
+  const animatedValues = useRef(
+    Array.from({ length: 7 }, () => new Animated.Value(0))
+  ).current;
+
   useEffect(() => {
     if (item.sender.id !== user?.id && !item.is_read && onMessageAppear) {
       onMessageAppear(item.id);
     }
   }, [item.id, item.is_read, item.sender.id, user?.id, onMessageAppear]);
+
+  // Animation au montage du menu
+  useEffect(() => {
+    if (showReactions) {
+      // Réinitialiser les valeurs
+      animatedValues.forEach(anim => anim.setValue(0));
+      
+      // Créer une séquence d'animations en cascade
+      const animations = animatedValues.map((anim, index) => 
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 200,
+          delay: index * 30, // Délai de 30ms entre chaque icône
+          useNativeDriver: true,
+        })
+      );
+
+      Animated.stagger(0, animations).start();
+    }
+  }, [showReactions]);
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -66,11 +91,9 @@ const MessageContainer = ({
     });
   };
 
-  // 🆕 Fonction pour gérer la sélection de réaction
   const handleReactionSelect = (reaction: string) => {
     console.log("Réaction sélectionnée:", reaction);
     
-    // Si l'utilisateur clique sur la même réaction qu'il a déjà, on la retire (toggle)
     if (userReaction === reaction) {
       console.log("Toggle off - retrait de la réaction");
     } else if (userReaction) {
@@ -86,7 +109,6 @@ const MessageContainer = ({
     setShowReactions(false);
   };
 
-  // 🆕 Fonction pour obtenir la réaction de l'utilisateur actuel
   const getUserReaction = () => {
     if (!item.reactions || !currentUserId) return null;
     
@@ -98,14 +120,6 @@ const MessageContainer = ({
     return null;
   };
 
-  // 🆕 Fonction pour compter les réactions
-  const getReactionCount = (emoji: string) => {
-    if (!item.reactions || !item.reactions[emoji]) return 0;
-    return item.reactions[emoji].length;
-  };
-
-
-  // 🆕 Fonction pour obtenir toutes les réactions avec leur nombre
   const getAllReactions = () => {
     if (!item.reactions) return [];
     
@@ -122,7 +136,6 @@ const MessageContainer = ({
   const userReaction = getUserReaction();
   const allReactions = getAllReactions();
 
-  // --- Gestion du timestamp ---
   let showTimestamp = false;
   let timestampLabel = "";
 
@@ -165,7 +178,7 @@ const MessageContainer = ({
 
   const showTriangle = (addSpacing || showTimestamp);
 
-  const reactions = [
+  const REACTIONS = [
     { emoji: "👍", name: "like" },
     { emoji: "❤️", name: "heart" },
     { emoji: "😂", name: "funny" },
@@ -183,7 +196,6 @@ const MessageContainer = ({
         </View>
       )}
 
-      {/* Modal avec le menu de réactions */}
       <Modal transparent visible={showReactions} animationType="fade" onRequestClose={() => setShowReactions(false)}>
         <Pressable style={styles.overlay} onPress={() => setShowReactions(false)}>
           <View 
@@ -196,22 +208,43 @@ const MessageContainer = ({
               }
             ]}
           >
-            {reactions.map((reaction) => (
-              <Pressable
-                key={reaction.name}
-                style={[
-                  styles.reactionButton,
-                  userReaction === reaction.emoji && {
-                    backgroundColor: colors.gray,
-                    marginHorizontal: 1,
-                    borderRadius: 15
-                  }
-                ]}
-                onPress={() => handleReactionSelect(reaction.emoji)}
-              >
-                <Text style={styles.emojiText}>{reaction.emoji}</Text>
-              </Pressable>
-            ))}
+            {REACTIONS.map((reaction, idx) => {
+              const animatedStyle = {
+                opacity: animatedValues[idx],
+                transform: [
+                  {
+                    translateY: animatedValues[idx].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [15, 0], // Monte de 15px vers 0
+                    }),
+                  },
+                  {
+                    scale: animatedValues[idx].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.5, 1], // Zoom léger
+                    }),
+                  },
+                ],
+              };
+
+              return (
+                <Animated.View key={reaction.name} style={animatedStyle}>
+                  <Pressable
+                    style={[
+                      styles.reactionButton,
+                      userReaction === reaction.emoji && {
+                        backgroundColor: colors.gray,
+                        marginHorizontal: 1,
+                        borderRadius: 15
+                      }
+                    ]}
+                    onPress={() => handleReactionSelect(reaction.emoji)}
+                  >
+                    <Text style={styles.emojiText}>{reaction.emoji}</Text>
+                  </Pressable>
+                </Animated.View>
+              );
+            })}
           </View>
         </Pressable>
       </Modal>
@@ -234,29 +267,14 @@ const MessageContainer = ({
             {item.content}
           </Text>
 
-          {/* 🆕 Affichage des réactions groupées */}
           {allReactions.length > 0 && (
             <View style={[
               styles.reactionBubbleContainer,
               isMyMessage ? styles.reactionBubbleMymessage : styles.reactionBubbleFriendmessage
             ]}>
-              {/* {allReactions.map((reaction, idx) => (
-                <View 
-                  key={`${reaction.emoji}-${idx}`} 
-                  style={[
-                    styles.reactionBubble,
-                    reaction.hasUserReacted && styles.reactionBubbleHighlight
-                  ]}
-                >
-                    <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
-                    {reaction.count > 1 && (
-                      <Text style={styles.reactionCount}>{reaction.count}</Text>
-                    )}
-                </View>
-              ))} */}
               <View style={[styles.reactionBubble]}>
                 {allReactions.map((reaction, idx) => (
-                  <View key={idx} style={styles.reactionItem}>
+                  <View key={idx}>
                     <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
                     {reaction.count > 1 && (
                       <Text style={styles.reactionCount}>{reaction.count}</Text>

@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, Image, Pressable, Modal } from "react-native";
+import { StyleSheet, Text, View, Image, Pressable, Modal, Vibration } from "react-native";
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { colors } from "../../constants/theme";
 import { AuthContext } from "../../context/AuthContext";
 import { Check, Checks } from "phosphor-react-native";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 
 const MessageContainer = ({
   item,
@@ -46,6 +47,13 @@ const MessageContainer = ({
   };
 
   const handleLongPress = () => {
+    Vibration.vibrate(100);
+    // Feedback haptique (petit son/vibration système)
+    ReactNativeHapticFeedback.trigger("impactMedium", {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+
     messageRef.current?.measure((x, y, width, height, pageX, pageY) => {
       setMenuPosition({
         top: pageY - 95,
@@ -54,9 +62,21 @@ const MessageContainer = ({
       setShowReactions(true);
     });
   };
+  const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
 
+  // const handleReactionSelect = (reaction: string) => {
+  //   console.log("Réaction sélectionnée:", reaction);
+  //   setShowReactions(false);
+  // };
   const handleReactionSelect = (reaction: string) => {
     console.log("Réaction sélectionnée:", reaction);
+
+    if (reaction == selectedReaction) {
+      setSelectedReaction(null);
+    }
+    else {
+      setSelectedReaction(reaction);
+    }
     setShowReactions(false);
   };
 
@@ -139,8 +159,15 @@ const MessageContainer = ({
             {reactions.map((reaction) => (
               <Pressable
                 key={reaction.name}
-                style={styles.reactionButton}
-                onPress={() => handleReactionSelect(reaction.name)}
+                style={[
+                  styles.reactionButton,
+                  selectedReaction == reaction.emoji && {
+                    backgroundColor: colors.gray,
+                    marginHorizontal: 1,
+                    borderRadius: 15
+                  }
+                ]}
+                onPress={() => handleReactionSelect(reaction.emoji)}
               >
                 <Text style={styles.emojiText}>{reaction.emoji}</Text>
               </Pressable>
@@ -159,12 +186,24 @@ const MessageContainer = ({
           isMyMessage ? styles.myMessage : styles.friendMessage,
           showTriangle && (isMyMessage ? { borderTopRightRadius: 0 } : { borderTopLeftRadius: 0 }),
           addSpacing && { marginTop: 12 },
-          isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 }
+          isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 },
+
+          // Ajout d'espace en présence de reaction
+          selectedReaction && { marginBottom: 18 },
         ]}>
           
           <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
             {item.content}
           </Text>
+
+          {selectedReaction && (
+            <View style={[
+              styles.reactionBubble,
+              isMyMessage ? styles.reactionBubbleMymessage : styles.reactionBubbleFriendmessage
+            ]}>
+              <Text style={{ fontSize: 13 }}>{selectedReaction}</Text>
+            </View>
+          )}
 
           {showTriangle && <View style={
             isMyMessage ? styles.triangleRight : styles.triangleLeft
@@ -197,6 +236,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.1)",
   },
+  reactionBubble: {
+    backgroundColor: colors.gray,
+    borderRadius: 15,
+    paddingHorizontal: 3,
+    paddingVertical: 1,
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+  reactionBubbleMymessage: {    
+    position: "absolute",
+    bottom: -17,
+    right: 5,
+  },
+  reactionBubbleFriendmessage: {    
+    position: "absolute",
+    bottom: -17,
+    left: 5,
+  },
+  
   triangleRight: {
     position: "absolute",
     right: -6,   

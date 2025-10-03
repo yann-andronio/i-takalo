@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View, Image, Pressable, Modal, Vibration, Animated } from "react-native";
 import React, { useEffect, useContext, useState, useRef } from "react";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { colors } from "../../constants/theme";
 import { AuthContext } from "../../context/AuthContext";
-import { Check, Checks } from "phosphor-react-native";
+import { Check, Checks, ArrowBendUpLeft } from "phosphor-react-native";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
-
+import ReplyMessageDisplay from "./ReplyMessageDisplay";
+ 
 const MessageContainer = ({
   item,
   index,
@@ -13,6 +15,7 @@ const MessageContainer = ({
   onMessageAppear,
   onReactionSelect,
   currentUserId,
+  onSwipeReply,
 }: {
   item: any;
   index: number;
@@ -21,11 +24,16 @@ const MessageContainer = ({
   onMessageAppear?: (messageId: string) => void;
   onReactionSelect?: (messageId: string, reaction: string) => void;
   currentUserId?: string;
+  onSwipeReply?: (message: any) => void;
 }) => {
   const { user } = useContext(AuthContext);
   const [showReactions, setShowReactions] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const messageRef = useRef<View>(null);
+
+  // Animation pour le swipe
+  const translateX = useRef(new Animated.Value(0)).current;
+  const replyIconOpacity = useRef(new Animated.Value(0)).current;
 
   // Animation refs pour chaque réaction
   const animatedValues = useRef(
@@ -41,15 +49,13 @@ const MessageContainer = ({
   // Animation au montage du menu
   useEffect(() => {
     if (showReactions) {
-      // Réinitialiser les valeurs
       animatedValues.forEach(anim => anim.setValue(0));
       
-      // Créer une séquence d'animations en cascade
       const animations = animatedValues.map((anim, index) => 
         Animated.timing(anim, {
           toValue: 1,
           duration: 200,
-          delay: index * 30, // Délai de 30ms entre chaque icône
+          delay: index * 30,
           useNativeDriver: true,
         })
       );
@@ -57,6 +63,78 @@ const MessageContainer = ({
       Animated.stagger(0, animations).start();
     }
   }, [showReactions]);
+
+  const onGestureEvent = Animated.event(
+    [{ nativeEvent: { translationX: translateX } }],
+    { 
+      useNativeDriver: true,
+      listener: (event: any) => {
+        const { translationX } = event.nativeEvent;
+        const isMyMessage = item.sender.id === user?.id;
+        
+        // Limiter le mouvement selon le type de message
+        if (isMyMessage) {
+          // Mon message : glisser vers la gauche (valeur négative)
+          if (translationX > 0) {
+            translateX.setValue(0);
+          } else if (translationX < -80) {
+            translateX.setValue(-80);
+          }
+        } else {
+          // Message ami : glisser vers la droite (valeur positive)
+          if (translationX < 0) {
+            translateX.setValue(0);
+          } else if (translationX > 80) {
+            translateX.setValue(80);
+          }
+        }
+
+        // Animer l'opacité de l'icône
+        const progress = Math.min(Math.abs(translationX._value) / 80, 1);
+        replyIconOpacity.setValue(progress);
+      }
+    }
+  );
+
+  const onHandlerStateChange = (event: any) => {
+    if (event.nativeEvent.state === State.END) {
+      const { translationX } = event.nativeEvent;
+      const threshold = 60;
+      const isMyMessage = item.sender.id === user?.id;
+
+      // Vérifier si le swipe est suffisant
+      const shouldReply = isMyMessage 
+        ? translationX < -threshold 
+        : translationX > threshold;
+
+      if (shouldReply) {
+        // Déclencher l'action de réponse
+        ReactNativeHapticFeedback.trigger("impactMedium", {
+          enableVibrateFallback: true,
+          ignoreAndroidSystemSettings: false,
+        });
+        
+        if (onSwipeReply) {
+          onSwipeReply(item);
+        }
+      }
+
+      // Réinitialiser l'animation
+      Animated.parallel([
+        Animated.spring(translateX, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 10,
+        }),
+        Animated.timing(replyIconOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        })
+      ]).start();
+    }
+  };
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -76,7 +154,7 @@ const MessageContainer = ({
   };
 
   const handleLongPress = () => {
-    Vibration.vibrate(100);
+    Vibration.vibrate(50);
     ReactNativeHapticFeedback.trigger("impactMedium", {
       enableVibrateFallback: true,
       ignoreAndroidSystemSettings: false,
@@ -92,20 +170,9 @@ const MessageContainer = ({
   };
 
   const handleReactionSelect = (reaction: string) => {
-    console.log("Réaction sélectionnée:", reaction);
-    
-    if (userReaction === reaction) {
-      console.log("Toggle off - retrait de la réaction");
-    } else if (userReaction) {
-      console.log(`Changement de réaction: ${userReaction} -> ${reaction}`);
-    } else {
-      console.log("Nouvelle réaction ajoutée");
-    }
-    
     if (onReactionSelect) {
       onReactionSelect(item.id, reaction);
     }
-    
     setShowReactions(false);
   };
 
@@ -215,13 +282,13 @@ const MessageContainer = ({
                   {
                     translateY: animatedValues[idx].interpolate({
                       inputRange: [0, 1],
-                      outputRange: [15, 0], // Monte de 15px vers 0
+                      outputRange: [15, 0],
                     }),
                   },
                   {
                     scale: animatedValues[idx].interpolate({
                       inputRange: [0, 1],
-                      outputRange: [0.5, 1], // Zoom léger
+                      outputRange: [0.5, 1],
                     }),
                   },
                 ],
@@ -249,62 +316,94 @@ const MessageContainer = ({
         </Pressable>
       </Modal>
 
-      <Pressable
-        ref={messageRef}
-        onLongPress={handleLongPress}
-        delayLongPress={300}
-      >
-        <View style={[
-          styles.messageContainer,
-          isMyMessage ? styles.myMessage : styles.friendMessage,
-          showTriangle && (isMyMessage ? { borderTopRightRadius: 0 } : { borderTopLeftRadius: 0 }),
-          addSpacing && { marginTop: 12 },
-          isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 },
-          allReactions.length > 0 && { marginBottom: 22 },
-        ]}>
-          
-          <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
-            {item.content}
-          </Text>
+      <View style={styles.swipeContainer}>
+        {/* Icône de réponse en arrière-plan */}
+        <Animated.View 
+          style={[
+            styles.replyIconContainer,
+            isMyMessage ? styles.replyIconRight : styles.replyIconLeft,
+            { opacity: replyIconOpacity }
+          ]}
+        >
+          <ArrowBendUpLeft size={24} color={colors.neutral400} weight="bold" />
+        </Animated.View>
+ 
+        <PanGestureHandler
+          onGestureEvent={onGestureEvent}
+          onHandlerStateChange={onHandlerStateChange}
+          // activeOffsetX={isMyMessage ? [-10, 10] : [10, -10]}
+          activeOffsetX={isMyMessage ? [-10, 10] : [-10, 10]}
 
-          {allReactions.length > 0 && (
-            <View style={[
-              styles.reactionBubbleContainer,
-              isMyMessage ? styles.reactionBubbleMymessage : styles.reactionBubbleFriendmessage
-            ]}>
-              <View style={[styles.reactionBubble]}>
-                {allReactions.map((reaction, idx) => (
-                  <View key={idx}>
-                    <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
-                    {reaction.count > 1 && (
-                      <Text style={styles.reactionCount}>{reaction.count}</Text>
-                    )}
+        >
+          <Animated.View style={{ transform: [{ translateX }] }}>
+            <Pressable
+              ref={messageRef}
+              onLongPress={handleLongPress}
+              delayLongPress={300}
+            >
+              <View style={[
+                styles.messageContainer,
+                isMyMessage ? styles.myMessage : styles.friendMessage,
+                showTriangle && (isMyMessage ? { borderTopRightRadius: 0 } : { borderTopLeftRadius: 0 }),
+                addSpacing && { marginTop: 12 },
+                isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 },
+                allReactions.length > 0 && { marginBottom: 22 },
+              ]}>
+                
+                {/* Affichage du message cité */}
+                {item.reply_to && (
+                  <ReplyMessageDisplay
+                    replyTo={item.reply_to}
+                    isMyMessage={isMyMessage}
+                    currentUserId={currentUserId}
+                  />
+                )}
+
+                <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
+                  {item.content}
+                </Text>
+
+                {allReactions.length > 0 && (
+                  <View style={[
+                    styles.reactionBubbleContainer,
+                    isMyMessage ? styles.reactionBubbleMymessage : styles.reactionBubbleFriendmessage
+                  ]}>
+                    <View style={[styles.reactionBubble]}>
+                      {allReactions.map((reaction, idx) => (
+                        <View key={idx}>
+                          <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
+                          {reaction.count > 1 && (
+                            <Text style={styles.reactionCount}>{reaction.count}</Text>
+                          )}
+                        </View>
+                      ))}
+                    </View>
                   </View>
-                ))}
+                )}
+
+                {showTriangle && <View style={
+                  isMyMessage ? styles.triangleRight : styles.triangleLeft
+                } />}
+                
+                <View style={isMyMessage ? styles.myMessageFooter : styles.friendMessageFooter}>
+                  <Text style={isMyMessage ? styles.myMessageTime : styles.friendMessageTime}>
+                    {formatTime(item.timestamp)}
+                  </Text>
+                </View>
+
+                {isMyMessage && (
+                  <View style={[styles.readStatusDot]}>
+                    {item.is_read ? 
+                      <Checks size={15} color={colors.primary} weight="bold" />
+                      : <Check size={13} color={colors.neutral500} weight="bold" />
+                    }
+                  </View>
+                )}
               </View>
-            </View>
-          )}
-
-          {showTriangle && <View style={
-            isMyMessage ? styles.triangleRight : styles.triangleLeft
-          } />}
-          
-          <View style={isMyMessage ? styles.myMessageFooter : styles.friendMessageFooter}>
-            <Text style={isMyMessage ? styles.myMessageTime : styles.friendMessageTime}>
-              {formatTime(item.timestamp)}
-            </Text>
-          </View>
-
-          {isMyMessage && (
-            <View style={[styles.readStatusDot]}>
-              {item.is_read ? 
-                <Checks size={15} color={colors.primary} weight="bold" />
-                : <Check size={13} color={colors.neutral500} weight="bold" />
-              }
-            </View>
-          )}
-        </View>
-      </Pressable>
+            </Pressable>
+          </Animated.View>
+        </PanGestureHandler>
+      </View>
     </View>
   );
 };
@@ -315,6 +414,22 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.1)",
+  },
+  swipeContainer: {
+    position: "relative",
+  },
+  replyIconContainer: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    zIndex: -1,
+  },
+  replyIconLeft: {
+    left: 10,
+  },
+  replyIconRight: {
+    right: 10,
   },
   reactionBubbleContainer: {
     flexDirection: "row",

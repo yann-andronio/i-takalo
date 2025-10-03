@@ -8,6 +8,7 @@ import {
   Platform,
   ActivityIndicator,
   TextInput,
+  Keyboard,
 } from 'react-native';
 import React, {
   useState,
@@ -31,6 +32,7 @@ import { FlashList } from '@shopify/flash-list';
 import MessageInput from '../components/messages/MessageInput';
 import MessageContainer from '../components/messages/MessageContainer';
 import MessageVocal from '../components/messages/MessageVocal';
+import ReplyPreview from '../components/messages/ReplyPreview';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 const API_SOCKET_URL = "wss://automobiles-artists-hide-tender.trycloudflare.com"
 import ProductDetailsInMessage from '../components/ProductDetailsInMessage';
@@ -72,6 +74,9 @@ const ChatScreen = () => {
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [messageText, setMessageText] = useState('');
+
+  // État pour gérer les réponses
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
   const fetchPreviousMessages = async () => {
     setLoading(true);
@@ -134,7 +139,6 @@ const ChatScreen = () => {
           return;
         }
 
-        // 🆕 Gestion des réactions - mise à jour complète
         if (parsedData.type == 'reaction') {
           setMessages(prev =>
             prev.map(message =>
@@ -159,6 +163,7 @@ const ChatScreen = () => {
           timestamp: parsedData.timestamp,
           is_read: false,
           reactions: parsedData.reactions || {},
+          reply_to: parsedData.reply_to || null,
         };
 
         setMessages(prev => [...prev, newMessage]);
@@ -206,7 +211,6 @@ const ChatScreen = () => {
     [isConnected],
   );
 
-  // 🆕 Fonction pour envoyer une réaction
   const sendReaction = useCallback(
     (messageId: string, reaction: string) => {
       if (isConnected && wsRef.current) {
@@ -287,15 +291,21 @@ const ChatScreen = () => {
     setIsTyping(false);
     sendTypingStatus(false);
 
-    wsRef.current?.sendMessage(
-      JSON.stringify({
-        message: trimmedMessage,
-      }),
-    );
+    const messageData: any = {
+      message: trimmedMessage,
+    };
+
+    // Ajouter l'ID du message auquel on répond
+    if (replyingTo) {
+      messageData.reply_to_id = replyingTo.id;
+    }
+
+    wsRef.current?.sendMessage(JSON.stringify(messageData));
 
     setMessageText('');
     setIsButtonDisabled(true);
-  }, [messageText, sendTypingStatus]);
+    setReplyingTo(null);
+  }, [messageText, sendTypingStatus, replyingTo]);
 
   const handleStopRecording = useCallback((uri: string | null) => {
     setIsRecording(false);
@@ -310,6 +320,20 @@ const ChatScreen = () => {
       setIsRecording(true);
     }
   }, [isRecording]);
+
+  // Gérer le swipe pour répondre
+  const handleSwipeReply = useCallback((message: Message) => {
+    setReplyingTo(message);
+    // Ouvrir le clavier
+    setTimeout(() => {
+      messageInputRef.current?.focus();
+    }, 100);
+  }, []);
+
+  // Annuler la réponse
+  const handleCancelReply = useCallback(() => {
+    setReplyingTo(null);
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -378,6 +402,7 @@ const ChatScreen = () => {
                   onReactionSelect={(messageId, reaction) => {
                     sendReaction(messageId, reaction);
                   }}
+                  onSwipeReply={handleSwipeReply}
                   currentUserId={user?.id}
                 />
               );
@@ -406,6 +431,12 @@ const ChatScreen = () => {
         behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS == 'ios' ? 90 : 70}
       >
+        {/* Aperçu du message auquel on répond */}
+        <ReplyPreview
+          replyingTo={replyingTo}
+          onCancel={handleCancelReply}
+        />
+
         {isRecording ? (
           <MessageVocal onStopRecording={handleStopRecording} />
         ) : (

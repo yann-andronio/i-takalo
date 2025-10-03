@@ -37,7 +37,6 @@ const MessageInput = ({
   messageInputRef,
   value = "",
 }: MessageInputProps) => {
-  // Ne re-render que si ces props changent
   return (
     <View className="flex-row items-end p-4 bg-white justify-center border-t border-gray-200">
       
@@ -66,21 +65,6 @@ const MessageInput = ({
       </View>
       
       {value.trim() ? (
-        // <TouchableOpacity
-        //   style={[
-        //     styles.sendButton,
-        //     isButtonDisabled ? styles.sendButtonDisabled : {},
-        //   ]}
-        //   onPress={onSendMessage}
-        //   disabled={isButtonDisabled}
-        // >
-        //   <PaperPlaneRight
-        //     size={24}
-        //     color={isButtonDisabled ? colors.neutral400 : colors.white}
-        //     weight="fill"
-        //   />
-        // </TouchableOpacity>
-
         <TouchableOpacity
           onPress={onSendMessage}
           disabled={isButtonDisabled}

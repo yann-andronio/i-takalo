@@ -32,7 +32,6 @@ import MessageInput from '../components/messages/MessageInput';
 import MessageContainer from '../components/messages/MessageContainer';
 import MessageVocal from '../components/messages/MessageVocal';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-// import { API_SOCKET_URL } from '@env';
 const API_SOCKET_URL = "wss://automobiles-artists-hide-tender.trycloudflare.com"
 import ProductDetailsInMessage from '../components/ProductDetailsInMessage';
 
@@ -60,7 +59,7 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocketService | null>(null);
-  const flashListRef = useRef<FlashList<any>>(null); // ✅ ref pour FlashList
+  const flashListRef = useRef<FlashList<any>>(null);
   const [loading, setLoading] = useState(true);
 
   const { user, token } = useContext(AuthContext);
@@ -135,6 +134,21 @@ const ChatScreen = () => {
           return;
         }
 
+        // 🆕 Gestion des réactions - mise à jour complète
+        if (parsedData.type == 'reaction') {
+          setMessages(prev =>
+            prev.map(message =>
+              message.id == parsedData.message_id
+                ? {
+                    ...message,
+                    reactions: parsedData.reactions || {},
+                  }
+                : message,
+            ),
+          );
+          return;
+        }
+
         const newMessage: Message = {
           id: parsedData.message_id || Date.now().toString(),
           conversation: conversation.id,
@@ -144,6 +158,7 @@ const ChatScreen = () => {
           content: parsedData.message,
           timestamp: parsedData.timestamp,
           is_read: false,
+          reactions: parsedData.reactions || {},
         };
 
         setMessages(prev => [...prev, newMessage]);
@@ -161,13 +176,6 @@ const ChatScreen = () => {
     }
   }, [conversation, user?.id, token]);
 
-  // useEffect(() => {
-  //   if (messages && flashListRef.current) {
-  //     setTimeout(() => {
-  //       flashListRef.current.scrollToEnd();
-  //     }, 0);
-  //   }
-  // }, [messages]);
   useEffect(() => {
     if (messages.length > 0 && flashListRef.current) {
       setTimeout(() => {
@@ -180,7 +188,7 @@ const ChatScreen = () => {
         } catch (error) {
           console.log('Erreur scroll FlashList:', error);
         }
-      }, 50); // délai très court
+      }, 50);
     }
   }, [messages]);
 
@@ -191,6 +199,22 @@ const ChatScreen = () => {
           JSON.stringify({
             type: 'read_receipt',
             message_id: messageId,
+          }),
+        );
+      }
+    },
+    [isConnected],
+  );
+
+  // 🆕 Fonction pour envoyer une réaction
+  const sendReaction = useCallback(
+    (messageId: string, reaction: string) => {
+      if (isConnected && wsRef.current) {
+        wsRef.current.sendMessage(
+          JSON.stringify({
+            type: 'reaction',
+            message_id: messageId,
+            reaction: reaction,
           }),
         );
       }
@@ -333,14 +357,11 @@ const ChatScreen = () => {
         </View>
       ) : (
         <View style={{ flex: 1 }}>
-          {/* modification de androinio************************************************************************************/}
           <ProductDetailsInMessage produits={produit} />
-          {/* modification de androinio************************************************************************************/}
           <FlashList
             ref={flashListRef}
             data={[...messages]}
             renderItem={({ item, index }) => {
-              console.log('item_image_new', item.sender.image);
               return (
                 <MessageContainer
                   item={item}
@@ -354,6 +375,10 @@ const ChatScreen = () => {
                       sendReadReceipt(messageId);
                     }
                   }}
+                  onReactionSelect={(messageId, reaction) => {
+                    sendReaction(messageId, reaction);
+                  }}
+                  currentUserId={user?.id}
                 />
               );
             }}

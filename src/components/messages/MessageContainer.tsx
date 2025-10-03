@@ -11,12 +11,16 @@ const MessageContainer = ({
   previousMessage,
   lastMessage,
   onMessageAppear,
+  onReactionSelect,
+  currentUserId,
 }: {
   item: any;
   index: number;
   previousMessage?: any | null;
   lastMessage?: any | null;
   onMessageAppear?: (messageId: string) => void;
+  onReactionSelect?: (messageId: string, reaction: string) => void;
+  currentUserId?: string;
 }) => {
   const { user } = useContext(AuthContext);
   const [showReactions, setShowReactions] = useState(false);
@@ -48,7 +52,6 @@ const MessageContainer = ({
 
   const handleLongPress = () => {
     Vibration.vibrate(100);
-    // Feedback haptique (petit son/vibration système)
     ReactNativeHapticFeedback.trigger("impactMedium", {
       enableVibrateFallback: true,
       ignoreAndroidSystemSettings: false,
@@ -62,25 +65,62 @@ const MessageContainer = ({
       setShowReactions(true);
     });
   };
-  const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
 
-  // const handleReactionSelect = (reaction: string) => {
-  //   console.log("Réaction sélectionnée:", reaction);
-  //   setShowReactions(false);
-  // };
+  // 🆕 Fonction pour gérer la sélection de réaction
   const handleReactionSelect = (reaction: string) => {
     console.log("Réaction sélectionnée:", reaction);
-
-    if (reaction == selectedReaction) {
-      setSelectedReaction(null);
+    
+    // Si l'utilisateur clique sur la même réaction qu'il a déjà, on la retire (toggle)
+    if (userReaction === reaction) {
+      console.log("Toggle off - retrait de la réaction");
+    } else if (userReaction) {
+      console.log(`Changement de réaction: ${userReaction} -> ${reaction}`);
+    } else {
+      console.log("Nouvelle réaction ajoutée");
     }
-    else {
-      setSelectedReaction(reaction);
+    
+    if (onReactionSelect) {
+      onReactionSelect(item.id, reaction);
     }
+    
     setShowReactions(false);
   };
 
+  // 🆕 Fonction pour obtenir la réaction de l'utilisateur actuel
+  const getUserReaction = () => {
+    if (!item.reactions || !currentUserId) return null;
+    
+    for (const [emoji, userIds] of Object.entries(item.reactions)) {
+      if (Array.isArray(userIds) && userIds.includes(String(currentUserId))) {
+        return emoji;
+      }
+    }
+    return null;
+  };
+
+  // 🆕 Fonction pour compter les réactions
+  const getReactionCount = (emoji: string) => {
+    if (!item.reactions || !item.reactions[emoji]) return 0;
+    return item.reactions[emoji].length;
+  };
+
+
+  // 🆕 Fonction pour obtenir toutes les réactions avec leur nombre
+  const getAllReactions = () => {
+    if (!item.reactions) return [];
+    
+    return Object.entries(item.reactions)
+      .filter(([_, userIds]: [string, any]) => Array.isArray(userIds) && userIds.length > 0)
+      .map(([emoji, userIds]: [string, any]) => ({
+        emoji,
+        count: userIds.length,
+        hasUserReacted: userIds.includes(String(currentUserId)),
+      }));
+  };
+
   const isMyMessage = item.sender.id === user?.id;
+  const userReaction = getUserReaction();
+  const allReactions = getAllReactions();
 
   // --- Gestion du timestamp ---
   let showTimestamp = false;
@@ -161,7 +201,7 @@ const MessageContainer = ({
                 key={reaction.name}
                 style={[
                   styles.reactionButton,
-                  selectedReaction == reaction.emoji && {
+                  userReaction === reaction.emoji && {
                     backgroundColor: colors.gray,
                     marginHorizontal: 1,
                     borderRadius: 15
@@ -187,21 +227,43 @@ const MessageContainer = ({
           showTriangle && (isMyMessage ? { borderTopRightRadius: 0 } : { borderTopLeftRadius: 0 }),
           addSpacing && { marginTop: 12 },
           isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 },
-
-          // Ajout d'espace en présence de reaction
-          selectedReaction && { marginBottom: 18 },
+          allReactions.length > 0 && { marginBottom: 22 },
         ]}>
           
           <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
             {item.content}
           </Text>
 
-          {selectedReaction && (
+          {/* 🆕 Affichage des réactions groupées */}
+          {allReactions.length > 0 && (
             <View style={[
-              styles.reactionBubble,
+              styles.reactionBubbleContainer,
               isMyMessage ? styles.reactionBubbleMymessage : styles.reactionBubbleFriendmessage
             ]}>
-              <Text style={{ fontSize: 13 }}>{selectedReaction}</Text>
+              {/* {allReactions.map((reaction, idx) => (
+                <View 
+                  key={`${reaction.emoji}-${idx}`} 
+                  style={[
+                    styles.reactionBubble,
+                    reaction.hasUserReacted && styles.reactionBubbleHighlight
+                  ]}
+                >
+                    <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
+                    {reaction.count > 1 && (
+                      <Text style={styles.reactionCount}>{reaction.count}</Text>
+                    )}
+                </View>
+              ))} */}
+              <View style={[styles.reactionBubble]}>
+                {allReactions.map((reaction, idx) => (
+                  <View key={idx} style={styles.reactionItem}>
+                    <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
+                    {reaction.count > 1 && (
+                      <Text style={styles.reactionCount}>{reaction.count}</Text>
+                    )}
+                  </View>
+                ))}
+              </View>
             </View>
           )}
 
@@ -236,22 +298,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.1)",
   },
+  reactionBubbleContainer: {
+    flexDirection: "row",
+    gap: 4,
+  },
   reactionBubble: {
     backgroundColor: colors.gray,
-    borderRadius: 15,
-    paddingHorizontal: 3,
-    paddingVertical: 1,
-    borderWidth: 2,
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1.5,
     borderColor: colors.white,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  reactionBubbleHighlight: {
+    backgroundColor: colors.gray,
+    borderColor: colors.white,
+  },
+  reactionEmojiSmall: {
+    fontSize: 12,
+  },
+  reactionCount: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: colors.neutral700,
   },
   reactionBubbleMymessage: {    
     position: "absolute",
-    bottom: -17,
+    bottom: -18,
     right: 5,
   },
   reactionBubbleFriendmessage: {    
     position: "absolute",
-    bottom: -17,
+    bottom: -18,
     left: 5,
   },
   

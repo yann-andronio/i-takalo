@@ -23,5 +23,6 @@ export interface User {
     content: string;
     timestamp: string;
     is_read: boolean;
+    reaction: string;
   }
   

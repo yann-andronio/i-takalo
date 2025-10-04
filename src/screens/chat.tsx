@@ -36,9 +36,9 @@ import MessageContainer from '../components/messages/MessageContainer';
 import MessageVocal from '../components/messages/MessageVocal';
 import ReplyPreview from '../components/messages/ReplyPreview';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-import { API_SOCKET_URL } from '@env';
+// import { API_SOCKET_URL } from '@env';
 
-// const API_SOCKET_URL = "wss://boc-nato-packed-definitions.trycloudflare.com"
+const API_SOCKET_URL = "wss://yourself-mesh-milk-firm.trycloudflare.com"
 import ProductDetailsInMessage from '../components/ProductDetailsInMessage';
 
 type ChatScreenRouteProp = RouteProp<

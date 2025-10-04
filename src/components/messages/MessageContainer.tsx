@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Pressable, Modal, Vibration, Animated } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Pressable, Modal, Vibration, Animated, Image } from "react-native";
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { colors } from "../../constants/theme";
@@ -350,6 +350,50 @@ const MessageContainer = ({
                   />
                 )}
 
+                {item.images && item.images.length > 0 && (
+                  <View style={styles.imagesContainer}>
+                    {item.images.length === 1 ? (
+                      <TouchableOpacity
+                        onPress={() => {
+                          // Ouvrir l'image en plein écran
+                        }}
+                      >
+                        <Image
+                          source={{ uri: item.images[0] }}
+                          style={styles.singleImage}
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={styles.multipleImagesGrid}>
+                        {item.images.slice(0, 4).map((imageUri: string, idx: number) => (
+                          <TouchableOpacity
+                            key={idx}
+                            onPress={() => {
+                              // Ouvrir la galerie d'images
+                            }}
+                            style={styles.gridImageContainer}
+                          >
+                            <Image
+                              source={{ uri: imageUri }}
+                              style={styles.gridImage}
+                              resizeMode="cover"
+                            />
+                            {idx === 3 && item.images.length > 4 && (
+                              <View style={styles.moreImagesOverlay}>
+                                <Text style={styles.moreImagesText}>
+                                  +{item.images.length - 4}
+                                </Text>
+                              </View>
+                            )}
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                )}
+
+
                 <View style={[
                   {paddingHorizontal: 13},
                   isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 }
@@ -607,5 +651,49 @@ const styles = StyleSheet.create({
   },
   emojiText: {
     fontSize: 25,
+  },
+
+
+
+  imagesContainer: {
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 8,
+  },
+  singleImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+  },
+  multipleImagesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  gridImageContainer: {
+    width: '48%',
+    height: 120,
+    position: 'relative',
+  },
+  gridImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+  },
+  moreImagesOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  moreImagesText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });

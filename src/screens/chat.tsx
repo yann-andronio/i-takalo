@@ -1,3 +1,5 @@
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
+import RNFS from 'react-native-fs';
 import {
   StyleSheet,
   Text,
@@ -323,28 +325,113 @@ const ChatScreen = () => {
     [isTyping, isButtonDisabled, sendTypingStatus],
   );
 
-  const sendMessage = useCallback(() => {
-    const trimmedMessage = messageText.trim();
-    if (trimmedMessage == '') return;
 
+  // Dans le composant ChatScreen, ajoutez ces états
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+
+
+  const handlePickImage = useCallback(() => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.8,
+        selectionLimit: 5, // Limite à 5 images
+        includeBase64: true, // Important pour l'envoi
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('Sélection annulée');
+        } else if (response.errorCode) {
+          console.log('Erreur:', response.errorMessage);
+        } else if (response.assets) {
+          const imageUris = response.assets
+            .filter(asset => asset.uri)
+            .map(asset => asset.uri as string);
+          
+          setSelectedImages(prev => [...prev, ...imageUris]);
+        }
+      }
+    );
+  }, []);
+
+  // Fonction pour prendre une photo
+  const handleTakePicture = useCallback(() => {
+    launchCamera(
+      {
+        mediaType: 'photo',
+        quality: 0.8,
+        includeBase64: true,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('Photo annulée');
+        } else if (response.errorCode) {
+          console.log('Erreur:', response.errorMessage);
+        } else if (response.assets && response.assets[0]?.uri) {
+          setSelectedImages(prev => [...prev, response.assets![0].uri as string]);
+        }
+      }
+    );
+  }, []);
+
+
+  // Fonction pour retirer une image
+  const handleRemoveImage = useCallback((index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+
+  // Fonction utilitaire pour convertir en base64
+  const convertImageToBase64 = async (uri: string): Promise<string> => {
+    try {
+      const base64 = await RNFS.readFile(uri, 'base64');
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (error) {
+      console.error('Erreur conversion base64:', error);
+      throw error;
+    }
+  };
+
+
+  const sendMessage = useCallback(async () => {
+    const trimmedMessage = messageText.trim();
+    if (trimmedMessage === '' && selectedImages.length === 0) return;
+  
     setIsTyping(false);
     sendTypingStatus(false);
-
-    const messageData: any = {
-      message: trimmedMessage,
-    };
-
-    // Ajouter l'ID du message auquel on répond
-    if (replyingTo) {
-      messageData.reply_to_id = replyingTo.id;
+  
+    try {
+      const messageData: any = {
+        message: trimmedMessage,
+      };
+  
+      // Ajouter l'ID du message auquel on répond
+      if (replyingTo) {
+        messageData.reply_to_id = replyingTo.id;
+      }
+  
+      // Convertir les images en base64
+      if (selectedImages.length > 0) {
+        const base64Images = await Promise.all(
+          selectedImages.map(uri => convertImageToBase64(uri))
+        );
+        messageData.images = base64Images;
+      }
+  
+      // Envoyer le message
+      wsRef.current?.sendMessage(JSON.stringify(messageData));
+  
+      // Réinitialiser les états
+      setMessageText('');
+      setSelectedImages([]);
+      setIsButtonDisabled(true);
+      setReplyingTo(null);
+    } catch (error) {
+      console.error('Erreur envoi message:', error);
+      // Optionnel: afficher une alerte à l'utilisateur
     }
-
-    wsRef.current?.sendMessage(JSON.stringify(messageData));
-
-    setMessageText('');
-    setIsButtonDisabled(true);
-    setReplyingTo(null);
-  }, [messageText, sendTypingStatus, replyingTo]);
+  }, [messageText, sendTypingStatus, replyingTo, selectedImages]);
+  
 
   const handleStopRecording = useCallback((uri: string | null) => {
     setIsRecording(false);
@@ -485,10 +572,12 @@ const ChatScreen = () => {
             onChangeText={handleMessageChange}
             isButtonDisabled={isButtonDisabled}
             onSendMessage={sendMessage}
-            onTakePicture={() => console.log('teste')}
-            onPickImage={() => console.log('teste')}
+            onTakePicture={handleTakePicture}
+            onPickImage={handlePickImage}
             onRecordPress={handleRecordingPress}
             value={messageText}
+            selectedImages={selectedImages}
+            onRemoveImage={handleRemoveImage}
           />
         )}
       </KeyboardAvoidingView>

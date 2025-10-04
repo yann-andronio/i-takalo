@@ -34,7 +34,9 @@ import MessageContainer from '../components/messages/MessageContainer';
 import MessageVocal from '../components/messages/MessageVocal';
 import ReplyPreview from '../components/messages/ReplyPreview';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-const API_SOCKET_URL = "wss://automobiles-artists-hide-tender.trycloudflare.com"
+import { API_SOCKET_URL } from '@env';
+
+// const API_SOCKET_URL = "wss://boc-nato-packed-definitions.trycloudflare.com"
 import ProductDetailsInMessage from '../components/ProductDetailsInMessage';
 
 type ChatScreenRouteProp = RouteProp<
@@ -63,6 +65,8 @@ const ChatScreen = () => {
   const wsRef = useRef<WebSocketService | null>(null);
   const flashListRef = useRef<FlashList<any>>(null);
   const [loading, setLoading] = useState(true);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [shouldScrollToEnd, setShouldScrollToEnd] = useState(false);
 
   const { user, token } = useContext(AuthContext);
 
@@ -87,6 +91,9 @@ const ChatScreen = () => {
       if (conv && conv.id) {
         const msgs = await getConversationMessages(conv.id);
         setMessages(msgs);
+        if (msgs.length > 0) {
+          setShouldScrollToEnd(true);
+        }
       }
     } catch (error) {
       console.error('Erreur lors du chargement de la conversation :', error);
@@ -98,6 +105,35 @@ const ChatScreen = () => {
   useEffect(() => {
     fetchPreviousMessages();
   }, [id]);
+
+  // Fonction pour gérer le scroll initial
+  const handleFlashListLayout = useCallback(() => {
+    if (shouldScrollToEnd && messages.length > 0) {
+      setTimeout(() => {
+        if (flashListRef.current) {
+          try {
+            flashListRef.current.scrollToIndex({
+              index: messages.length - 1,
+              animated: false,
+              viewPosition: 1,
+            });
+            setShouldScrollToEnd(false);
+            setIsFirstLoad(false);
+          } catch (error) {
+            console.log('Erreur scroll initial:', error);
+            // Fallback: essayer scrollToEnd
+            try {
+              flashListRef.current?.scrollToEnd?.({ animated: false });
+              setShouldScrollToEnd(false);
+              setIsFirstLoad(false);
+            } catch (e) {
+              console.log('Erreur fallback scroll:', e);
+            }
+          }
+        }
+      }, 200);
+    }
+  }, [shouldScrollToEnd, messages.length]);
 
   useEffect(() => {
     if (!token) {
@@ -181,21 +217,24 @@ const ChatScreen = () => {
     }
   }, [conversation, user?.id, token]);
 
+  // Scroll pour les nouveaux messages (après le premier chargement)
   useEffect(() => {
-    if (messages.length > 0 && flashListRef.current) {
+    if (messages.length > 0 && !isFirstLoad) {
       setTimeout(() => {
-        try {
-          flashListRef.current.scrollToIndex({
-            index: messages.length - 1,
-            animated: true,
-            viewPosition: 1,
-          });
-        } catch (error) {
-          console.log('Erreur scroll FlashList:', error);
+        if (flashListRef.current) {
+          try {
+            flashListRef.current.scrollToIndex({
+              index: messages.length - 1,
+              animated: true,
+              viewPosition: 1,
+            });
+          } catch (error) {
+            console.log('Erreur scroll FlashList:', error);
+          }
         }
       }, 50);
     }
-  }, [messages]);
+  }, [messages, isFirstLoad]);
 
   const sendReadReceipt = useCallback(
     (messageId: string) => {
@@ -416,6 +455,7 @@ const ChatScreen = () => {
               minIndexForVisible: 0,
               autoscrollToTopThreshold: 0,
             }}
+            onLayout={handleFlashListLayout}
           />
 
           {peerIsTyping && (

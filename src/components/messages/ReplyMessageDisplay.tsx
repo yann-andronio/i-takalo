@@ -14,25 +14,21 @@ interface ReplyMessageDisplayProps {
   };
   isMyMessage: boolean;
   currentUserId?: string;
-  onPress?: () => void;
 }
 
 const ReplyMessageDisplay: React.FC<ReplyMessageDisplayProps> = ({
   replyTo,
   isMyMessage,
   currentUserId,
-  onPress,
 }) => {
   const isMyReply = replyTo.sender.id === currentUserId;
 
   return (
-    <TouchableOpacity 
+    <View 
       style={[
         styles.container,
         isMyMessage ? styles.myReplyContainer : styles.friendReplyContainer
       ]}
-      onPress={onPress}
-      activeOpacity={0.7}
     >
       <View style={[
         styles.replyBar,
@@ -51,11 +47,12 @@ const ReplyMessageDisplay: React.FC<ReplyMessageDisplayProps> = ({
             isMyMessage ? styles.myMessageText : styles.friendMessageText
           ]} 
           numberOfLines={2}
+          ellipsizeMode="tail"
         >
           {replyTo.content}
         </Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -64,20 +61,21 @@ export default ReplyMessageDisplay;
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    marginHorizontal: 4,
     borderRadius: 8,
     marginBottom: 4,
+    minWidth: 150,
   },
   myReplyContainer: {
-    backgroundColor: "rgba(254, 240, 148, 0.5)",
+    backgroundColor: "#FFF4A9",
   },
   friendReplyContainer: {
-    backgroundColor: "rgba(245, 245, 245, 0.7)",
+    backgroundColor: "#FAFAFA",
   },
   replyBar: {
-    width: 3,
-    borderRadius: 2,
+    width: 4,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
     marginRight: 6,
   },
   myReplyBar: {
@@ -88,6 +86,8 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
+    paddingVertical: 6,
+    paddingRight: 8, // Ajout d'un padding droit
   },
   senderName: {
     fontSize: 11,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   myMessageText: {
-    color: "#03233A",
+    color: colors.neutral600,
   },
   friendMessageText: {
     color: colors.neutral600,

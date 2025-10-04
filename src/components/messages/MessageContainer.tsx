@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, Pressable, Modal, Vibration, Animated } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Pressable, Modal, Vibration, Animated } from "react-native";
 import React, { useEffect, useContext, useState, useRef } from "react";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { colors } from "../../constants/theme";
@@ -64,41 +64,37 @@ const MessageContainer = ({
     }
   }, [showReactions]);
 
-  const onGestureEvent = Animated.event(
-    [{ nativeEvent: { translationX: translateX } }],
-    { 
-      useNativeDriver: true,
-      listener: (event: any) => {
-        const { translationX } = event.nativeEvent;
-        const isMyMessage = item.sender.id === user?.id;
-        
-        // Limiter le mouvement selon le type de message
-        if (isMyMessage) {
-          // Mon message : glisser vers la gauche (valeur négative)
-          if (translationX > 0) {
-            translateX.setValue(0);
-          } else if (translationX < -80) {
-            translateX.setValue(-80);
-          }
-        } else {
-          // Message ami : glisser vers la droite (valeur positive)
-          if (translationX < 0) {
-            translateX.setValue(0);
-          } else if (translationX > 80) {
-            translateX.setValue(80);
-          }
-        }
-
-        // Animer l'opacité de l'icône
-        const progress = Math.min(Math.abs(translationX._value) / 80, 1);
-        replyIconOpacity.setValue(progress);
+  const onGestureEvent = (event: any) => {
+    const { translationX, state } = event.nativeEvent;
+    const isMyMessage = item.sender.id === user?.id;
+    
+    // Ne bouger que pendant le geste actif
+    if (state === State.ACTIVE) {
+      // Limiter le mouvement selon le type de message
+      if (isMyMessage) {
+        // Mon message : glisser vers la gauche (valeur négative)
+        const limitedTranslation = Math.max(Math.min(translationX, 0), -80);
+        translateX.setValue(limitedTranslation);
+      } else {
+        // Message ami : glisser vers la droite (valeur positive)
+        const limitedTranslation = Math.min(Math.max(translationX, 0), 80);
+        translateX.setValue(limitedTranslation);
       }
+
+      // Animer l'opacité de l'icône
+      const progress = Math.min(Math.abs(translateX._value) / 80, 1);
+      replyIconOpacity.setValue(progress);
+    } else {
+      // Dès que le geste n'est plus actif, revenir à 0
+      translateX.setValue(0);
+      replyIconOpacity.setValue(0);
     }
-  );
+  };
 
   const onHandlerStateChange = (event: any) => {
-    if (event.nativeEvent.state === State.END) {
-      const { translationX } = event.nativeEvent;
+    const { state, translationX } = event.nativeEvent;
+    
+    if (state === State.END) {
       const threshold = 60;
       const isMyMessage = item.sender.id === user?.id;
 
@@ -118,21 +114,12 @@ const MessageContainer = ({
           onSwipeReply(item);
         }
       }
-
-      // Réinitialiser l'animation
-      Animated.parallel([
-        Animated.spring(translateX, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 10,
-        }),
-        Animated.timing(replyIconOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        })
-      ]).start();
+    }
+    
+    // Revenir à 0 immédiatement pour tous les états de fin
+    if (state === State.END || state === State.CANCELLED || state === State.FAILED) {
+      translateX.setValue(0);
+      replyIconOpacity.setValue(0);
     }
   };
 
@@ -254,7 +241,8 @@ const MessageContainer = ({
     { emoji: "🙏", name: "pray" },
     { emoji: "👏", name: "clap" },
   ];
-
+  const [isPressing, setIsPressing] = useState(false);
+  
   return (
     <View>
       {showTimestamp && (
@@ -315,39 +303,42 @@ const MessageContainer = ({
           </View>
         </Pressable>
       </Modal>
-
+      
       <View style={styles.swipeContainer}>
         {/* Icône de réponse en arrière-plan */}
-        <Animated.View 
-          style={[
-            styles.replyIconContainer,
-            isMyMessage ? styles.replyIconRight : styles.replyIconLeft,
-            { opacity: replyIconOpacity }
-          ]}
-        >
-          <ArrowBendUpLeft size={24} color={colors.neutral400} weight="bold" />
-        </Animated.View>
- 
+        {!isPressing &&
+          <Animated.View 
+            style={[
+              styles.replyIconContainer,
+              isMyMessage ? styles.replyIconRight : styles.replyIconLeft,
+              { opacity: replyIconOpacity }
+            ]}
+          >
+            <ArrowBendUpLeft size={24} color={colors.neutral400} weight="bold" />
+          </Animated.View>
+        }
         <PanGestureHandler
           onGestureEvent={onGestureEvent}
           onHandlerStateChange={onHandlerStateChange}
-          // activeOffsetX={isMyMessage ? [-10, 10] : [10, -10]}
-          activeOffsetX={isMyMessage ? [-10, 10] : [-10, 10]}
-
+          activeOffsetX={[-50, 50]}
+          activeOffsetY={[-5, 5]}
+          failOffsetY={[-10, 10]}
         >
           <Animated.View style={{ transform: [{ translateX }] }}>
             <Pressable
               ref={messageRef}
               onLongPress={handleLongPress}
               delayLongPress={300}
+              onPressIn={() => setIsPressing(true)}
+              onPressOut={() => setIsPressing(false)}
             >
               <View style={[
                 styles.messageContainer,
                 isMyMessage ? styles.myMessage : styles.friendMessage,
                 showTriangle && (isMyMessage ? { borderTopRightRadius: 0 } : { borderTopLeftRadius: 0 }),
                 addSpacing && { marginTop: 12 },
-                isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 },
                 allReactions.length > 0 && { marginBottom: 22 },
+                isPressing && { opacity: 0.7 } 
               ]}>
                 
                 {/* Affichage du message cité */}
@@ -359,27 +350,16 @@ const MessageContainer = ({
                   />
                 )}
 
-                <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
-                  {item.content}
-                </Text>
+                <View style={[
+                  {paddingHorizontal: 13},
+                  isMyMessage ? { paddingRight: 55 } : { paddingRight: 40 }
+                ]}>
+                  <Text style={isMyMessage ? styles.myMessageText : styles.friendMessageText}>
+                    {item.content}
+                  </Text>
+                </View>
 
-                {allReactions.length > 0 && (
-                  <View style={[
-                    styles.reactionBubbleContainer,
-                    isMyMessage ? styles.reactionBubbleMymessage : styles.reactionBubbleFriendmessage
-                  ]}>
-                    <View style={[styles.reactionBubble]}>
-                      {allReactions.map((reaction, idx) => (
-                        <View key={idx}>
-                          <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
-                          {reaction.count > 1 && (
-                            <Text style={styles.reactionCount}>{reaction.count}</Text>
-                          )}
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                )}
+                
 
                 {showTriangle && <View style={
                   isMyMessage ? styles.triangleRight : styles.triangleLeft
@@ -400,9 +380,28 @@ const MessageContainer = ({
                   </View>
                 )}
               </View>
+              {allReactions.length > 0 && (
+                <View style={[
+                  styles.reactionBubbleContainer,
+                  isMyMessage ? styles.reactionBubbleMymessage : styles.reactionBubbleFriendmessage
+                ]}>
+                  <View style={[styles.reactionBubble]}>
+                    {allReactions.map((reaction, idx) => (
+                      <View key={idx}>
+                        <Text style={styles.reactionEmojiSmall}>{reaction.emoji}</Text>
+                        {reaction.count > 1 && (
+                          <Text style={styles.reactionCount}>{reaction.count}</Text>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                </View>
+                )
+              }
             </Pressable>
           </Animated.View>
         </PanGestureHandler>
+
       </View>
     </View>
   );
@@ -460,12 +459,12 @@ const styles = StyleSheet.create({
   },
   reactionBubbleMymessage: {    
     position: "absolute",
-    bottom: -18,
+    bottom: 5,
     right: 5,
   },
   reactionBubbleFriendmessage: {    
     position: "absolute",
-    bottom: -18,
+    bottom: 5,
     left: 5,
   },
   
@@ -493,10 +492,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 11,
     borderBottomColor: "transparent",
   },    
+  // messageContainer: {
+  //   minWidth: "60%",  // Largeur minimale
+  //   maxWidth: "85%",  // Augmenté de 80% à 85%
+  //   paddingVertical: 4,
+  //   borderRadius: 12,
+  //   marginBottom: 2,
+  // },
   messageContainer: {
-    maxWidth: "80%",
-    paddingHorizontal: 13,
-    paddingVertical: 7,
+    maxWidth: "85%",
+    // paddingHorizontal: 13,
+    paddingVertical: 4,
     borderRadius: 12,
     marginBottom: 2,
   },

@@ -91,9 +91,10 @@ const MessageImages: React.FC<MessageImagesProps> = ({
 
 const styles = StyleSheet.create({
   imagesContainer: {
-    marginTop: 8,
-    marginBottom: 4,
-    paddingHorizontal: 8,
+    // marginTop: 8,
+    // marginBottom: 4,
+    paddingLeft: 4,
+    paddingRight: 3
   },
   imageWrapper: {
     position: 'relative',
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   gridImageContainer: {
-    width: '48%',
+    width: '49%',
     height: 120,
     position: 'relative',
   },

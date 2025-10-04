@@ -1,100 +1,127 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Image, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { colors } from '../../constants/theme';
+import ImageViewerModal from './ImageViewerModal';
 
 interface MessageImagesProps {
   images: string[];
   isUploading?: boolean;
-  onImagePress?: (index: number) => void;
 }
 
 const MessageImages: React.FC<MessageImagesProps> = ({ 
   images, 
   isUploading = false,
-  onImagePress 
 }) => {
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
   if (!images || images.length === 0) return null;
+
+  const handleImagePress = (index: number) => {
+    if (!isUploading) {
+      setSelectedImageIndex(index);
+      setViewerVisible(true);
+    }
+  };
 
   // Une seule image
   if (images.length === 1) {
     return (
-      <View style={styles.imagesContainer}>
-        <TouchableOpacity
-          onPress={() => onImagePress?.(0)}
-          disabled={isUploading}
-        >
-          <View style={styles.imageWrapper}>
-            <Image
-              source={{ uri: images[0] }}
-              style={styles.singleImage}
-              resizeMode="cover"
-            />
-            {isUploading && (
-              <View style={styles.uploadingOverlay}>
-                <View style={styles.uploadingContent}>
-                  <ActivityIndicator size="large" color="#fff" />
-                  <Text style={styles.uploadingText}>Envoi en cours...</Text>
+      <>
+        <View style={styles.imagesContainer}>
+          <TouchableOpacity
+            onPress={() => handleImagePress(0)}
+            disabled={isUploading}
+            activeOpacity={0.9}
+          >
+            <View style={styles.imageWrapper}>
+              <Image
+                source={{ uri: images[0] }}
+                style={styles.singleImage}
+                resizeMode="cover"
+              />
+              {isUploading && (
+                <View style={styles.uploadingOverlay}>
+                  <View style={styles.uploadingContent}>
+                    <ActivityIndicator size="large" color="#fff" />
+                    <Text style={styles.uploadingText}>Envoi en cours...</Text>
+                  </View>
                 </View>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <ImageViewerModal
+          visible={viewerVisible}
+          images={images}
+          initialIndex={selectedImageIndex}
+          onClose={() => setViewerVisible(false)}
+        />
+      </>
     );
   }
 
   // Plusieurs images (grille)
   return (
-    <View style={styles.imagesContainer}>
-      <View style={styles.multipleImagesGrid}>
-        {images.slice(0, 4).map((imageUri: string, idx: number) => (
-          <TouchableOpacity
-            key={idx}
-            onPress={() => onImagePress?.(idx)}
-            style={styles.gridImageContainer}
-            disabled={isUploading}
-          >
-            <View style={styles.imageWrapper}>
-              <Image
-                source={{ uri: imageUri }}
-                style={styles.gridImage}
-                resizeMode="cover"
-              />
-              
-              {/* Overlay pour "+X images" */}
-              {idx === 3 && images.length > 4 && (
-                <View style={styles.moreImagesOverlay}>
-                  <Text style={styles.moreImagesText}>
-                    +{images.length - 4}
-                  </Text>
-                </View>
-              )}
-              
-              {/* Overlay de chargement */}
-              {isUploading && (
-                <View style={styles.uploadingOverlay}>
-                  {idx === 0 && (
-                    <View style={styles.uploadingContent}>
-                      <ActivityIndicator size="small" color="#fff" />
-                      <Text style={styles.uploadingTextSmall}>Envoi...</Text>
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
+    <>
+      <View style={styles.imagesContainer}>
+        <View style={styles.multipleImagesGrid}>
+          {images.slice(0, 4).map((imageUri: string, idx: number) => (
+            <TouchableOpacity
+              key={idx}
+              onPress={() => handleImagePress(idx)}
+              style={styles.gridImageContainer}
+              disabled={isUploading}
+              activeOpacity={0.9}
+            >
+              <View style={styles.imageWrapper}>
+                <Image
+                  source={{ uri: imageUri }}
+                  style={styles.gridImage}
+                  resizeMode="cover"
+                />
+                
+                {/* Overlay pour "+X images" */}
+                {idx === 3 && images.length > 4 && !isUploading && (
+                  <View style={styles.moreImagesOverlay}>
+                    <Text style={styles.moreImagesText}>
+                      +{images.length - 4}
+                    </Text>
+                  </View>
+                )}
+                
+                {/* Overlay de chargement */}
+                {isUploading && (
+                  <View style={styles.uploadingOverlay}>
+                    {idx === 0 && (
+                      <View style={styles.uploadingContent}>
+                        <ActivityIndicator size="small" color="#fff" />
+                        <Text style={styles.uploadingTextSmall}>Envoi...</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
-    </View>
+
+      <ImageViewerModal
+        visible={viewerVisible}
+        images={images}
+        initialIndex={selectedImageIndex}
+        onClose={() => setViewerVisible(false)}
+      />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   imagesContainer: {
-    // marginTop: 8,
-    // marginBottom: 4,
     paddingLeft: 4,
-    paddingRight: 3
+    paddingRight: 3,
   },
   imageWrapper: {
     position: 'relative',

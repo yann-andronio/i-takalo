@@ -339,7 +339,7 @@ const MessageContainer = ({
                 showTriangle && (isMyMessage ? { borderTopRightRadius: 0 } : { borderTopLeftRadius: 0 }),
                 addSpacing && { marginTop: 12 },
                 allReactions.length > 0 && { marginBottom: 22 },
-                isPressing && { opacity: 0.7 } 
+                isPressing && item.images.length === 0 && { opacity: 0.7 } 
               ]}>
                 
                 {/* Affichage du message cité */}

@@ -16,6 +16,7 @@ import {
   SmileyIcon,
   PaperclipIcon,
   X,
+  Image as Gallery
 } from "phosphor-react-native";
 
 interface MessageInputProps {
@@ -74,7 +75,7 @@ const MessageInput = ({
       <View className="flex-row items-end p-4 justify-center">
         <View className="flex-row items-end gap-2 mr-3 mb-2">
           <TouchableOpacity onPress={onPickImage}>
-            <PaperclipIcon size={24} color="gray" />
+            <Gallery size={24} color="gray" />
           </TouchableOpacity>
           <TouchableOpacity onPress={onTakePicture}>
             <CameraIcon size={24} color="gray" />

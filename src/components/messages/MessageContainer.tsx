@@ -3,10 +3,11 @@ import React, { useEffect, useContext, useState, useRef } from "react";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { colors } from "../../constants/theme";
 import { AuthContext } from "../../context/AuthContext";
-import { Check, Checks, ArrowBendUpLeft } from "phosphor-react-native";
+import { Check, Checks, ArrowBendUpLeft, Clock } from "phosphor-react-native";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import ReplyMessageDisplay from "./ReplyMessageDisplay";
- 
+import MessageImages from './MessageImages';
+
 const MessageContainer = ({
   item,
   index,
@@ -350,48 +351,15 @@ const MessageContainer = ({
                   />
                 )}
 
-                {item.images && item.images.length > 0 && (
-                  <View style={styles.imagesContainer}>
-                    {item.images.length === 1 ? (
-                      <TouchableOpacity
-                        onPress={() => {
-                          // Ouvrir l'image en plein écran
-                        }}
-                      >
-                        <Image
-                          source={{ uri: item.images[0] }}
-                          style={styles.singleImage}
-                          resizeMode="cover"
-                        />
-                      </TouchableOpacity>
-                    ) : (
-                      <View style={styles.multipleImagesGrid}>
-                        {item.images.slice(0, 4).map((imageUri: string, idx: number) => (
-                          <TouchableOpacity
-                            key={idx}
-                            onPress={() => {
-                              // Ouvrir la galerie d'images
-                            }}
-                            style={styles.gridImageContainer}
-                          >
-                            <Image
-                              source={{ uri: imageUri }}
-                              style={styles.gridImage}
-                              resizeMode="cover"
-                            />
-                            {idx === 3 && item.images.length > 4 && (
-                              <View style={styles.moreImagesOverlay}>
-                                <Text style={styles.moreImagesText}>
-                                  +{item.images.length - 4}
-                                </Text>
-                              </View>
-                            )}
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                )}
+                {/* Affichage des images avec indicateur de chargement */}
+                <MessageImages 
+                  images={item.images || []} 
+                  isUploading={item.isUploading}
+                  onImagePress={(index) => {
+                    // TODO: Ouvrir la galerie d'images en plein écran
+                    console.log('Image pressed:', index);
+                  }}
+                />
 
 
                 <View style={[
@@ -417,9 +385,13 @@ const MessageContainer = ({
 
                 {isMyMessage && (
                   <View style={[styles.readStatusDot]}>
-                    {item.is_read ? 
-                      <Checks size={15} color={colors.primary} weight="bold" />
-                      : <Check size={13} color={colors.neutral500} weight="bold" />
+                    {
+                      item.isUploading ? 
+                        <Clock size={15} color={colors.neutral500} weight="bold" />
+                      :
+                      item.is_read ? 
+                        <Checks size={15} color={colors.primary} weight="bold" />
+                        : <Check size={13} color={colors.neutral500} weight="bold" />
                     }
                   </View>
                 )}

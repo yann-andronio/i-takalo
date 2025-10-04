@@ -36,6 +36,8 @@ import MessageContainer from '../components/messages/MessageContainer';
 import MessageVocal from '../components/messages/MessageVocal';
 import ReplyPreview from '../components/messages/ReplyPreview';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { v4 as uuidv4 } from 'uuid'; 
+
 // import { API_SOCKET_URL } from '@env';
 
 const API_SOCKET_URL = "wss://yourself-mesh-milk-firm.trycloudflare.com"
@@ -160,12 +162,12 @@ const ChatScreen = () => {
 
       wsRef.current.setOnMessageCallback(data => {
         const parsedData = JSON.parse(data);
-
+      
         if (parsedData.type == 'typing_status') {
           setPeerIsTyping(parsedData.is_typing);
           return;
         }
-
+      
         if (parsedData.type == 'read_receipt') {
           setMessages(prev =>
             prev.map(message =>
@@ -176,7 +178,7 @@ const ChatScreen = () => {
           );
           return;
         }
-
+      
         if (parsedData.type == 'reaction') {
           setMessages(prev =>
             prev.map(message =>
@@ -190,7 +192,7 @@ const ChatScreen = () => {
           );
           return;
         }
-
+      
         const newMessage: Message = {
           id: parsedData.message_id || Date.now().toString(),
           conversation: conversation.id,
@@ -202,10 +204,23 @@ const ChatScreen = () => {
           is_read: false,
           reactions: parsedData.reactions || {},
           reply_to: parsedData.reply_to || null,
+          images: parsedData.images || [],
         };
-
-        setMessages(prev => [...prev, newMessage]);
-
+      
+        // Si c'est un message qu'on a envoyé, remplacer le message optimiste
+        if (parsedData.sender_id == user?.id && parsedData.temp_id) {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === parsedData.temp_id 
+                ? { ...newMessage, isOptimistic: false }
+                : msg
+            )
+          );
+        } else {
+          // Sinon, ajouter le nouveau message normalement
+          setMessages(prev => [...prev, newMessage]);
+        }
+      
         if (parsedData.sender_id != user?.id) {
           sendReadReceipt(parsedData.message_id);
         }
@@ -392,7 +407,6 @@ const ChatScreen = () => {
     }
   };
 
-
   const sendMessage = useCallback(async () => {
     const trimmedMessage = messageText.trim();
     if (trimmedMessage === '' && selectedImages.length === 0) return;
@@ -401,8 +415,30 @@ const ChatScreen = () => {
     sendTypingStatus(false);
   
     try {
+      // Générer un ID temporaire pour le message optimiste
+      const tempMessageId = `temp_${Date.now()}`;
+      
+      // Créer un message optimiste avec les images locales
+      const optimisticMessage: Message = {
+        id: tempMessageId,
+        conversation: conversation!.id,
+        sender: user as User,
+        content: trimmedMessage,
+        timestamp: new Date().toISOString(),
+        is_read: false,
+        reactions: {},
+        reply_to: replyingTo || null,
+        images: selectedImages, // URLs locales des images
+        isOptimistic: true, // Marqueur pour identifier les messages optimistes
+        isUploading: true, // Nouveau marqueur pour l'état d'upload
+      };
+  
+      // Ajouter immédiatement le message à la liste
+      setMessages(prev => [...prev, optimisticMessage]);
+  
       const messageData: any = {
         message: trimmedMessage,
+        temp_id: tempMessageId, // Ajouter l'ID temporaire
       };
   
       // Ajouter l'ID du message auquel on répond
@@ -428,9 +464,11 @@ const ChatScreen = () => {
       setReplyingTo(null);
     } catch (error) {
       console.error('Erreur envoi message:', error);
-      // Optionnel: afficher une alerte à l'utilisateur
+      // En cas d'erreur, retirer le message optimiste
+      setMessages(prev => prev.filter(msg => !msg.isOptimistic));
     }
-  }, [messageText, sendTypingStatus, replyingTo, selectedImages]);
+  }, [messageText, sendTypingStatus, replyingTo, selectedImages, conversation, user]);
+  
   
 
   const handleStopRecording = useCallback((uri: string | null) => {

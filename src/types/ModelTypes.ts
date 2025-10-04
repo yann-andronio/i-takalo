@@ -25,6 +25,10 @@ export interface User {
     is_read: boolean;
     reactions: {};
     reply_to: any;
+
+    images?: string[];
+    isOptimistic?: boolean;
+    isUploading?: boolean;
     // reaction: string;
   }
   

@@ -33,12 +33,8 @@ import PopUpProduct from '../components/popup/PopUpProduct';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListChatnavigatorScreen } from '../types/Types';
 
-// --- AJOUTER L'IMPORTATION DU CAROUSEL ---
-// J'assume que c'est un composant populaire comme 'react-native-reanimated-carousel'
-// Veuillez ajuster l'importation si votre composant Carousel provient d'une autre librairie.
-import Carousel from 'react-native-reanimated-carousel'; 
-// Si votre Carousel est un composant local, changez l'importation en :
-// import Carousel from '../chemin/vers/votre/Carousel'; // Remplacez par le chemin correct
+// --- IMPORTATION DU CAROUSEL ---
+import Carousel from 'react-native-reanimated-carousel';
 
 const { width } = Dimensions.get('window');
 
@@ -62,15 +58,17 @@ export default function ProductScreen() {
   const { fetchAuthorById } = useContext(UserContext);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
   const [loadingCarousel, setLoadingCarousel] = useState(true);
+  // --- state for index actif de pagination ---
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const [showPopup, setShowPopup] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-  const ImageProductsForCarrouseel = item.images || []; 
-  const hasImages = ImageProductsForCarrouseel.length > 0;
+  const heroItems = item.images || [];
+  const hasImages = heroItems.length > 0;
 
   useEffect(() => {
-    setLoadingCarousel(hasImages); 
+    setLoadingCarousel(hasImages);
     const loadAuthor = async () => {
       if (item.author === undefined || item.author === null) {
         setAuthor(undefined);
@@ -84,7 +82,7 @@ export default function ProductScreen() {
       setLoadingAuthor(false);
     };
     loadAuthor();
-  }, [item.author, hasImages]); 
+  }, [item.author, hasImages]);
 
   if (loadingAuthor) {
     return (
@@ -143,7 +141,6 @@ export default function ProductScreen() {
   const isDonation = item.type === 'DONATION';
   const isSale = item.type === 'SALE';
 
-  // Fonction pour gérer la fin du chargement de l'image (pour le carrousel)
   const handleImageLoadEnd = () => {
     setLoadingCarousel(false);
   };
@@ -152,20 +149,21 @@ export default function ProductScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">
         <View className="w-full h-[400px] relative">
-          {/* Carrousel des Images start*/}
+          {/* Carrousel des Images */}
           {hasImages ? (
             <View className="w-full h-full">
               <Carousel
                 loop
-                width={width} 
-                height={400} 
+                width={width}
+                height={400}
                 autoPlay
                 autoPlayInterval={4000}
-                data={ImageProductsForCarrouseel} 
-                onSnapToItem={() => {
+                data={heroItems}
+                      /*  achaqu fois miova sary*/     
+                onSnapToItem={index => {
+                  setActiveIndex(index);
                   if (loadingCarousel) {
-                  
-                    setLoadingCarousel(false); 
+                    setLoadingCarousel(false);
                   }
                 }}
                 renderItem={({ item: imageUri, index }) => (
@@ -175,10 +173,22 @@ export default function ProductScreen() {
                     style={{ width: width, height: '100%' }}
                     resizeMode="cover"
                     className="rounded-b-3xl"
-                    onLoadEnd={index === 0 ? handleImageLoadEnd : undefined} // Déclenche l'arrêt du chargement seulement après la première image
+                    onLoadEnd={index === 0 ? handleImageLoadEnd : undefined}
                   />
                 )}
               />
+
+              {/* --- Pagination --- */}
+              <View
+                className=" absolute  bottom-20  w-full  flex-row  justify-center  space-x-2"
+              >
+                {heroItems.map((_, index) => (
+                  <View
+                    key={index}
+                    className={`w-2 h-2 mx-3 rounded-full ${ index === activeIndex ? 'bg-white' : 'bg-gray-400/50'}`}
+                  />
+                ))}
+              </View>
             </View>
           ) : (
             <View className="items-center justify-center w-full h-full bg-gray-200 rounded-b-3xl">
@@ -324,13 +334,11 @@ export default function ProductScreen() {
           )}
 
           {/* Section Recherché en échange (UX/UI amélioré) */}
-          {isEchange && item.mots_cles_recherches && item.mots_cles_recherches.length > 0 && (
-            
+          {isEchange &&
+            item.mots_cles_recherches &&
+            item.mots_cles_recherches.length > 0 && (
               <View className="mb-8 px-3 py-4 rounded-2xl bg-gradient-to-br from-[#fff8e1] to-[#fff2cc] border border-[#03233A]/40 shadow-sm">
                 <View className="flex-row items-center mb-4">
-                  {/* <View className="p-2.5 rounded-full bg-[#9f7126]/10">
-          <MagnifyingGlassIcon size={22} color="#9f7126" weight="bold" />
-        </View> */}
                   <Text className="ml-3 text-lg font-extrabold text-[#212529]">
                     Recherché en échange
                   </Text>

@@ -10,10 +10,11 @@ import DonationAdForm from '../components/DonationAdForm';
 import ProductSellForm from '../components/ProductSellForm';
 import { ArrowLeftIcon } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
+import EchangeAddForm from '../components/EchangeAddForm';
 
 export default function ProductAdScreen() {
      const navigation = useNavigation();
-     const [searchType, setSearchType] = useState<'donation' | 'vente'>('donation');
+     const [searchType, setSearchType] = useState<'donation' | 'vente'|'echange'>('donation');
 
   return (
     <SafeAreaView className="flex-1 bg-white px-6 py-5">
@@ -31,7 +32,7 @@ export default function ProductAdScreen() {
           onPress={() => setSearchType('donation')}
         >
           <Text className={`${searchType === 'donation' ? 'text-white' : 'text-[#03233A]'} font-normal `}>
-            donations
+            Donations
           </Text>
         </TouchableOpacity>
 
@@ -40,15 +41,33 @@ export default function ProductAdScreen() {
           onPress={() => setSearchType('vente')}
         >
           <Text className={`${searchType === 'vente' ? 'text-white' : 'text-[#03233A]'} font-normal`} >
-            vente
+            Vente
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          className={` py-3 rounded-full flex-1 items-center justify-center  ${searchType === 'echange' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
+          onPress={() => setSearchType('echange')}
+        >
+          <Text className={`${searchType === 'echange' ? 'text-white' : 'text-[#03233A]'} font-normal`} >
+             Échange
           </Text>
         </TouchableOpacity>
       </View>
 
 
-      {
-        searchType === "donation"  ?  <DonationAdForm/>:<ProductSellForm/>
-      }
+     {(() => {
+        switch (searchType) {
+          case 'donation':
+            return <DonationAdForm/>;
+          case 'vente':
+            return <ProductSellForm/>;
+          case 'echange':
+            return <EchangeAddForm/>;
+          default:
+            return null;
+        }
+      })()}
      
     </SafeAreaView>
   );

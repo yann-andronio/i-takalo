@@ -1,30 +1,16 @@
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  Image,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Image, ActivityIndicator} from 'react-native';
 import React, { useCallback, useState, useContext } from 'react';
-import { PlusIcon } from 'phosphor-react-native';
+import { PlusIcon, XCircleIcon } from 'phosphor-react-native'; 
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import {
-  useNavigation,
-  NavigationProp,
-  useFocusEffect,
-} from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect} from '@react-navigation/native';
 import * as yup from 'yup';
 import { launchImageLibrary, MediaType } from 'react-native-image-picker';
-
 import { RootStackParamListMainNavigatorTab } from '../types/Types';
 import API from '../api/Api';
-import { ProductContext, ProductDataI } from '../context/ProductContext'; // Import de ProductContext
+import { ProductContext, ProductDataI } from '../context/ProductContext';
 
-const DONATION_CATEGORIES = [
+const ECHANGE_CATEGORIES = [
   'T_SHIRT',
   'PANTALON',
   'ROBE',
@@ -35,23 +21,28 @@ const DONATION_CATEGORIES = [
 type FormData = {
   title: string;
   category: string;
-  description?: string;
+  description: string; 
   adresse: string;
 };
 
 const ValidationSchema: yup.ObjectSchema<FormData> = yup.object({
   title: yup.string().required('Le titre est requis.'),
   category: yup.string().required('La catégorie est requise.'),
-  description: yup.string().optional(),
+  description: yup.string().required("La description de l'article est requise."),
   adresse: yup.string().required("L'adresse est requise."),
 });
 
-export default function DonationAdForm() {
-  const navigation =
-    useNavigation<NavigationProp<RootStackParamListMainNavigatorTab>>();
+export default function EchangeAddForm() {
+  const navigation =useNavigation<NavigationProp<RootStackParamListMainNavigatorTab>>();
   const { addProduct } = useContext(ProductContext);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+ 
+  const [motsClesRecherches, setMotsClesRecherches] = useState<string[]>([]);
+  const [saisieMotCle, setSaisieMotCle] = useState<string>('');
+  const [controlAfficheErrorContreEchange, setControlAfficheErrorContreEchange] = useState(false); 
+ 
 
   const {
     control,
@@ -68,10 +59,14 @@ export default function DonationAdForm() {
     },
   });
 
-  useFocusEffect(
+/*ilaigna kofa miova onglet nle user na miala @ composant ty de reinitialiset champ jiaby */  
+useFocusEffect(
     useCallback(() => {
       reset();
       setSelectedImage(null);
+      setMotsClesRecherches([]); 
+      setSaisieMotCle('');
+      setControlAfficheErrorContreEchange(false)
     }, [reset]),
   );
 
@@ -85,7 +80,7 @@ export default function DonationAdForm() {
 
     launchImageLibrary(options, response => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
+        console.log(`utilisateur annule l' import  d'image picker`);
       } else if (response.errorCode) {
         console.log('Image Picker Error: ', response.errorMessage);
         Alert.alert('Erreur', "Impossible de sélectionner l'image.");
@@ -98,11 +93,38 @@ export default function DonationAdForm() {
     });
   };
 
-  const handleAddDonation: SubmitHandler<FormData> = async data => {
+ 
+  const addKeyword = () => {
+    const keyword = saisieMotCle.trim().toUpperCase();
+    if (keyword && !motsClesRecherches.includes(keyword)) {
+      setMotsClesRecherches([...motsClesRecherches, keyword]);
+      setSaisieMotCle('');
+    }
+  };
+
+  const removeKeyword = (keywordToRemove: string) => {
+    setMotsClesRecherches(
+      motsClesRecherches.filter(keyword => keyword !== keywordToRemove),
+    );
+  };
+ 
+
+  const handleAddEchange: SubmitHandler<FormData> = async data => {
+
+    setControlAfficheErrorContreEchange(true); 
     if (!selectedImage) {
       Alert.alert(
         'Erreur',
-        'Veuillez sélectionner une image pour votre donation.',
+        'Veuillez sélectionner une image pour votre échange.',
+      );
+      return;
+    }
+    
+    
+    if (motsClesRecherches.length === 0) {
+      Alert.alert(
+        'Erreur',
+        "Veuillez ajouter au moins un mot-clé de contre-échange (ce que vous recherchez).",
       );
       return;
     }
@@ -112,13 +134,14 @@ export default function DonationAdForm() {
     try {
       const formData = new FormData();
       formData.append('title', data.title);
-      formData.append('type', 'DONATION');
-      formData.append(
-        'description',
-        data.description || 'Pas de description fournie.',
-      );
+      formData.append('type', 'ECHANGE');
+      const keywordString = motsClesRecherches.join(', ');
+      const fullDescription = `${data.description} | Mots-clés recherchés : ${keywordString}`;
+      formData.append('description', fullDescription);
+
       formData.append('category', data.category);
       formData.append('adresse', data.adresse);
+      
 
       const filename = selectedImage.split('/').pop();
       const fileType = selectedImage.substring(
@@ -136,27 +159,29 @@ export default function DonationAdForm() {
           'Content-Type': 'multipart/form-data',
         },
       });
+    
 
-      console.log('Donation créée:', response.data);
-      const newDonation = response.data as ProductDataI;
-      addProduct(newDonation);
+      console.log('Échange créé:', response.data);
+      const newEchange = response.data as ProductDataI;
+      addProduct(newEchange);
 
-      Alert.alert('Succès', 'Votre donation a été ajoutée.', [
+      Alert.alert('Succès', 'Votre échange a été ajouté.', [
         {
           text: 'OK',
           onPress: () => {
             reset();
             setSelectedImage(null);
+            setMotsClesRecherches([]); 
             navigation.navigate('Accueil', { screen: 'AccueilMain' });
           },
         },
       ]);
     } catch (error: any) {
       console.log(
-        'Erreur création donation:',
+        'Erreur création échange:',
         error.response?.data || error.message,
       );
-      Alert.alert('Erreur', "Impossible d'ajouter la donation");
+      Alert.alert('Erreur', "Impossible d'ajouter l'échange");
     } finally {
       setLoading(false);
     }
@@ -187,8 +212,9 @@ export default function DonationAdForm() {
       </TouchableOpacity>
 
       <View className="mb-5">
+     
         <Text className="text-base font-bold mb-2">
-          Titre<Text className="text-red-500">*</Text>
+          Titre de votre article<Text className="text-red-500">*</Text>
         </Text>
         <Controller
           control={control}
@@ -198,7 +224,7 @@ export default function DonationAdForm() {
               className={`border rounded-lg p-3 text-black ${
                 errors.title ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Titre de l'article"
+              placeholder="Ex: Mon vieux T-Shirt de marque"
               placeholderTextColor="#6B7280"
               onChangeText={onChange}
               value={value}
@@ -209,6 +235,7 @@ export default function DonationAdForm() {
           <Text className="text-red-500 mt-1">{errors.title.message}</Text>
         )}
 
+        {/* --- Catégorie --- */}
         <Text className="text-base font-bold mb-2 mt-5">
           Catégorie<Text className="text-red-500">*</Text>
         </Text>
@@ -217,11 +244,13 @@ export default function DonationAdForm() {
           name="category"
           render={({ field: { onChange, value } }) => (
             <View className="flex-row flex-wrap  gap-3 items-center">
-              {DONATION_CATEGORIES.map(category => (
+              {ECHANGE_CATEGORIES.map(category => (
                 <TouchableOpacity
                   key={category}
                   onPress={() => onChange(category)}
-                  className={`rounded-full mb-2 px-4 py-2 ${value === category? 'bg-black': 'bg-gray-200'}`}
+                  className={`rounded-full mb-2 px-4 py-2 ${
+                    value === category ? 'bg-black' : 'bg-gray-200'
+                  }`}
                 >
                   <Text
                     className={`text-center font-bold ${
@@ -239,6 +268,85 @@ export default function DonationAdForm() {
           <Text className="text-red-500 mt-1">{errors.category.message}</Text>
         )}
 
+        {/* --- Description de l'article PROPOSÉ --- */}
+        <Text className="text-base font-bold mb-2 mt-5">
+          Description de votre article<Text className="text-red-500">*</Text>
+        </Text>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              className={`border rounded-lg p-3 h-24 text-black ${
+                errors.description ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Décrivez l'état, la taille, la couleur et les caractéristiques de l'article que vous proposez."
+              placeholderTextColor="#6B7280"
+              onChangeText={onChange}
+              value={value}
+              multiline
+              textAlignVertical="top"
+            />
+          )}
+        />
+        {errors.description && (
+          <Text className="text-red-500 mt-1">
+            {errors.description.message}
+          </Text>
+        )}
+
+       
+        <Text className="text-base font-bold mb-2 mt-5">
+          Mots-clés recherchés en échange<Text className="text-red-500">*</Text>
+        </Text>
+        
+     
+        <View className="flex-row items-center mb-3">
+          <TextInput
+            className="flex-1 border border-gray-300 rounded-lg p-3 text-black"
+            placeholder="Ex: 'Livre de cuisine' ou 'Casquette'"
+            placeholderTextColor="#6B7280"
+            onChangeText={setSaisieMotCle}
+            value={saisieMotCle}
+            onSubmitEditing={addKeyword} 
+            returnKeyType="done"
+          />
+          <TouchableOpacity
+            onPress={addKeyword}
+            className={`p-3 ml-2 rounded-full ${
+              saisieMotCle.trim() ? 'bg-black' : 'bg-gray-400'
+            }`}
+            disabled={!saisieMotCle.trim()}
+          >
+            <PlusIcon size={20} color="white" weight="bold" />
+          </TouchableOpacity>
+        </View>
+
+      
+        {motsClesRecherches.length > 0 && (
+          <View className="flex-row flex-wrap gap-2 mb-2">
+            {motsClesRecherches.map((keyword, index) => (
+              <View
+                key={index}
+                className="flex-row items-center bg-[#FEF094] rounded-full px-3 py-1.5"
+              >
+                <Text className="text-black font-semibold text-sm mr-1">
+                  {keyword}
+                </Text>
+                <TouchableOpacity onPress={() => removeKeyword(keyword)}>
+                  <XCircleIcon size={16} color="black" weight="bold" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
+          {motsClesRecherches.length === 0 && controlAfficheErrorContreEchange && (
+          <Text className="text-red-500 mt-1">
+            Veuillez ajouter au moins un mot-clé de contre-échange.
+          </Text>
+        )}
+        
+      
         <Text className="text-base font-bold mb-2 mt-5">
           Adresse<Text className="text-red-500">*</Text>
         </Text>
@@ -260,43 +368,21 @@ export default function DonationAdForm() {
         {errors.adresse && (
           <Text className="text-red-500 mt-1">{errors.adresse.message}</Text>
         )}
-
-        <Text className="text-base font-bold mb-2 mt-5">Description</Text>
-        <Controller
-          control={control}
-          name="description"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              className={`border rounded-lg p-3 h-24 text-black ${
-                errors.description ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Décrivez l'état de l'article, ses caractéristiques, etc."
-              placeholderTextColor="#6B7280"
-              onChangeText={onChange}
-              value={value}
-              multiline
-              textAlignVertical="top"
-            />
-          )}
-        />
-        {errors.description && (
-          <Text className="text-red-500 mt-1">
-            {errors.description.message}
-          </Text>
-        )}
       </View>
 
       <TouchableOpacity
         className={`rounded-full p-4 items-center mt-5 ${
           loading ? 'bg-gray-400' : 'bg-[#FEF094]'
         }`}
-        onPress={handleSubmit(handleAddDonation)}
+        onPress={handleSubmit(handleAddEchange)}
         disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="black" />
         ) : (
-          <Text className="text-black text-base font-bold">Ajouter</Text>
+          <Text className="text-black text-base font-bold">
+            Ajouter l'échange
+          </Text>
         )}
       </TouchableOpacity>
     </ScrollView>

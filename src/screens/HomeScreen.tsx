@@ -17,8 +17,6 @@ import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
 import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
-import { PRODUCT_IMAGES_DATA } from '../data/Testimage';
-import Carousel from 'react-native-reanimated-carousel';
 export default function HomeScreen() {
   const {
     allProducts,
@@ -59,24 +57,6 @@ export default function HomeScreen() {
         <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
       </View>
 
-     {/*  <Carousel
-        loop
-        width={width * 0.9}
-        height={200}
-        autoPlay
-        autoPlayInterval={4000}
-        data={PRODUCT_IMAGES_DATA}
-        renderItem={({ item, index }) => (
-          <View key={item.id} style={{ flex: 1 }}>
-            <Image
-              source={{ uri: item.image }}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
-              className="rounded-b-3xl"
-            />
-          </View>
-        )}
-      /> */}
 
       <ScrollView
         className="flex-1"

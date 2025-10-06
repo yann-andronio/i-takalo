@@ -33,6 +33,13 @@ import PopUpProduct from '../components/popup/PopUpProduct';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListChatnavigatorScreen } from '../types/Types';
 
+// --- AJOUTER L'IMPORTATION DU CAROUSEL ---
+// J'assume que c'est un composant populaire comme 'react-native-reanimated-carousel'
+// Veuillez ajuster l'importation si votre composant Carousel provient d'une autre librairie.
+import Carousel from 'react-native-reanimated-carousel'; 
+// Si votre Carousel est un composant local, changez l'importation en :
+// import Carousel from '../chemin/vers/votre/Carousel'; // Remplacez par le chemin correct
+
 const { width } = Dimensions.get('window');
 
 type ProductScreenRouteProp = RouteProp<
@@ -54,15 +61,16 @@ export default function ProductScreen() {
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const { fetchAuthorById } = useContext(UserContext);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
-  const [loadingImage, setLoadingImage] = useState(true);
+  const [loadingCarousel, setLoadingCarousel] = useState(true);
 
   const [showPopup, setShowPopup] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-  const hasImages = item.images && item.images.length > 0;
+  const ImageProductsForCarrouseel = item.images || []; 
+  const hasImages = ImageProductsForCarrouseel.length > 0;
 
   useEffect(() => {
-    setLoadingImage(hasImages ? true : false);
+    setLoadingCarousel(hasImages); 
     const loadAuthor = async () => {
       if (item.author === undefined || item.author === null) {
         setAuthor(undefined);
@@ -76,7 +84,7 @@ export default function ProductScreen() {
       setLoadingAuthor(false);
     };
     loadAuthor();
-  }, [item.author, hasImages]);
+  }, [item.author, hasImages]); 
 
   if (loadingAuthor) {
     return (
@@ -135,30 +143,43 @@ export default function ProductScreen() {
   const isDonation = item.type === 'DONATION';
   const isSale = item.type === 'SALE';
 
+  // Fonction pour gérer la fin du chargement de l'image (pour le carrousel)
+  const handleImageLoadEnd = () => {
+    setLoadingCarousel(false);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">
         <View className="w-full h-[400px] relative">
-          {/* Carrousel des Images */}
+          {/* Carrousel des Images start*/}
           {hasImages ? (
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={true}
-              className="w-full h-full"
-              onContentSizeChange={() => setLoadingImage(false)} // Indique que le contenu est chargé
-            >
-              {item.images.map((imageUri, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: imageUri }}
-                  style={{ width: width, height: '100%' }} // Chaque image prend toute la largeur
-                  resizeMode="cover"
-                  className="rounded-b-3xl"
-                  // onLoadEnd={() => setLoadingImage(false)} //
-                />
-              ))}
-            </ScrollView>
+            <View className="w-full h-full">
+              <Carousel
+                loop
+                width={width} 
+                height={400} 
+                autoPlay
+                autoPlayInterval={4000}
+                data={ImageProductsForCarrouseel} 
+                onSnapToItem={() => {
+                  if (loadingCarousel) {
+                  
+                    setLoadingCarousel(false); 
+                  }
+                }}
+                renderItem={({ item: imageUri, index }) => (
+                  <Image
+                    key={index}
+                    source={{ uri: imageUri }}
+                    style={{ width: width, height: '100%' }}
+                    resizeMode="cover"
+                    className="rounded-b-3xl"
+                    onLoadEnd={index === 0 ? handleImageLoadEnd : undefined} // Déclenche l'arrêt du chargement seulement après la première image
+                  />
+                )}
+              />
+            </View>
           ) : (
             <View className="items-center justify-center w-full h-full bg-gray-200 rounded-b-3xl">
               <ImageSquareIcon size={50} color="#6B7280" weight="light" />
@@ -168,7 +189,7 @@ export default function ProductScreen() {
             </View>
           )}
 
-          {hasImages && loadingImage && (
+          {hasImages && loadingCarousel && (
             <View className="absolute inset-0 items-center justify-center bg-gray-200 rounded-b-3xl">
               <ActivityIndicator size="large" color="#03233A" />
             </View>
@@ -302,12 +323,12 @@ export default function ProductScreen() {
             </View>
           )}
 
-          {/* Section Recherché en échange*/}
+          {/* Section Recherché en échange (UX/UI amélioré) */}
           {isEchange && item.mots_cles_recherches && item.mots_cles_recherches.length > 0 && (
-
+            
               <View className="mb-8 px-3 py-4 rounded-2xl bg-gradient-to-br from-[#fff8e1] to-[#fff2cc] border border-[#03233A]/40 shadow-sm">
                 <View className="flex-row items-center mb-4">
-                  {/*   <View className="p-2.5 rounded-full bg-[#9f7126]/10">
+                  {/* <View className="p-2.5 rounded-full bg-[#9f7126]/10">
           <MagnifyingGlassIcon size={22} color="#9f7126" weight="bold" />
         </View> */}
                   <Text className="ml-3 text-lg font-extrabold text-[#212529]">

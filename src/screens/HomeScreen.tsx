@@ -7,6 +7,8 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Image,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeroSection from '../components/HeroSection';
@@ -15,7 +17,8 @@ import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
 import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
-
+import { PRODUCT_IMAGES_DATA } from '../data/Testimage';
+import Carousel from 'react-native-reanimated-carousel';
 export default function HomeScreen() {
   const {
     allProducts,
@@ -26,7 +29,8 @@ export default function HomeScreen() {
   } = useContext(ProductContext);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [isselectfilterDonation, setIsSelectfilterDonation] = useState<string>('all');
+  const [isselectfilterDonation, setIsSelectfilterDonation] =
+    useState<string>('all');
   const [refreshing, setRefreshing] = useState(false);
 
   const handleApplyFilters = (filters: any) => {
@@ -45,6 +49,8 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
+  const { width } = Dimensions.get('window');
+
   return (
     <SafeAreaView className="flex-1 bg-white font-jakarta">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
@@ -53,10 +59,33 @@ export default function HomeScreen() {
         <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
       </View>
 
+     {/*  <Carousel
+        loop
+        width={width * 0.9}
+        height={200}
+        autoPlay
+        autoPlayInterval={4000}
+        data={PRODUCT_IMAGES_DATA}
+        renderItem={({ item, index }) => (
+          <View key={item.id} style={{ flex: 1 }}>
+            <Image
+              source={{ uri: item.image }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+              className="rounded-b-3xl"
+            />
+          </View>
+        )}
+      /> */}
+
       <ScrollView
         className="flex-1"
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#03233A']} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#03233A']}
+          />
         }
       >
         <View className="px-6 ">
@@ -71,7 +100,7 @@ export default function HomeScreen() {
         </View>
 
         <Text className="text-xl font-bold font-jakarta text-gray-800 mb-2 px-6">
-          Produits de Dons teste
+          Produits de Dons
         </Text>
 
         {loading ? (
@@ -82,7 +111,7 @@ export default function HomeScreen() {
         ) : donationProducts.length > 0 ? (
           <FlatList
             data={donationProducts}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => <ProductCard item={item} />}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -107,7 +136,7 @@ export default function HomeScreen() {
         <View className="px-6 mb-24">
           <FlatList
             data={allProducts}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => <ProductCard item={item} />}
             showsVerticalScrollIndicator={false}
             numColumns={2}

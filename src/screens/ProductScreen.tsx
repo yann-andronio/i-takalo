@@ -10,7 +10,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { ProductDataI } from '../context/ProductContext';
+// L'interface ProductDataI est maintenant mise à jour pour avoir 'images: string[]'
+import { ProductDataI } from '../context/ProductContext'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeftIcon,
@@ -22,8 +23,8 @@ import {
   CubeTransparentIcon,
   ClockCounterClockwiseIcon,
   UserIcon,
-  DotsThreeVerticalIcon,
   DotsThreeIcon,
+  ImageSquare, // Ajout de ImageSquare pour le placeholder
 } from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext, UserI } from '../context/UserContext';
@@ -46,17 +47,27 @@ type ChatNavigationProp = NativeStackNavigationProp<
 export default function ProductScreen() {
   const navigation = useNavigation<ChatNavigationProp>();
   const route = useRoute<ProductScreenRouteProp>();
-  const { item } = route.params;
+  const { item } = route.params; // item contient maintenant item.images[]
   const { user } = useContext(AuthContext);
 
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const { fetchAuthorById } = useContext(UserContext);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
+  const [loadingImage, setLoadingImage] = useState(true); // État pour le chargement des images du carrousel
 
   const [showPopup, setShowPopup] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  
+  // --- NOUVELLES LOGIQUES ---
+  const hasImages = item.images && item.images.length > 0;
+  const initialImageLoaded = hasImages ? false : true; // Si pas d'images, on considère le "chargement" terminé
+  // --- FIN NOUVELLES LOGIQUES ---
+
 
   useEffect(() => {
+    // Si il y a des images, on met le loading à true, sinon à false
+    setLoadingImage(hasImages ? true : false); 
+    
     const loadAuthor = async () => {
       if (item.author === undefined || item.author === null) {
         setAuthor(undefined);
@@ -70,8 +81,10 @@ export default function ProductScreen() {
       setLoadingAuthor(false);
     };
     loadAuthor();
-  }, [item.author]);
+  }, [item.author, hasImages]); // Dépendance à hasImages pour la réinitialisation
 
+  // ... (Le reste des fonctions est inchangé)
+  
   if (loadingAuthor) {
     return (
       <SafeAreaView className="items-center justify-center flex-1 bg-white">
@@ -97,10 +110,6 @@ export default function ProductScreen() {
       'Activation de la réalité augmentée pour le produit :',
       item.title,
     );
-  };
-
-  const handleMessagePress = () => {
-    console.log("Envoi d'un message au vendeur :", author);
   };
 
   const toggleDescription = () => setShowFullDescription(!showFullDescription);
@@ -132,14 +141,46 @@ export default function ProductScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">
+        
+        {/* --- DÉBUT : CARROUSEL D'IMAGES --- */}
         <View className="w-full h-[400px] relative">
-          <Image
-            source={{ uri: item.image }}
-            style={{ width: width, height: '100%' }}
-            resizeMode="cover"
-            className="rounded-b-3xl"
-          />
+          
+          {/* Carrousel des Images */}
+          {hasImages ? (
+            <ScrollView 
+                horizontal 
+                pagingEnabled 
+                showsHorizontalScrollIndicator={true} 
+                className="w-full h-full"
+                onContentSizeChange={() => setLoadingImage(false)} // Indique que le contenu est chargé
+            >
+              {item.images.map((imageUri, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: imageUri }}
+                  style={{ width: width, height: '100%' }} // Chaque image prend toute la largeur
+                  resizeMode="cover"
+                  className="rounded-b-3xl"
+                  // onLoadEnd={() => setLoadingImage(false)} // Peut être commenté si on utilise onContentSizeChange
+                />
+              ))}
+            </ScrollView>
+          ) : (
+            // Placeholder si aucune image n'est présente
+            <View className="items-center justify-center w-full h-full bg-gray-200 rounded-b-3xl">
+              <ImageSquare size={50} color="#6B7280" weight="light" />
+              <Text className="mt-2 text-gray-500 text-sm">Aucune photo disponible</Text>
+            </View>
+          )}
 
+          {/* Loader superposé au début du chargement des images */}
+          {hasImages && loadingImage && (
+             <View className="absolute inset-0 items-center justify-center bg-gray-200 rounded-b-3xl">
+                <ActivityIndicator size="large" color="#03233A" />
+             </View>
+          )}
+
+          {/* Dégradé supérieur et Boutons (positionnés au-dessus du carrousel) */}
           <View className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent" />
 
           <View className="absolute z-10 flex-row items-center justify-between top-6 left-6 right-6">
@@ -177,8 +218,11 @@ export default function ProductScreen() {
             </View>
           </View>
         </View>
+        {/* --- FIN : CARROUSEL D'IMAGES --- */}
 
+        {/* --- DÉTAILS DU PRODUIT (Le reste du code est inchangé) --- */}
         <View className="p-6 -mt-8 bg-white shadow-lg rounded-t-3xl">
+          {/* ... (Contenu du produit inchangé) */}
           <View className="flex-row items-start justify-between mb-4">
             <View className="flex-1">
               <Text className="mb-1 text-3xl font-extrabold text-gray-900">
@@ -215,7 +259,7 @@ export default function ProductScreen() {
           <View className="flex-row items-center mb-6">
             <HeartIcon size={16} color="#4b5563" weight="bold" />
             <Text className="ml-2 text-sm font-medium text-gray-600">
-              {item.likes} likes
+              {item.likes.length} likes {/* Assurez-vous d'utiliser item.likes.length */}
             </Text>
           </View>
 

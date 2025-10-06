@@ -5,10 +5,10 @@ import { ImageSourcePropType } from 'react-native';
 export interface ProductDataI {
   id: number;
   title: string;
-  image: string;
-  type: 'SALE' | 'DONATION';
+  images: string[];
+  type: 'SALE' | 'DONATION' | 'ECHANGE';
   description?: string;
-  author?: number ;
+  author?: number;
   likes: number[];
   category: string;
   price?: number;
@@ -20,6 +20,7 @@ export interface ProductDataI {
 interface ProductContextType {
   allProducts: ProductDataI[];
   saleProducts: ProductDataI[];
+  echangeProducts: ProductDataI[]
   donationProducts: ProductDataI[];
   loading: boolean;
   fetchProducts: () => void;
@@ -32,6 +33,7 @@ export const ProductContext = createContext<ProductContextType>({
   allProducts: [],
   saleProducts: [],
   donationProducts: [],
+  echangeProducts: [],
   loading: false,
   fetchProducts: () => {},
   fetchFilteredProductsDonation: () => {},
@@ -45,6 +47,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   const [allProducts, setAllProducts] = useState<ProductDataI[]>([]);
   const [saleProducts, setsaleProducts] = useState<ProductDataI[]>([]);
   const [donationProducts, setDonationProducts] = useState<ProductDataI[]>([]);
+  const [echangeProducts, setEchangeProducts] = useState<ProductDataI[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchProducts = async () => {
@@ -55,9 +58,11 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const sales = fetchedProducts.filter(i => i.type === 'SALE');
       const donations = fetchedProducts.filter(i => i.type === 'DONATION');
+      const echanges = fetchedProducts.filter(i => i.type === 'ECHANGE');
       setAllProducts(fetchedProducts);
       setDonationProducts(donations);
-      setsaleProducts(sales)
+      setsaleProducts(sales);
+      setEchangeProducts(echanges)
     } catch (err) {
       console.error('Erreur lors du chargement des produits:', err);
     } finally {
@@ -100,6 +105,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
       setAllProducts(prev => prev.filter(p => p.id !== id));
       setsaleProducts(prev => prev.filter(p => p.id !== id));
       setDonationProducts(prev => prev.filter(p => p.id !== id));
+      setEchangeProducts(prev => prev.filter(p => p.id !== id));
 
       console.log(`Produit ${id} supprimé avec succès`);
     } catch (err) {
@@ -119,6 +125,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
         allProducts,
         donationProducts,
         saleProducts,
+        echangeProducts,
         loading,
         fetchFilteredProductsDonation,
         fetchProducts,

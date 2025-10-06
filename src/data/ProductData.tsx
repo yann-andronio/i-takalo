@@ -1,9 +1,9 @@
-import { ImageSourcePropType } from 'react-native';
+/* import { ImageSourcePropType } from 'react-native';
 
 export interface ProductDataI {
   id: number;
   title: string;
-  image: string;
+  image: string[];
   type: 'SALE' | 'DONATION';
   description?: string;
   author?: number;
@@ -75,3 +75,4 @@ export const ProductData: ProductDataI[] = [
     created_at: '2025-08-31T17:27:06.855246Z',
   },
 ];
+ */

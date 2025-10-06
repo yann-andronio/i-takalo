@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'; // Import de useEffect
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { ProductDataI } from '../context/ProductContext';
-import { HeartIcon, HandHeartIcon, UserIcon } from 'phosphor-react-native';
+// Importez ImageSquare pour l'image par défaut
+import { HeartIcon, HandHeartIcon, UserIcon, ImageSquare } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListHomenavigatorScreen } from '../types/Types';
 import { AuthContext } from '../context/AuthContext';
-import { UserContext, UserI } from '../context/UserContext'; // Import de UserI
-import API from '../api/Api'; // Import de l'API
+import { UserContext, UserI } from '../context/UserContext';
+import API from '../api/Api';
 
 interface ProductCardProps {
   item: ProductDataI;
@@ -34,8 +35,15 @@ export default function ProductCard({ item }: ProductCardProps) {
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
 
+  // --- LOGIQUE IMAGE PRINCIPALE ---
+  // On prend le premier élément du tableau 'images'.
+  const mainImageUri = item.images && item.images.length > 0 ? item.images[0] : null; 
+  // --- FIN LOGIQUE IMAGE PRINCIPALE ---
+
+
   useEffect(() => {
     const loadAuthor = async () => {
+      // ... (Logique de chargement de l'auteur inchangée)
       if (item.author === undefined || item.author === null) {
         setAuthor(undefined);
         setLoadingAuthor(false);
@@ -55,6 +63,9 @@ export default function ProductCard({ item }: ProductCardProps) {
   const isSaleProduct = item.type === 'SALE';
   const linearImageSource = require('../assets/images/productCardImage/linear2.png');
 
+  // Si pas d'image, on utilise une couleur de fond pour l'ImageBackground
+  const hasImage = !!mainImageUri; 
+
   return (
     <TouchableOpacity
       className="w-48 overflow-hidden bg-white shadow-lg rounded-2xl"
@@ -62,17 +73,32 @@ export default function ProductCard({ item }: ProductCardProps) {
       activeOpacity={0.8}
     >
       <ImageBackground
-        source={{ uri: item.image }}
+        // Conditionnel : utilise l'URI si elle existe, sinon utilise une source vide
+        source={hasImage ? { uri: mainImageUri } : undefined} 
         className="justify-between w-full h-72"
         resizeMode="cover"
         onLoadEnd={() => setIsImageLoading(false)}
+        // Si pas d'image, met un fond gris pour le placeholder
+        style={!hasImage ? { backgroundColor: '#E5E7EB' } : undefined} 
       >
-        {(isImageLoading || loadingAuthor) && (
+        
+        {/* Affichage du loader ou du placeholder si pas d'image */}
+        {(isImageLoading && hasImage) || loadingAuthor ? (
+          // Loader affiché si l'image charge OU si l'auteur charge (et qu'il y a une image)
           <View className="absolute inset-0 items-center justify-center bg-gray-200">
             <ActivityIndicator size="large" color="#03233A" />
           </View>
-        )}
+        ) : !hasImage ? (
+          // --- NOUVELLE LOGIQUE : ICÔNE DE PHOSPHOR EN TANT QUE PLACEHOLDER ---
+          <View className="absolute inset-0 items-center justify-center">
+            <ImageSquare size={50} color="#6B7280" weight="light" />
+            <Text className="mt-2 text-gray-500 text-xs">Pas de photo</Text>
+          </View>
+          // --- FIN NOUVELLE LOGIQUE ---
+        ) : null}
 
+        {/* ... (Le reste du code reste inchangé, géré par le state loadingAuthor) */}
+        
         {!(isImageLoading || loadingAuthor) && (
           <View
             className="absolute items-center justify-center overflow-hidden border-2 border-white rounded-full top-4 left-4 w-11 h-11"
@@ -95,11 +121,14 @@ export default function ProductCard({ item }: ProductCardProps) {
         )}
 
         {/* Superposition dégradée fond */}
-        <Image
-          source={linearImageSource}
-          resizeMode="cover"
-          className="absolute bottom-0 z-10 w-full h-full"
-        />
+        {hasImage && (
+            <Image
+                source={linearImageSource}
+                resizeMode="cover"
+                className="absolute bottom-0 z-10 w-full h-full"
+            />
+        )}
+
 
         <View className="absolute inset-x-0 bottom-0 z-20 p-4">
           <View className="flex-row items-end justify-between ">

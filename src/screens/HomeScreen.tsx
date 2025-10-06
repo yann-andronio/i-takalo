@@ -22,6 +22,7 @@ export default function HomeScreen() {
     allProducts,
     fetchFilteredProductsDonation,
     donationProducts,
+    echangeProducts,
     loading,
     fetchProducts,
   } = useContext(ProductContext);
@@ -88,9 +89,9 @@ export default function HomeScreen() {
             <ActivityIndicator size="large" color="#03233A" />
             <Text className="mt-2 text-gray-500">Chargement...</Text>
           </View>
-        ) : donationProducts.length > 0 ? (
+        ) : echangeProducts.length > 0 ? (
           <FlatList
-            data={donationProducts}
+            data={echangeProducts}
             keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => <ProductCard item={item} />}
             horizontal

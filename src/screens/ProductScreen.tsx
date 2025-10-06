@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { ProductDataI } from '../context/ProductContext'; 
+import { ProductDataI } from '../context/ProductContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeftIcon,
@@ -23,7 +23,9 @@ import {
   ClockCounterClockwiseIcon,
   UserIcon,
   DotsThreeIcon,
-  ImageSquareIcon, 
+  ImageSquareIcon,
+  HandshakeIcon,
+  MagnifyingGlassIcon,
 } from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext, UserI } from '../context/UserContext';
@@ -52,17 +54,15 @@ export default function ProductScreen() {
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const { fetchAuthorById } = useContext(UserContext);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
-  const [loadingImage, setLoadingImage] = useState(true); 
+  const [loadingImage, setLoadingImage] = useState(true);
 
   const [showPopup, setShowPopup] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  
-  const hasImages = item.images && item.images.length > 0;
-  
 
+  const hasImages = item.images && item.images.length > 0;
 
   useEffect(() => {
-    setLoadingImage(hasImages ? true : false); 
+    setLoadingImage(hasImages ? true : false);
     const loadAuthor = async () => {
       if (item.author === undefined || item.author === null) {
         setAuthor(undefined);
@@ -78,7 +78,6 @@ export default function ProductScreen() {
     loadAuthor();
   }, [item.author, hasImages]);
 
-  
   if (loadingAuthor) {
     return (
       <SafeAreaView className="items-center justify-center flex-1 bg-white">
@@ -128,24 +127,26 @@ export default function ProductScreen() {
     navigation.navigate('Chat', {
       conversationId: '1',
       participant: author,
-      produit : item
+      produit: item,
     });
   };
+
+  const isEchange = item.type === 'ECHANGE';
+  const isDonation = item.type === 'DONATION';
+  const isSale = item.type === 'SALE';
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">
-        
         <View className="w-full h-[400px] relative">
-          
           {/* Carrousel des Images */}
           {hasImages ? (
-            <ScrollView 
-                horizontal 
-                pagingEnabled 
-                showsHorizontalScrollIndicator={true} 
-                className="w-full h-full"
-                onContentSizeChange={() => setLoadingImage(false)} // Indique que le contenu est chargé
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={true}
+              className="w-full h-full"
+              onContentSizeChange={() => setLoadingImage(false)} // Indique que le contenu est chargé
             >
               {item.images.map((imageUri, index) => (
                 <Image
@@ -154,23 +155,23 @@ export default function ProductScreen() {
                   style={{ width: width, height: '100%' }} // Chaque image prend toute la largeur
                   resizeMode="cover"
                   className="rounded-b-3xl"
-                  // onLoadEnd={() => setLoadingImage(false)} // 
+                  // onLoadEnd={() => setLoadingImage(false)} //
                 />
               ))}
             </ScrollView>
           ) : (
-          
             <View className="items-center justify-center w-full h-full bg-gray-200 rounded-b-3xl">
               <ImageSquareIcon size={50} color="#6B7280" weight="light" />
-              <Text className="mt-2 text-gray-500 text-sm">Aucune photo disponible</Text>
+              <Text className="mt-2 text-gray-500 text-sm">
+                Aucune photo disponible
+              </Text>
             </View>
           )}
 
-       
           {hasImages && loadingImage && (
-             <View className="absolute inset-0 items-center justify-center bg-gray-200 rounded-b-3xl">
-                <ActivityIndicator size="large" color="#03233A" />
-             </View>
+            <View className="absolute inset-0 items-center justify-center bg-gray-200 rounded-b-3xl">
+              <ActivityIndicator size="large" color="#03233A" />
+            </View>
           )}
 
           {/* Dégradé supérieur et Boutons (positionnés au-dessus du carrousel) */}
@@ -219,9 +220,31 @@ export default function ProductScreen() {
               <Text className="mb-1 text-3xl font-extrabold text-gray-900">
                 {item.title}
               </Text>
-              <Text className="text-xl font-semibold text-gray-700">
-                {item.price} Ar
-              </Text>
+              <View className="flex-row items-center mt-1">
+                {isSale && (
+                  <>
+                    <Text className="ml-2 text-xl font-bold text-gray-700">
+                      {item.price} Ar
+                    </Text>
+                  </>
+                )}
+                {isDonation && (
+                  <>
+                    <HeartIcon size={22} color="#EF4444" weight="bold" />
+                    <Text className="ml-2 text-xl font-bold text-gray-700">
+                      Donation (Gratuit)
+                    </Text>
+                  </>
+                )}
+                {isEchange && (
+                  <>
+                    <HandshakeIcon size={22} color="#F59E0B" weight="bold" />
+                    <Text className="ml-2 text-xl font-bold text-gray-700">
+                      Échange
+                    </Text>
+                  </>
+                )}
+              </View>
             </View>
             <View className="flex-row items-center p-2 bg-gray-100 rounded-lg">
               <TagIcon size={18} color="#4B5563" weight="bold" />
@@ -234,10 +257,7 @@ export default function ProductScreen() {
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
               <MapPinIcon size={16} color="#4b5563" />
-              <Text className="ml-2 text-sm text-gray-600">
-                {item.adresse}
-                adresse
-              </Text>
+              <Text className="ml-2 text-sm text-gray-600">{item.adresse}</Text>
             </View>
             <View className="flex-row items-center">
               <ClockCounterClockwiseIcon size={16} color="#4b5563" />
@@ -250,7 +270,7 @@ export default function ProductScreen() {
           <View className="flex-row items-center mb-6">
             <HeartIcon size={16} color="#4b5563" weight="bold" />
             <Text className="ml-2 text-sm font-medium text-gray-600">
-              {item.likes.length} likes 
+              {item.likes.length} likes
             </Text>
           </View>
 
@@ -282,6 +302,34 @@ export default function ProductScreen() {
             </View>
           )}
 
+          {/* Section Recherché en échange*/}
+          {isEchange && item.mots_cles_recherches && item.mots_cles_recherches.length > 0 && (
+
+              <View className="mb-8 px-3 py-4 rounded-2xl bg-gradient-to-br from-[#fff8e1] to-[#fff2cc] border border-[#03233A]/40 shadow-sm">
+                <View className="flex-row items-center mb-4">
+                  {/*   <View className="p-2.5 rounded-full bg-[#9f7126]/10">
+          <MagnifyingGlassIcon size={22} color="#9f7126" weight="bold" />
+        </View> */}
+                  <Text className="ml-3 text-lg font-extrabold text-[#212529]">
+                    Recherché en échange
+                  </Text>
+                </View>
+
+                <View className="flex-row flex-wrap gap-2">
+                  {item.mots_cles_recherches.map((keyword, index) => (
+                    <View
+                      key={index}
+                      className="px-4 py-1.5 rounded-full bg-[#212529]/5 border border-[#9f7126]/20 backdrop-blur-sm"
+                    >
+                      <Text className="text-sm font-semibold text-[#03233A] tracking-wide">
+                        {keyword.toUpperCase()}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
           <View className="mb-6">
             <Text className="mb-2 text-xl font-bold text-gray-800">
               Description
@@ -300,7 +348,7 @@ export default function ProductScreen() {
             )}
           </View>
 
-        
+          {/* Buttons  principale*/}
           <View className="flex-row items-center justify-between gap-4">
             <TouchableOpacity
               className="flex-row items-center justify-center flex-1 p-4 bg-gray-200 rounded-xl"

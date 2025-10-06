@@ -12,6 +12,7 @@ export interface ProductDataI {
   likes: number[];
   category: string;
   price?: number;
+  mots_cles_recherches?:string[],
   created_at: string;
   adresse?: string;
   updated_at: string;

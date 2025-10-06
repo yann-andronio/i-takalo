@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ProductData, ProductDataI } from '../data/ProductData';
 import ProductCard from '../components/ProductCard';
 import UserCard from '../components/UserCard';
 import SearchBar from '../components/SearchBar';

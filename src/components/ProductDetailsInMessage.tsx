@@ -24,7 +24,7 @@ export default function ProductDetailsInMessage({
   return (
     <View className="flex-row items-center justify-between p-4 m-4 border border-gray-200 rounded-xl">
       <Image
-        source={{ uri: produit.image }}
+        source={{ uri: produit.images[0] }}
         className="w-16 h-16 mr-3 rounded-lg"
       />
 

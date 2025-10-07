@@ -174,8 +174,8 @@ export default function DonationAdForm() {
         headers: {
           'Content-Type': 'multipart/form-data', 
         },
-        timeout: 60000, 
-      });
+/*         timeout: 60000, 
+ */      });
 
       console.log('Donation créée:', response.data);
       const newDonation = response.data as ProductDataI;

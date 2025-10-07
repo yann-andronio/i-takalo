@@ -201,7 +201,7 @@ export default function EchangeAddForm() {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 60000, 
+        // timeout: 60000, 
       });
 
       console.log('Échange créé:', response.data);

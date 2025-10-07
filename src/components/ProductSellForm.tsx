@@ -159,6 +159,8 @@ export default function ProductSellForm() {
       formData.append('category', data.category);
       formData.append('adresse', data.adresse);
 
+      let pictures = []
+
       selectedImages.forEach(imageAsset => {
         if (imageAsset.uri && imageAsset.fileName && imageAsset.type) {
           const fileUri = imageAsset.uri;
@@ -170,16 +172,29 @@ export default function ProductSellForm() {
 
          
           formData.append('images', file as any);
+          pictures.push({'images': file as any});
         }
       });
 
       console.log('--- ENVOI DU PRODUIT EN VENTE ---');
+   /*    const testeJson = {
+        title: data.title,
+        description: data.description || 'Pas de description fournie.',
+        type: "SALE",
+        price: data.price.toString(),
+        images: [],
+        mots_cles_recherches: []
+      } */
 
-      const response = await API.post('/api/v1/products/create/', formData, {
+      console.log("formData", formData)
+  /*     console.log("testeJson", testeJson)
+      console.log("pictures", pictures[0]) */
+
+      const response = await API.post('/api/v1/products/create/', formData  , {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 60000,
+        timeout: 6000,
       });
 
       console.log('Produit créé:', response.data);

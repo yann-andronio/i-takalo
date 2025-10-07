@@ -44,7 +44,7 @@ export default function ValidationTransactionScreen() {
       <View className="p-4 mx-6 mt-6 bg-white border shadow-md rounded-2xl border-gray-50">
         <View className="flex-row items-start">
           <Image
-            source={{ uri: produit.image }}
+            source={{ uri: produit.images[0] }}
             className="w-24 h-24 mr-4 rounded-xl"
             resizeMode="cover"
           />

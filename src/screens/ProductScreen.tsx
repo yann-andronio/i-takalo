@@ -159,7 +159,7 @@ export default function ProductScreen() {
                 autoPlay
                 autoPlayInterval={4000}
                 data={heroItems}
-                      /*  achaqu fois miova sary*/     
+                /*  achaqu fois miova sary*/
                 onSnapToItem={index => {
                   setActiveIndex(index);
                   if (loadingCarousel) {
@@ -179,13 +179,13 @@ export default function ProductScreen() {
               />
 
               {/* --- Pagination --- */}
-              <View
-                className=" absolute  bottom-20  w-full  flex-row  justify-center  space-x-2"
-              >
+              <View className=" absolute  bottom-20  w-full  flex-row  justify-center  space-x-2">
                 {heroItems.map((_, index) => (
                   <View
                     key={index}
-                    className={`w-2 h-2 mx-3 rounded-full ${ index === activeIndex ? 'bg-white' : 'bg-gray-400/50'}`}
+                    className={`w-2 h-2 mx-3 rounded-full ${
+                      index === activeIndex ? 'bg-white' : 'bg-gray-400/50'
+                    }`}
                   />
                 ))}
               </View>
@@ -400,6 +400,10 @@ export default function ProductScreen() {
               </TouchableOpacity>
             )}
           </View>
+        </View>
+
+        <View>
+          
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,7 +1,15 @@
 import React, { createContext, useState, useEffect } from 'react';
 import API from '../api/Api';
-import { ImageSourcePropType } from 'react-native';
 
+export interface ProductSuggestionI {
+  id: number;
+  author_image:string
+  title: string;
+  images: string[];
+  price?: number;
+  type: 'SALE' | 'DONATION' | 'ECHANGE';
+  category: string;
+}
 export interface ProductDataI {
   id: number;
   title: string;
@@ -12,22 +20,24 @@ export interface ProductDataI {
   likes: number[];
   category: string;
   price?: number;
-  mots_cles_recherches?:string[],
+  mots_cles_recherches?: string[];
   created_at: string;
   adresse?: string;
   updated_at: string;
+  suggestions: ProductSuggestionI[]; 
 }
 
 interface ProductContextType {
   allProducts: ProductDataI[];
   saleProducts: ProductDataI[];
-  echangeProducts: ProductDataI[]
+  echangeProducts: ProductDataI[];
   donationProducts: ProductDataI[];
   loading: boolean;
   fetchProducts: () => void;
   fetchFilteredProductsDonation: (filters: any) => void;
   addProduct: (newProduct: ProductDataI) => void;
   deleteProduct: (id: number) => void;
+  fetchProductById: (id: number) => Promise<ProductDataI | undefined>; 
 }
 
 export const ProductContext = createContext<ProductContextType>({
@@ -40,6 +50,7 @@ export const ProductContext = createContext<ProductContextType>({
   fetchFilteredProductsDonation: () => {},
   addProduct: () => {},
   deleteProduct: () => {},
+  fetchProductById: async () => undefined, 
 });
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -63,13 +74,24 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
       setAllProducts(fetchedProducts);
       setDonationProducts(donations);
       setsaleProducts(sales);
-      setEchangeProducts(echanges)
+      setEchangeProducts(echanges);
     } catch (err) {
       console.error('Erreur lors du chargement des produits:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  const fetchProductById = async (id: number): Promise<ProductDataI | undefined> => {
+    try {
+      const res = await API.get(`/api/v1/products/${id}/`);
+      return res.data as ProductDataI; 
+    } catch (err) {
+      console.error(`Erreur lors du chargement du produit ${id}:`, err);
+      return undefined;
+    }
+  };
+
 
   const fetchFilteredProductsDonation = async (filters: any) => {
     setLoading(true);
@@ -132,6 +154,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
         fetchProducts,
         addProduct,
         deleteProduct,
+        fetchProductById, 
       }}
     >
       {children}

@@ -8,9 +8,14 @@ import {
   TouchableOpacity,
   Linking,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { ProductDataI } from '../context/ProductContext';
+import {
+  ProductDataI,
+  ProductSuggestionI,
+  ProductContext,
+} from '../context/ProductContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeftIcon,
@@ -26,14 +31,13 @@ import {
   ImageSquareIcon,
   HandshakeIcon,
   MagnifyingGlassIcon,
+  ShoppingCartIcon,
 } from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext, UserI } from '../context/UserContext';
 import PopUpProduct from '../components/popup/PopUpProduct';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListChatnavigatorScreen } from '../types/Types';
-
-// --- IMPORTATION DU CAROUSEL ---
 import Carousel from 'react-native-reanimated-carousel';
 
 const { width } = Dimensions.get('window');
@@ -51,15 +55,29 @@ type ChatNavigationProp = NativeStackNavigationProp<
 export default function ProductScreen() {
   const navigation = useNavigation<ChatNavigationProp>();
   const route = useRoute<ProductScreenRouteProp>();
-  const { item } = route.params;
+
+  const initialItem = route.params.item;
   const { user } = useContext(AuthContext);
 
-  const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const { fetchAuthorById } = useContext(UserContext);
+  const { fetchProductById } = useContext(ProductContext);
+
+  const [productData, setProductData] = useState<ProductDataI | undefined>(
+    initialItem,
+  );
+
+  const [author, setAuthor] = useState<UserI | undefined>(undefined);
+  const [loadingProduct, setLoadingProduct] = useState(true);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
   const [loadingCarousel, setLoadingCarousel] = useState(true);
   // --- state for index actif de pagination ---
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const item = productData || initialItem;
+
+  const suggestionProducts = (item.suggestions || []) as ProductSuggestionI[];
+
+  console.log('Suggestions azo:', suggestionProducts);
 
   const [showPopup, setShowPopup] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -69,28 +87,36 @@ export default function ProductScreen() {
 
   useEffect(() => {
     setLoadingCarousel(hasImages);
-    const loadAuthor = async () => {
-      if (item.author === undefined || item.author === null) {
-        setAuthor(undefined);
+
+    const loadData = async () => {
+      // 1. Charger les détails complets du produit (pour les suggestions)
+      setLoadingProduct(true);
+      const fullProduct = await fetchProductById(initialItem.id);
+
+      if (fullProduct) {
+        setProductData(fullProduct);
+        setLoadingAuthor(true);
+        if (fullProduct.author === undefined || fullProduct.author === null) {
+          setAuthor(undefined);
+          setLoadingAuthor(false);
+        } else {
+          const fetchedAuthor = await fetchAuthorById(fullProduct.author);
+          setAuthor(fetchedAuthor);
+          setLoadingAuthor(false);
+        }
+      } else {
         setLoadingAuthor(false);
-        return;
       }
-      setLoadingAuthor(true);
-
-      const fetchedAuthor = await fetchAuthorById(item.author);
-      setAuthor(fetchedAuthor);
-      setLoadingAuthor(false);
+      setLoadingProduct(false);
     };
-    loadAuthor();
-  }, [item.author, hasImages]);
+    loadData();
+  }, [initialItem.id, fetchProductById, fetchAuthorById, hasImages]);
 
-  if (loadingAuthor) {
+  if (loadingProduct || loadingAuthor) {
     return (
       <SafeAreaView className="items-center justify-center flex-1 bg-white">
         <ActivityIndicator size="large" color="#FEF094" />
-        <Text className="mt-4 text-gray-600">
-          Chargement des détails de l'auteur...
-        </Text>
+        <Text className="mt-4 text-gray-600">Chargement des détails...</Text>
       </SafeAreaView>
     );
   }
@@ -137,6 +163,11 @@ export default function ProductScreen() {
     });
   };
 
+  const handleSuggestionPress = (suggestion: ProductSuggestionI) => {
+    navigation.push('Product' as any, {
+      item: suggestion,
+    });
+  };
   const isEchange = item.type === 'ECHANGE';
   const isDonation = item.type === 'DONATION';
   const isSale = item.type === 'SALE';
@@ -144,6 +175,8 @@ export default function ProductScreen() {
   const handleImageLoadEnd = () => {
     setLoadingCarousel(false);
   };
+
+  const linearImageSource = require('../assets/images/productCardImage/linear2.png');
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -159,7 +192,7 @@ export default function ProductScreen() {
                 autoPlay
                 autoPlayInterval={4000}
                 data={heroItems}
-                /*  achaqu fois miova sary*/
+                /* achaqu fois miova sary*/
                 onSnapToItem={index => {
                   setActiveIndex(index);
                   if (loadingCarousel) {
@@ -304,6 +337,7 @@ export default function ProductScreen() {
               {item.likes.length} likes
             </Text>
           </View>
+          {/* ... (Section Author, Echange, Description) ... */}
 
           {author && (
             <View className="flex-row items-center p-4 mb-6 bg-gray-100 rounded-xl">
@@ -333,7 +367,7 @@ export default function ProductScreen() {
             </View>
           )}
 
-          {/* Section Recherché en échange (UX/UI amélioré) */}
+          {/* Section Recherché en échange  */}
           {isEchange &&
             item.mots_cles_recherches &&
             item.mots_cles_recherches.length > 0 && (
@@ -376,7 +410,6 @@ export default function ProductScreen() {
               </TouchableOpacity>
             )}
           </View>
-
           {/* Buttons  principale*/}
           <View className="flex-row items-center justify-between gap-4">
             <TouchableOpacity
@@ -402,9 +435,139 @@ export default function ProductScreen() {
           </View>
         </View>
 
-        <View>
-          
-        </View>
+        {/* suugestion */}
+        {suggestionProducts.length > 0 && (
+          <View className="p-6 pt-8 bg-gray-50">
+            <Text className="mb-6 text-2xl font-extrabold text-gray-900">
+              Suggestions pour vous
+            </Text>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              className="flex-row px-[0.2rem] py-3"
+            >
+              {suggestionProducts.map(suggestion => {
+                const izyAtakalo = item.type === 'ECHANGE';
+                const izyOmena = item.type === 'DONATION';
+                const izyAmidy = item.type === 'SALE';
+                const firstImage = suggestion.images?.[0];
+                const authorProfileImage = suggestion.author_image
+                  ? { uri: suggestion.author_image }
+                  : null;
+                return (
+                  <TouchableOpacity
+                    key={suggestion.id}
+                    className="w-44 h-64 mr-3 bg-white rounded-xl shadow-lg overflow-hidden "
+                    onPress={() => handleSuggestionPress(suggestion)}
+                  >
+                    <ImageBackground
+                      source={{ uri: firstImage }}
+                      className="w-full relative h-full"
+                      resizeMode="cover"
+                    >
+                      
+                      <View className="absolute top-3 right-3 z-20 p-1 bg-white rounded-full shadow-md">
+                        {authorProfileImage ? (
+                          <Image
+                            source={authorProfileImage}
+                            className="w-8 h-8 rounded-full border border-gray-100"
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <View className="items-center justify-center w-8 h-8 bg-gray-300 rounded-full border border-gray-100">
+                            <UserIcon size={18} color="white" weight="bold" />
+                          </View>
+                        )}
+                      </View>
+                      <Image
+                        source={linearImageSource}
+                        resizeMode="cover"
+                        className="absolute  bottom-0 w-full h-full opacity-90"
+                      />
+                      <View className="p-3 flex-1 justify-end">
+                        <View className="mb-2 flew justify-between items-center flex-row">
+                          <View className=" flex-1">
+                            <Text
+                              className="text-base font-extrabold text-white mb-0.5 shadow-md"
+                              numberOfLines={2}
+                            >
+                              {suggestion.title}
+                            </Text>
+                            <Text className="text-xs font-medium text-gray-200">
+                              {suggestion.category}
+                            </Text>
+                          </View>
+                          <View className="flex-1">
+                            {izyAtakalo && (
+                              <View className="flex-row items-center self-end bg-white p-1 rounded-lg">
+                                <HandshakeIcon
+                                  size={17}
+                                  color="#F59E0B"
+                                  weight="bold"
+                                />
+                              </View>
+                            )}
+
+                            {izyAmidy && (
+                              <View className="flex-row items-center self-end bg-white p-1 rounded-lg">
+                                <ShoppingCartIcon
+                                  size={22}
+                                  color="#F59E0B"
+                                  weight="bold"
+                                />
+                              </View>
+                            )}
+                          </View>
+                        </View>
+
+                        <View className="flex-row items-end justify-between mt-1">
+                          <View className="flex-row items-center">
+                            {/*  {izyAmidy && (
+                              <Text className="text-xl font-extrabold text-yellow-300">
+                                {suggestion.price}
+                              </Text>
+                            )} */}
+
+                            {/* {izyAtakalo && (
+                              <View className="flex-row items-center self-end bg-white p-1 rounded-lg">
+                                <HandshakeIcon
+                                  size={22}
+                                  color="#FCD34D"
+                                  weight="bold"
+                                />
+                                <Text className="ml-1 text-base font-bold text-yellow-300">
+                                  Échange
+                                </Text> 
+                              </View>
+                            )} */}
+
+                            {izyOmena && (
+                              <Text className="text-xl font-extrabold text-white">
+                                Gratuit
+                              </Text>
+                            )}
+                          </View>
+
+                          {/*  <Text
+                            className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase self-end ${
+                              suggestion.type === 'SALE'
+                                ? 'bg-red-500 text-white' 
+                                : suggestion.type === 'DONATION'
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-yellow-500 text-white' 
+                            }`}
+                          >
+                            {suggestion.type}
+                          </Text> */}
+                        </View>
+                      </View>
+                    </ImageBackground>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

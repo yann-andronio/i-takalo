@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   header: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
+    top: Platform.OS === 'ios' ? 50 : 50,
     left: 0,
     right: 0,
     flexDirection: 'row',

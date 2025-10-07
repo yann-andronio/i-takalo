@@ -533,6 +533,7 @@ const styles = StyleSheet.create({
   },
   myMessage: {
     backgroundColor: "#FEF094",
+    // backgroundColor: "red",
     alignSelf: "flex-end",
   },
   friendMessage: {

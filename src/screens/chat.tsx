@@ -38,9 +38,9 @@ import ReplyPreview from '../components/messages/ReplyPreview';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { v4 as uuidv4 } from 'uuid'; 
 
-// import { API_SOCKET_URL } from '@env';
+import { API_SOCKET_URL } from '@env';
 
-const API_SOCKET_URL = "wss://mounting-draws-answering-extras.trycloudflare.com"
+// const API_SOCKET_URL = "wss://mounting-draws-answering-extras.trycloudflare.com"
 import ProductDetailsInMessage from '../components/ProductDetailsInMessage';
 
 type ChatScreenRouteProp = RouteProp<

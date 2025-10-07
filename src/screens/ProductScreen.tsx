@@ -178,6 +178,8 @@ export default function ProductScreen() {
 
   const linearImageSource = require('../assets/images/productCardImage/linear2.png');
 
+  
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">

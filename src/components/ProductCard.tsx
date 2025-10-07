@@ -7,14 +7,13 @@ import {
   ImageBackground,
   ActivityIndicator,
 } from 'react-native';
-import { ProductDataI } from '../context/ProductContext';
-import { HeartIcon, HandHeartIcon, UserIcon, ImageSquareIcon } from 'phosphor-react-native';
+import { ProductDataI, ProductContext } from '../context/ProductContext';
+import { HeartIcon, ImageSquareIcon } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListHomenavigatorScreen } from '../types/Types';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext, UserI } from '../context/UserContext';
-import API from '../api/Api';
 
 interface ProductCardProps {
   item: ProductDataI;
@@ -29,8 +28,16 @@ export default function ProductCard({ item }: ProductCardProps) {
   const navigation = useNavigation<ProductCardNavigationProp>();
 
   const { users , fetchAuthorById } = useContext(UserContext);
-  const [isImageLoading, setIsImageLoading] = useState(true);
+ 
+/* like*/
 
+  const { user } = useContext(AuthContext); 
+  const { ToggleLike } = useContext(ProductContext); 
+  const [isLiking, setIsLiking] = useState(false)
+
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  
+  
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
 
@@ -62,6 +69,16 @@ export default function ProductCard({ item }: ProductCardProps) {
 
   const hasImage = !!mainImageUri; 
 
+  // Déterminer si le user courant a liké
+  const isLiked = user && item.likes.includes(user.id); 
+   const handleLikePress = async () => {
+    if (!user || isLiking) return; 
+
+    setIsLiking(true);
+    await ToggleLike(item.id); 
+    setIsLiking(false);
+  };
+
   return (
     <TouchableOpacity
       className="w-48 overflow-hidden bg-white shadow-lg rounded-2xl"
@@ -77,7 +94,6 @@ export default function ProductCard({ item }: ProductCardProps) {
         style={!hasImage ? { backgroundColor: '#E5E7EB' } : undefined} 
       >
         
-   
         {(isImageLoading && hasImage) || loadingAuthor ? (
         
           <View className="absolute inset-0 items-center justify-center bg-gray-200">
@@ -92,28 +108,6 @@ export default function ProductCard({ item }: ProductCardProps) {
       
         ) : null}
 
-      
-        
-       {/*  {!(isImageLoading || loadingAuthor) && (
-          <View
-            className="absolute items-center justify-center overflow-hidden border-2 border-white rounded-full top-4 left-4 w-11 h-11"
-            style={{ backgroundColor: isSaleProduct ? '#F3F4F6' : '#03233A' }}
-          >
-            {isSaleProduct && profileImageSource ? (
-              <Image
-                source={profileImageSource}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : isSaleProduct ? (
-              <View className="items-center justify-center w-full h-full bg-gray-100">
-                <UserIcon size={22} color="gray" weight="light" />
-              </View>
-            ) : (
-              <HandHeartIcon size={28} color="white" weight="light" />
-            )}
-          </View>
-        )} */}
         
         {!(isImageLoading || loadingAuthor) && (
           <View
@@ -163,8 +157,21 @@ export default function ProductCard({ item }: ProductCardProps) {
               </Text>
             )}
 
-            <TouchableOpacity className="flex-row items-center bg-white rounded-md p-[5px]">
-              <HeartIcon size={20} color="#03233A" />
+            <TouchableOpacity 
+              className="flex-row items-center bg-white rounded-md p-[5px]"
+              onPress={handleLikePress}
+              disabled={isLiking} 
+            >
+              {isLiking ? (
+                <ActivityIndicator size="small" color="#03233A" />
+              ) : (
+                <HeartIcon 
+                  size={20} 
+                  color={isLiked ? 'red' : '#03233A'} 
+                  weight={isLiked ? 'fill' : 'regular'} 
+                />
+              )}
+              
               <Text className="ml-1 text-xs text-black">
                 {item.likes.length}
               </Text>

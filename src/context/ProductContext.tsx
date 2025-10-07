@@ -1,9 +1,10 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import API from '../api/Api';
+import { AuthContext } from './AuthContext';
 
 export interface ProductSuggestionI {
   id: number;
-  author_image:string
+  author_image: string;
   title: string;
   images: string[];
   price?: number;
@@ -24,7 +25,7 @@ export interface ProductDataI {
   created_at: string;
   adresse?: string;
   updated_at: string;
-  suggestions: ProductSuggestionI[]; 
+  suggestions: ProductSuggestionI[];
 }
 
 interface ProductContextType {
@@ -37,7 +38,8 @@ interface ProductContextType {
   fetchFilteredProductsDonation: (filters: any) => void;
   addProduct: (newProduct: ProductDataI) => void;
   deleteProduct: (id: number) => void;
-  fetchProductById: (id: number) => Promise<ProductDataI | undefined>; 
+  fetchProductById: (id: number) => Promise<ProductDataI | undefined>;
+  ToggleLike: (productId: number) => Promise<boolean>;
 }
 
 export const ProductContext = createContext<ProductContextType>({
@@ -50,7 +52,8 @@ export const ProductContext = createContext<ProductContextType>({
   fetchFilteredProductsDonation: () => {},
   addProduct: () => {},
   deleteProduct: () => {},
-  fetchProductById: async () => undefined, 
+  fetchProductById: async () => undefined,
+  ToggleLike: async productId => false, 
 });
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -61,6 +64,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   const [donationProducts, setDonationProducts] = useState<ProductDataI[]>([]);
   const [echangeProducts, setEchangeProducts] = useState<ProductDataI[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const { user } = useContext(AuthContext);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -82,16 +87,17 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const fetchProductById = async (id: number): Promise<ProductDataI | undefined> => {
+  const fetchProductById = async (
+    id: number,
+  ): Promise<ProductDataI | undefined> => {
     try {
       const res = await API.get(`/api/v1/products/${id}/`);
-      return res.data as ProductDataI; 
+      return res.data as ProductDataI;
     } catch (err) {
       console.error(`Erreur lors du chargement du produit ${id}:`, err);
       return undefined;
     }
   };
-
 
   const fetchFilteredProductsDonation = async (filters: any) => {
     setLoading(true);
@@ -138,6 +144,48 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const ToggleLike = async (productId: number): Promise<boolean> => {
+  
+    if (!user || !user.id) {
+        console.warn('Action de like impossible : Utilisateur non connecté.');
+        return false;
+    }
+    const userId = user.id;
+
+    try {
+        const res = await API.post(`/api/v1/products/${productId}/like/`);
+        const { action } = res.data; 
+
+        const updateProductList = (prevProducts: ProductDataI[]): ProductDataI[] => {
+            return prevProducts.map(product => {
+                if (product.id === productId) {
+                    let newLikes = [...product.likes];
+                    if (action === 'added') {
+                        if (!newLikes.includes(userId)) { 
+                            newLikes.push(userId);
+                        }
+                    } else if (action === 'removed') {
+                        newLikes = newLikes.filter(id => id !== userId); 
+                    }
+                    return { ...product, likes: newLikes };
+                }
+                return product;
+            });
+        };
+
+        setAllProducts(updateProductList);
+        setsaleProducts(updateProductList);
+        setDonationProducts(updateProductList);
+        setEchangeProducts(updateProductList);
+
+        return true; 
+        
+    } catch (err) {
+        console.error(`Erreur lors du like/unlike du produit ${productId}:`, err);
+        return false;
+    }
+};
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -154,7 +202,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
         fetchProducts,
         addProduct,
         deleteProduct,
-        fetchProductById, 
+        fetchProductById,
+        ToggleLike, // Fonction de like ajoutée
       }}
     >
       {children}

@@ -1,222 +1,462 @@
-import 'react-native-gesture-handler';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import React, { useState, useEffect } from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+  TextInput,
+  ScrollView,
+} from 'react-native';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
-import React, { useEffect, useState } from 'react';
-import { AuthProvider } from './src/context/AuthContext';
-import AppNavigator from './src/navigation/AppNavigator';
-import './global.css'; // NativeWind
-import { LogBox, View, Text, StyleSheet, Modal, ActivityIndicator } from 'react-native';
-import { ProductProvider } from './src/context/ProductContext';
-import { UserProvider } from './src/context/UserContext';
-import Toast from 'react-native-toast-message';
-import codePush from '@revopush/react-native-code-push';
+// ⚠️ REMPLACEZ PAR VOTRE WEB CLIENT ID de Google Cloud Console
+// const GOOGLE_WEB_CLIENT_ID = 'VOTRE_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_WEB_CLIENT_ID = '82290075303-99d1t00h5nfc82af5fs8kf6dlm7vajlc.apps.googleusercontent.com';
 
-// Masque le warning de SafeAreaView
-LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
+// ⚠️ REMPLACEZ PAR L'URL DE VOTRE API DJANGO
+const API_URL = 'https://bridges-oaks-manually-cells.trycloudflare.com'; // Pour émulateur Android
 
-const App: React.FC = () => {
-  const [syncStatus, setSyncStatus] = useState<string>('');
-  const [downloadProgress, setDownloadProgress] = useState<{
-    receivedBytes: number;
-    totalBytes: number;
-  } | null>(null);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
-    // Vérifier les mises à jour au démarrage
-    syncCodePush();
+    // Configuration de Google Sign-In
+    GoogleSignin.configure({
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+
+    // Vérifier si l'utilisateur est déjà connecté
+    checkIfLoggedIn();
   }, []);
 
-  const syncCodePush = () => {
-    codePush.sync(
-      {
-        installMode: codePush.InstallMode.ON_NEXT_RESTART,
-        mandatoryInstallMode: codePush.InstallMode.IMMEDIATE,
-        updateDialog: {
-          title: 'Mise à jour disponible',
-          optionalUpdateMessage: 'Une nouvelle version est disponible. Voulez-vous la télécharger ?',
-          optionalIgnoreButtonLabel: 'Plus tard',
-          optionalInstallButtonLabel: 'Installer',
-          mandatoryUpdateMessage: 'Une mise à jour importante est requise.',
-          mandatoryContinueButtonLabel: 'Continuer',
-        },
-      },
-      (status) => {
-        switch (status) {
-          case codePush.SyncStatus.CHECKING_FOR_UPDATE:
-            setSyncStatus('Vérification des mises à jour...');
-            setShowUpdateModal(true);
-            break;
-          case codePush.SyncStatus.DOWNLOADING_PACKAGE:
-            setSyncStatus('Téléchargement en cours...');
-            setShowUpdateModal(true);
-            break;
-          case codePush.SyncStatus.INSTALLING_UPDATE:
-            setSyncStatus('Installation de la mise à jour...');
-            break;
-          case codePush.SyncStatus.UP_TO_DATE:
-            setSyncStatus('');
-            setShowUpdateModal(false);
-            setDownloadProgress(null);
-            break;
-          case codePush.SyncStatus.UPDATE_INSTALLED:
-            setSyncStatus('Mise à jour installée ! Redémarrage...');
-            setTimeout(() => {
-              setShowUpdateModal(false);
-            }, 1500);
-            break;
-          case codePush.SyncStatus.UNKNOWN_ERROR:
-            setSyncStatus('');
-            setShowUpdateModal(false);
-            setDownloadProgress(null);
-            break;
-        }
-      },
-      (progress) => {
-        if (progress) {
-          setDownloadProgress(progress);
-        }
+  // Vérifier si un token existe
+  const checkIfLoggedIn = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userData = await AsyncStorage.getItem('user');
+      
+      if (token && userData) {
+        setUser(JSON.parse(userData));
       }
-    );
+    } catch (error) {
+      console.log('Erreur lors de la vérification:', error);
+    }
   };
 
-  const getProgressPercentage = () => {
-    if (!downloadProgress) return 0;
-    return Math.round((downloadProgress.receivedBytes / downloadProgress.totalBytes) * 100);
+  // Connexion avec Google
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      
+      // Vérifier si les services Google Play sont disponibles
+      await GoogleSignin.hasPlayServices();
+      
+      // Obtenir les informations de l'utilisateur
+      const userInfo = await GoogleSignin.signIn();
+      
+      console.log('✅ Google User Info:', userInfo);
+      
+      // Obtenir l'ID token
+      const tokens = await GoogleSignin.getTokens();
+      console.log('🔑 ID Token:', tokens.idToken);
+      
+      // Envoyer le token à votre backend Django
+      const response = await axios.post(`${API_URL}/api/v1/auth/google/`, {
+        token: tokens.idToken,
+      });
+      
+      console.log('✅ Réponse du serveur:', response.data);
+      
+      // Sauvegarder le JWT token et les infos utilisateur
+      await AsyncStorage.setItem('token', response.data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(response.data.member));
+      
+      setUser(response.data.member);
+      Alert.alert('Succès', 'Connexion avec Google réussie ! 🎉');
+      
+    } catch (error) {
+      setLoading(false);
+      handleGoogleSignInError(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const formatBytes = (bytes: number) => {
-    return (bytes / 1024 / 1024).toFixed(2);
+  // Gestion des erreurs Google Sign-In
+  const handleGoogleSignInError = (error) => {
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      console.log('❌ Connexion annulée');
+      Alert.alert('Annulé', 'Connexion annulée');
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      console.log('⏳ Connexion en cours...');
+    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      console.log('❌ Play Services non disponible');
+      Alert.alert('Erreur', 'Google Play Services non disponible');
+    } else {
+      console.error('❌ Erreur:', error);
+      Alert.alert('Erreur', error.message || 'Une erreur est survenue');
+    }
   };
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <ProductProvider>
-          <UserProvider>
-            <AppNavigator />
-            <Toast />
+  // Connexion avec Email/Password
+  const signInWithEmail = async () => {
+    if (!email || !password) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+      return;
+    }
 
-            {/* Modal de progression des mises à jour */}
-            <Modal
-              visible={showUpdateModal}
-              transparent
-              animationType="fade"
-              statusBarTranslucent
-            >
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>iTakalo</Text>
-                  <Text style={styles.syncMessage}>{syncStatus}</Text>
+    try {
+      setLoading(true);
+      
+      const response = await axios.post(`${API_URL}/api/v1/auth/login/`, {
+        email: email,
+        password: password,
+      });
+      
+      console.log('✅ Connexion réussie:', response.data);
+      
+      // Sauvegarder le token
+      await AsyncStorage.setItem('token', response.data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(response.data.member));
+      
+      setUser(response.data.member);
+      Alert.alert('Succès', 'Connexion réussie ! 🎉');
+      
+    } catch (error) {
+      console.error('❌ Erreur de connexion:', error.response?.data || error.message);
+      Alert.alert('Erreur', error.response?.data?.error || 'Identifiants invalides');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                  {downloadProgress && (
-                    <View style={styles.progressContainer}>
-                      <View style={styles.progressBar}>
-                        <View
-                          style={[
-                            styles.progressFill,
-                            { width: `${getProgressPercentage()}%` },
-                          ]}
-                        />
-                      </View>
-                      <Text style={styles.progressText}>
-                        {getProgressPercentage()}%
-                      </Text>
-                      <Text style={styles.progressDetails}>
-                        {formatBytes(downloadProgress.receivedBytes)} MB /{' '}
-                        {formatBytes(downloadProgress.totalBytes)} MB
-                      </Text>
-                    </View>
-                  )}
+  // Déconnexion
+  const signOut = async () => {
+    try {
+      // Déconnexion de Google si connecté avec Google
+      if (user?.is_google_user) {
+        await GoogleSignin.signOut();
+      }
+      
+      // Supprimer les données locales
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('user');
+      
+      setUser(null);
+      setEmail('');
+      setPassword('');
+      
+      Alert.alert('Déconnexion', 'Vous êtes déconnecté');
+      
+    } catch (error) {
+      console.error('❌ Erreur de déconnexion:', error);
+    }
+  };
 
-                  {syncStatus.includes('Vérification') && (
-                    <ActivityIndicator
-                      size="large"
-                      color="#10B981"
-                      style={styles.spinner}
-                    />
-                  )}
-                </View>
+  // Si l'utilisateur est connecté
+  if (user) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.profileContainer}>
+            <Text style={styles.title}>✅ Connecté</Text>
+            
+            {user.profile_picture ? (
+              <Image
+                source={{ uri: user.profile_picture }}
+                style={styles.avatar}
+              />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>
+                  {user.first_name?.[0] || user.email[0].toUpperCase()}
+                </Text>
               </View>
-            </Modal>
-          </UserProvider>
-        </ProductProvider>
-      </AuthProvider>
-    </GestureHandlerRootView>
+            )}
+            
+            <Text style={styles.name}>
+              {user.first_name} {user.last_name}
+            </Text>
+            <Text style={styles.email}>{user.email}</Text>
+            
+            {user.is_google_user && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>🔐 Google Account</Text>
+              </View>
+            )}
+            
+            <View style={styles.infoCard}>
+              <Text style={styles.infoLabel}>ID:</Text>
+              <Text style={styles.infoValue}>{user.id}</Text>
+            </View>
+            
+            {user.username && (
+              <View style={styles.infoCard}>
+                <Text style={styles.infoLabel}>Username:</Text>
+                <Text style={styles.infoValue}>{user.username}</Text>
+              </View>
+            )}
+            
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={signOut}>
+              <Text style={styles.logoutButtonText}>Déconnexion</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  // Page de connexion
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.loginContainer}>
+          <Text style={styles.title}>🔐 Connexion</Text>
+          <Text style={styles.subtitle}>Bienvenue ! Connectez-vous pour continuer</Text>
+          
+          {/* Bouton Google Sign-In */}
+          <View style={styles.googleButtonContainer}>
+            <GoogleSigninButton
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={signInWithGoogle}
+              disabled={loading}
+            />
+          </View>
+          
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OU</Text>
+            <View style={styles.dividerLine} />
+          </View>
+          
+          {/* Formulaire Email/Password */}
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            editable={!loading}
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Mot de passe"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            editable={!loading}
+          />
+          
+          <TouchableOpacity
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            onPress={signInWithEmail}
+            disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginButtonText}>Se connecter</Text>
+            )}
+          </TouchableOpacity>
+          
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#4285F4" />
+              <Text style={styles.loadingText}>Connexion en cours...</Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  loginContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  profileContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  googleButtonContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ddd',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: '#666',
+    fontSize: 14,
+  },
+  input: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  loginButton: {
+    backgroundColor: '#4285F4',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  loginButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#666',
+    fontSize: 14,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginVertical: 20,
+  },
+  avatarPlaceholder: {
+    backgroundColor: '#4285F4',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+  avatarText: {
+    color: '#fff',
+    fontSize: 40,
+    fontWeight: 'bold',
   },
-  modalTitle: {
+  name: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#10B981',
-    marginBottom: 12,
+    color: '#333',
+    marginBottom: 5,
   },
-  syncMessage: {
+  email: {
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#374151',
+    color: '#666',
+    marginBottom: 10,
   },
-  progressContainer: {
-    width: '100%',
-    marginTop: 8,
+  badge: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginVertical: 10,
   },
-  progressBar: {
-    height: 10,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 5,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#10B981',
-    borderRadius: 5,
-  },
-  progressText: {
-    fontSize: 20,
+  badgeText: {
+    color: '#4CAF50',
+    fontSize: 14,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 4,
-    color: '#10B981',
   },
-  progressDetails: {
-    fontSize: 13,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginTop: 8,
+  infoCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    padding: 15,
+    width: '100%',
+    marginVertical: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  spinner: {
-    marginTop: 16,
+  infoLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#333',
+  },
+  logoutButton: {
+    backgroundColor: '#f44336',
+    borderRadius: 10,
+    padding: 15,
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
-// Configuration CodePush
-const codePushOptions = {
-  checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
-  installMode: codePush.InstallMode.ON_NEXT_RESTART,
-};
-
-export default codePush(codePushOptions)(App);
+export default App;

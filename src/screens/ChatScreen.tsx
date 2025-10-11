@@ -20,7 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ArrowLeftIcon } from 'phosphor-react-native';
 import { API_SOCKET_URL } from '@env';
 
-// const API_SOCKET_URL = "wss://discounts-batteries-scratch-guarantees.trycloudflare.com"
+// const API_SOCKET_URL = "wss://mounting-draws-answering-extras.trycloudflare.com"
 
 
 const ChatScreen = () => {

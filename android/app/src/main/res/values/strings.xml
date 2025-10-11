@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">itakalo</string>
+    <string moduleConfig="true" name="CodePushServerUrl">https://api.revopush.org</string>
+    <string moduleConfig="true" name="CodePushDeploymentKey">NcCDnxILaBSYO_3Ref_3zn3JY7t14kvjzha2Ml</string>
 </resources>

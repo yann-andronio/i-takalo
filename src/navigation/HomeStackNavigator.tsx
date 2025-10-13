@@ -7,12 +7,14 @@ import ProductScreen from '../screens/ProductScreen';
 import ConversationScreen from '../screens/ConversationScreen';
 import Chat from '../screens/chat';
 import ValidationTransactionScreen from '../screens/ValidationTransactionScreen';
+import TransitionScreen from '../screens/TransitionScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function HomeStackNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+       <Stack.Screen name="Transition" component={TransitionScreen} /> 
       <Stack.Screen name="AccueilMain" component={HomeScreen} />
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="Product" component={ProductScreen} />

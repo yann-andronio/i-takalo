@@ -1,20 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Image, Text, TouchableOpacity, Dimensions, Animated, StyleSheet, Modal, TextInput } from 'react-native';
+import { View, Image, Text, TouchableOpacity, Dimensions, Animated, StyleSheet } from 'react-native';
 import { StartScreenData } from '../data/StartScreenData';
 import { Marquee } from '@animatereactnative/marquee';
+import LoginBottomSheet from '../components/modal/LoginBottomSheet';
 
 interface StartScreenProps {
   navigation: any;
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
-  const { width, height } = Dimensions.get('window');
+  const { width } = Dimensions.get('window');
   const leftColumn = StartScreenData.slice(0, 3);
   const rightColumn = StartScreenData.slice(3, 6);
 
   const [showBottomSheet, setShowBottomSheet] = useState(false);
-  const bottomSheetTranslate = useRef(new Animated.Value(height)).current;
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
 
   const bottomContentOpacity = useRef(new Animated.Value(0)).current;
   const bottomContentTranslate = useRef(new Animated.Value(50)).current;
@@ -36,37 +35,17 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
     ]).start();
   }, []);
 
-  const openBottomSheet = () => {
+  const handleOpenBottomSheet = () => {
     setShowBottomSheet(true);
-    Animated.parallel([
-      Animated.timing(bottomSheetTranslate, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(backdropOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
   };
 
-  const closeBottomSheet = () => {
-    Animated.parallel([
-      Animated.timing(bottomSheetTranslate, {
-        toValue: height,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(backdropOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setShowBottomSheet(false);
-    });
+  const handleCloseBottomSheet = () => {
+    setShowBottomSheet(false);
+  };
+
+  const handleNavigateToLogin = () => {
+    setShowBottomSheet(false);
+    navigation.replace('Login');
   };
 
   return (
@@ -136,78 +115,20 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
         >
           <Text style={styles.buttonTextLogin}>S'inscrire sur iTakalo</Text>
         </TouchableOpacity>
+        
         <TouchableOpacity
           style={styles.buttonRegister}
-          onPress={openBottomSheet}
+          onPress={handleOpenBottomSheet}
         >
           <Text style={styles.buttonTextRegister}>J'ai déjà un compte</Text>
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Bottom Sheet Modal */}
-      <Modal
+      <LoginBottomSheet
         visible={showBottomSheet}
-        transparent={true}
-        animationType="none"
-        onRequestClose={closeBottomSheet}
-      >
-        <View style={styles.modalContainer}>
-          <Animated.View 
-            style={[styles.backdrop, { opacity: backdropOpacity }]}
-          >
-            <TouchableOpacity 
-              style={styles.backdropTouchable}
-              activeOpacity={1}
-              onPress={closeBottomSheet}
-            />
-          </Animated.View>
-
-          <Animated.View
-            style={[
-              styles.bottomSheet,
-              {
-                transform: [{ translateY: bottomSheetTranslate }],
-              },
-            ]}
-          >
-            <View style={styles.handleBar} />
-            
-            <Text style={styles.bottomSheetTitle}>Connexion</Text>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email ou nom d'utilisateur</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Entrez votre email"
-                placeholderTextColor="#999"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Mot de passe</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Entrez votre mot de passe"
-                placeholderTextColor="#999"
-                secureTextEntry
-              />
-            </View>
-
-            <TouchableOpacity>
-              <Text style={styles.forgotPassword}>Mot de passe oublié?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={() => {
-                closeBottomSheet();
-              }}
-            >
-              <Text style={styles.loginButtonText}>Se connecter</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </Modal>
+        onClose={handleCloseBottomSheet}
+        onNavigateToLogin={handleNavigateToLogin}
+      />
     </View>
   );
 };
@@ -270,80 +191,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '500',
     fontSize: 15,
-  },
-  // Bottom Sheet Styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  backdropTouchable: {
-    flex: 1,
-  },
-  bottomSheet: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    paddingTop: 10,
-    minHeight: 400,
-  },
-  handleBar: {
-    width: 40,
-    height: 5,
-    backgroundColor: '#DDD',
-    borderRadius: 3,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  bottomSheetTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#000',
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: '#000',
-  },
-  forgotPassword: {
-    color: '#007AFF',
-    fontSize: 14,
-    marginBottom: 24,
-    textAlign: 'right',
-  },
-  loginButton: {
-    backgroundColor: '#FEF094',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  loginButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 

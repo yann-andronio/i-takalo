@@ -14,7 +14,7 @@ const AppNavigator = () => {
     
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 4500);
 
     return () => clearTimeout(timer);
   }, []);

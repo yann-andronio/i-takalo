@@ -1,7 +1,8 @@
-import React, {useEffect, useRef} from 'react';
-import { View, Image, Text, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Image, Text, TouchableOpacity, Dimensions, Animated, StyleSheet, Modal, TextInput } from 'react-native';
 import { StartScreenData } from '../data/StartScreenData';
 import { Marquee } from '@animatereactnative/marquee';
+
 interface StartScreenProps {
   navigation: any;
 }
@@ -11,17 +12,14 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
   const leftColumn = StartScreenData.slice(0, 3);
   const rightColumn = StartScreenData.slice(3, 6);
 
-
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const bottomSheetTranslate = useRef(new Animated.Value(height)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
 
   const bottomContentOpacity = useRef(new Animated.Value(0)).current;
   const bottomContentTranslate = useRef(new Animated.Value(50)).current;
 
-  // Refs pour suivre les indices
-  const leftIndexRef = useRef(0);
-  const rightIndexRef = useRef(0);
-
   useEffect(() => {
-    // Animation du contenu en bas
     Animated.parallel([
       Animated.timing(bottomContentOpacity, {
         toValue: 1,
@@ -36,9 +34,43 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [])
+  }, []);
+
+  const openBottomSheet = () => {
+    setShowBottomSheet(true);
+    Animated.parallel([
+      Animated.timing(bottomSheetTranslate, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const closeBottomSheet = () => {
+    Animated.parallel([
+      Animated.timing(bottomSheetTranslate, {
+        toValue: height,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowBottomSheet(false);
+    });
+  };
+
   return (
-    <View className="flex-1 w-full relative">
+    <View style={styles.container}>
       <View className="flex-row justify-between p-5 z-0">
         <Marquee
           speed={0.5} 
@@ -79,60 +111,240 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
       <Image
         source={require('../assets/images/StartImageScreen/blueeffect.png')}
         resizeMode="cover"
-        className="absolute w-full h-full z-0"
+        style={styles.backgroundImage}
       />
 
-      {/* <View className="absolute flex gap-3 bottom-12 w-full px-5 z-10 ">
-        <Text
-          className="font-bold text-white"
-          style={{ fontSize: width * 0.12 }}
-        >
-          i-takalo
-        </Text>
-        <View className="mb-4">
-          <Text className=" text-white text-xl">
-            Plateforme de tendance juvénile,
-          </Text>
-          <Text className=" text-white text-xl">
-            là où l’envie rencontre le style
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          className="bg-[#FEF094] w-full flex items-center px-6 py-3 rounded-full"
-          onPress={() => navigation.replace('Login')}
-        >
-          <Text className="text-black font-bold text-lg">Commencer</Text>
-        </TouchableOpacity>
-      </View> */}
       <Animated.View
-        className="absolute flex gap-3 bottom-12 w-full px-5 z-10"
-        style={{
-          opacity: bottomContentOpacity,
-          transform: [{ translateY: bottomContentTranslate }],
-        }}
+        style={[
+          styles.bottomContent,
+          {
+            opacity: bottomContentOpacity,
+            transform: [{ translateY: bottomContentTranslate }],
+          },
+        ]}
       >
-        <Text className="font-bold text-white" style={{ fontSize: width * 0.12 }}>
-          i-takalo
-        </Text>
-        <View className="mb-4">
-          <Text className="text-white text-xl">
-            Plateforme de tendance juvénile,
-          </Text>
-          <Text className="text-white text-xl">
-            là où l'envie rencontre le style
-          </Text>
+        <Text style={[styles.title, { fontSize: width * 0.12 }]}>i-takalo</Text>
+
+        <View style={styles.subtitleContainer}>
+          <Text style={styles.subtitle}>Plateforme de tendance juvénile,</Text>
+          <Text style={styles.subtitle}>là où l'envie rencontre le style</Text>
         </View>
 
         <TouchableOpacity
-          className="bg-[#FEF094] w-full flex items-center px-6 py-3 rounded-full"
+          style={styles.buttonLogin}
           onPress={() => navigation.replace('Login')}
         >
-          <Text className="text-black font-bold text-lg">Commencer</Text>
+          <Text style={styles.buttonTextLogin}>S'inscrire sur iTakalo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonRegister}
+          onPress={openBottomSheet}
+        >
+          <Text style={styles.buttonTextRegister}>J'ai déjà un compte</Text>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* Bottom Sheet Modal */}
+      <Modal
+        visible={showBottomSheet}
+        transparent={true}
+        animationType="none"
+        onRequestClose={closeBottomSheet}
+      >
+        <View style={styles.modalContainer}>
+          <Animated.View 
+            style={[styles.backdrop, { opacity: backdropOpacity }]}
+          >
+            <TouchableOpacity 
+              style={styles.backdropTouchable}
+              activeOpacity={1}
+              onPress={closeBottomSheet}
+            />
+          </Animated.View>
+
+          <Animated.View
+            style={[
+              styles.bottomSheet,
+              {
+                transform: [{ translateY: bottomSheetTranslate }],
+              },
+            ]}
+          >
+            <View style={styles.handleBar} />
+            
+            <Text style={styles.bottomSheetTitle}>Connexion</Text>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email ou nom d'utilisateur</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Entrez votre email"
+                placeholderTextColor="#999"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Mot de passe</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Entrez votre mot de passe"
+                placeholderTextColor="#999"
+                secureTextEntry
+              />
+            </View>
+
+            <TouchableOpacity>
+              <Text style={styles.forgotPassword}>Mot de passe oublié?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => {
+                closeBottomSheet();
+              }}
+            >
+              <Text style={styles.loginButtonText}>Se connecter</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: '100%',
+    position: 'relative',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    zIndex: 0,
+  },
+  bottomContent: {
+    position: 'absolute',
+    bottom: 48,
+    width: '100%',
+    paddingHorizontal: 20,
+    zIndex: 10,
+    gap: 12,
+  },
+  title: {
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  subtitleContainer: {
+    marginBottom: 16,
+  },
+  subtitle: {
+    color: 'white',
+    fontSize: 18,
+  },
+  buttonLogin: {
+    backgroundColor: '#FEF094',
+    borderColor: "#FEF094",
+    borderWidth: 1,
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 9,
+    borderRadius: 5,
+  },
+  buttonTextLogin: {
+    color: '#000',
+    fontWeight: '500',
+    fontSize: 15,
+  },
+  buttonRegister: {
+    backgroundColor: 'transparent',
+    borderColor: "#FEF094",
+    borderWidth: 1,
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 9,
+    borderRadius: 5,
+  },
+  buttonTextRegister: {
+    color: '#fff',
+    fontWeight: '500',
+    fontSize: 15,
+  },
+  // Bottom Sheet Styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  backdropTouchable: {
+    flex: 1,
+  },
+  bottomSheet: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 10,
+    minHeight: 400,
+  },
+  handleBar: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#DDD',
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  bottomSheetTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000',
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: '#333',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#000',
+  },
+  forgotPassword: {
+    color: '#007AFF',
+    fontSize: 14,
+    marginBottom: 24,
+    textAlign: 'right',
+  },
+  loginButton: {
+    backgroundColor: '#FEF094',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  loginButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
 
 export default StartScreen;

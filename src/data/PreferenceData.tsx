@@ -15,7 +15,7 @@ export const CATEGORIES_DATA = [
   { name: 'Loisirs créatifs & Art', icon: PaintBrush },
   { name: 'Musique & Instruments', icon: Lightbulb }, 
   { name: 'Articles pour Bébé', icon: Baby },
-  { name: 'Jouets & Jeux', icon: PawPrint }, 
+{ name: 'Divertissement & Loisirs Créatifs', icon: PawPrint }, 
     { name: 'Véhicules & Pièces auto', icon: Car },
   { name: 'Services & Événements', icon: FirstAid },
     { name: 'Ustensiles de Cuisine', icon: ForkKnife },

@@ -15,7 +15,7 @@ interface PreferenceCardProps {
   toggleCategory: () => void;
 }
 
-export function PreferenceCard({ item, isSelected, toggleCategory }: PreferenceCardProps) {
+export function PreferenceCard2({ item, isSelected, toggleCategory }: PreferenceCardProps) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

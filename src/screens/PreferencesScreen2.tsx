@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CATEGORIES_DATA } from '../data/PreferenceData';
 import { PreferenceCard } from '../components/PreferenceCard';
 import { InfoIcon, ArrowRight } from 'phosphor-react-native'; 
+import { PreferenceCard2 } from '../components/PreferenceCard2';
 
 // --- Palette de Couleurs du Thème ---
 const PRIMARY_COLOR = '#083B58';
@@ -66,7 +67,7 @@ export default function PreferencesScreen() {
                     Vos Centres d'Intérêt
                 </Text>
                 <Text className="text-base text-gray-500 mt-1">
-                    Choisissez au moins 1 catégorie pour commencer.
+                    Choisissez au moins 1 préférence pour commencer.
                 </Text>
             </View>
 
@@ -111,7 +112,7 @@ export default function PreferencesScreen() {
                             };
 
                             return (
-                                <PreferenceCard
+                                <PreferenceCard2
                                     key={item.name}
                                     item={item}
                                     isSelected={isSelected}

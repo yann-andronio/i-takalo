@@ -8,7 +8,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { red } from 'react-native-reanimated/lib/typescript/Colors';
 const AppNavigator = () => {
   const { user , loadingtoken } = useContext(AuthContext);
-  /* const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     
@@ -21,7 +21,7 @@ const AppNavigator = () => {
 
   if (isLoading) {
     return <SplashScreen />; 
-  } */
+  }
 
 
 

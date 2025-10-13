@@ -4,7 +4,7 @@ import React from 'react'
 export default function SplashScreen() {
   return (
     <ImageBackground
-      source={require('../assets/images/2.png')}
+      source={require('../assets/images/Logo/pdp.jpeg')}
       resizeMode='contain'
       className="flex-1 w-full "
     >

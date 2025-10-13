@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { StartScreenData } from '../data/StartScreenData';
-
+import { Marquee } from '@animatereactnative/marquee';
 interface StartScreenProps {
   navigation: any;
 }
@@ -14,27 +14,40 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
   return (
     <View className="flex-1 w-full relative">
       <View className="flex-row justify-between p-5 z-0">
-        <View className="flex flex-col justify-between">
-          {leftColumn.map((item, index) => (
-            <Image
-              key={index}
-              source={item.image}
-              className="mb-4"
-              resizeMode="contain"
-            />
-          ))}
-        </View>
-
-        <View className="flex flex-col gap-2">
-          {rightColumn.map((item, index) => (
-            <Image
-              key={index}
-              source={item.image}
-              className="mb-4"
-              resizeMode="contain"
-            />
-          ))}
-        </View>
+        <Marquee
+          speed={0.5} 
+          spacing={20}
+          direction="vertical"
+          reverse={false} 
+        >
+          <View className="flex justify-center items-center flex-col">
+            {leftColumn.map((item, index) => (
+              <Image
+                key={index}
+                source={item.image}
+                className="mb-4"
+                resizeMode="contain"
+              />
+            ))}
+          </View>
+        </Marquee>
+        <Marquee
+          speed={0.5} 
+          spacing={20}
+          direction="vertical"
+          reverse={true} 
+        >
+          <View className="flex flex-col justify-center items-center gap-2">
+            {rightColumn.map((item, index) => (
+              <Image
+                key={index}
+                source={item.image}
+                className="mb-4"
+                resizeMode="contain"
+              />
+            ))}
+          </View>
+        </Marquee>
       </View>
 
       <Image
@@ -44,7 +57,10 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
       />
 
       <View className="absolute flex gap-3 bottom-12 w-full px-5 z-10 ">
-        <Text className="font-bold text-white"style={{ fontSize: width * 0.12 }}>
+        <Text
+          className="font-bold text-white"
+          style={{ fontSize: width * 0.12 }}
+        >
           i-takalo
         </Text>
         <View className="mb-4">

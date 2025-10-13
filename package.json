@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@animatereactnative/marquee": "^0.5.2",
     "@hookform/resolvers": "^5.2.1",
     "@react-native/new-app-screen": "0.81.0",
     "@react-navigation/bottom-tabs": "^7.4.6",

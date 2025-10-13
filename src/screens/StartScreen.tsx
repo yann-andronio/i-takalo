@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { StartScreenData } from '../data/StartScreenData';
 import { Marquee } from '@animatereactnative/marquee';
-import LoginBottomSheet from '../components/modal/LoginBottomSheet';
+import LoginBottomSheet from '../components/modal/auth/LoginBottomSheet';
+import RegisterBottomSheet from '../components/modal/auth/RegisterBottomSheet';
 
 interface StartScreenProps {
   navigation: any;
@@ -21,12 +22,12 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
   const leftColumn = StartScreenData.slice(0, 3);
   const rightColumn = StartScreenData.slice(3, 6);
 
-  // Bottom sheet animation and state
-  const [showBottomSheet, setShowBottomSheet] = useState(false);
+  // Gestion du BottomSheet
+  const [visibleSheet, setVisibleSheet] = useState<'login' | 'register' | null>(null);
   const bottomSheetTranslate = useRef(new Animated.Value(height)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
 
-  // Bottom content animation
+  // Animation du contenu du bas
   const bottomContentOpacity = useRef(new Animated.Value(0)).current;
   const bottomContentTranslate = useRef(new Animated.Value(50)).current;
 
@@ -48,8 +49,8 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
   }, []);
 
   // --- OPEN / CLOSE BottomSheet ---
-  const openBottomSheet = () => {
-    setShowBottomSheet(true);
+  const openBottomSheet = (type: 'login' | 'register') => {
+    setVisibleSheet(type);
     Animated.parallel([
       Animated.timing(bottomSheetTranslate, {
         toValue: 0,
@@ -77,49 +78,39 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      setShowBottomSheet(false);
+      setVisibleSheet(null);
     });
   };
 
   return (
     <View style={styles.container}>
-      {/* --- Images défilantes --- */}
+      {/* --- Défilement vertical des images --- */}
       <View style={styles.marqueeContainer}>
-        <Marquee speed={0.5} spacing={20} direction="vertical" reverse={false}>
+        <Marquee speed={0.5} spacing={20} direction="vertical">
           <View style={styles.imageColumn}>
             {leftColumn.map((item, index) => (
-              <Image
-                key={index}
-                source={item.image}
-                style={styles.image}
-                resizeMode="contain"
-              />
+              <Image key={index} source={item.image} style={styles.image} resizeMode="contain" />
             ))}
           </View>
         </Marquee>
 
-        <Marquee speed={0.5} spacing={20} direction="vertical" reverse={true}>
+        <Marquee speed={0.5} spacing={20} direction="vertical" reverse>
           <View style={styles.imageColumn}>
             {rightColumn.map((item, index) => (
-              <Image
-                key={index}
-                source={item.image}
-                style={styles.image}
-                resizeMode="contain"
-              />
+              <Image key={index} source={item.image} style={styles.image} resizeMode="contain" />
             ))}
           </View>
         </Marquee>
       </View>
 
-      {/* --- Effet visuel de fond --- */}
+      {/* --- Effet de fond --- */}
       <Image
         source={require('../assets/images/StartImageScreen/blueeffect.png')}
         resizeMode="cover"
         style={styles.backgroundImage}
       />
 
-      {/* --- Contenu du bas --- */}
+      {/* --- Contenu inférieur --- */}
       <Animated.View
         style={[
           styles.bottomContent,
@@ -136,56 +127,49 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
           <Text style={styles.subtitle}>là où l'envie rencontre le style</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.buttonLogin}
-          onPress={() => navigation.replace('Login')}
-        >
+        <TouchableOpacity style={styles.buttonLogin} onPress={() => openBottomSheet('register')}>
           <Text style={styles.buttonTextLogin}>S'inscrire sur iTakalo</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonRegister} onPress={openBottomSheet}>
+        <TouchableOpacity style={styles.buttonRegister} onPress={() => openBottomSheet('login')}>
           <Text style={styles.buttonTextRegister}>J'ai déjà un compte</Text>
         </TouchableOpacity>
       </Animated.View>
 
-      {/* --- Bottom Sheet Modal séparé --- */}
-      <LoginBottomSheet
-        visible={showBottomSheet}
-        onClose={closeBottomSheet}
-        bottomSheetTranslate={bottomSheetTranslate}
-        backdropOpacity={backdropOpacity}
-        navigation={navigation}
-      />
+      {/* --- Affichage dynamique du bon BottomSheet --- */}
+      {visibleSheet === 'login' && (
+        <LoginBottomSheet
+          visible
+          onClose={closeBottomSheet}
+          bottomSheetTranslate={bottomSheetTranslate}
+          backdropOpacity={backdropOpacity}
+          navigation={navigation}
+        />
+      )}
+      {visibleSheet === 'register' && (
+        <RegisterBottomSheet
+          visible
+          onClose={closeBottomSheet}
+          bottomSheetTranslate={bottomSheetTranslate}
+          backdropOpacity={backdropOpacity}
+          navigation={navigation}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: '100%',
-    position: 'relative',
-  },
+  container: { flex: 1, width: '100%', position: 'relative' },
   marqueeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 20,
     zIndex: 0,
   },
-  imageColumn: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    marginBottom: 16,
-  },
-  backgroundImage: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    zIndex: 0,
-  },
+  imageColumn: { flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
+  image: { marginBottom: 16 },
+  backgroundImage: { position: 'absolute', width: '100%', height: '100%', zIndex: 0 },
   bottomContent: {
     position: 'absolute',
     bottom: 48,
@@ -194,17 +178,9 @@ const styles = StyleSheet.create({
     zIndex: 10,
     gap: 12,
   },
-  title: {
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  subtitleContainer: {
-    marginBottom: 16,
-  },
-  subtitle: {
-    color: 'white',
-    fontSize: 18,
-  },
+  title: { fontWeight: 'bold', color: 'white' },
+  subtitleContainer: { marginBottom: 16 },
+  subtitle: { color: 'white', fontSize: 18 },
   buttonLogin: {
     backgroundColor: '#FEF094',
     borderColor: '#FEF094',
@@ -214,11 +190,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 5,
   },
-  buttonTextLogin: {
-    color: '#000',
-    fontWeight: '500',
-    fontSize: 15,
-  },
+  buttonTextLogin: { color: '#000', fontWeight: '500', fontSize: 15 },
   buttonRegister: {
     backgroundColor: 'transparent',
     borderColor: '#FEF094',
@@ -228,11 +200,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 5,
   },
-  buttonTextRegister: {
-    color: '#fff',
-    fontWeight: '500',
-    fontSize: 15,
-  },
+  buttonTextRegister: { color: '#fff', fontWeight: '500', fontSize: 15 },
 });
 
 export default StartScreen;

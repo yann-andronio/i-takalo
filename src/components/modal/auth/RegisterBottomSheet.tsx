@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,13 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { AuthContext } from '../../../context/AuthContext';
 
-interface LoginBottomSheetProps {
+
+interface RegisterBottomSheetProps {
   visible: boolean;
   onClose: () => void;
   bottomSheetTranslate: Animated.Value;
@@ -18,7 +22,7 @@ interface LoginBottomSheetProps {
   navigation: any;
 }
 
-const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
+const RegisterBottomSheet: React.FC<RegisterBottomSheetProps> = ({
   visible,
   onClose,
   bottomSheetTranslate,
@@ -26,6 +30,18 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
   navigation,
 }) => {
   const { height } = Dimensions.get('window');
+  const { loginWithGoogle, loading } = useContext(AuthContext);
+
+  const handleGoogleSignIn = async () => {
+    console.log('Succès', 'Connexion avec Google réussie ! 🎉');
+
+    const success = await loginWithGoogle();
+    if (success) {
+      Alert.alert('Succès', 'Connexion avec Google réussie ! 🎉');
+    } else {
+      Alert.alert('Erreur', 'Échec de la connexion avec Google');
+    }
+  };
 
   return (
     <Modal
@@ -34,8 +50,21 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
       animationType="none"
       onRequestClose={onClose}
     >
+      {loading && 
+        (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: '40%',
+            left: '50%',
+            transform: [{ translateX: -15 }, { translateY: -15 }],
+          }}
+        >
+          <ActivityIndicator size="large" color="#fff" />
+        </Animated.View>
+        )
+      }
       <View style={styles.modalContainer}>
-        {/* Backdrop */}
         <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
           <TouchableOpacity
             style={styles.backdropTouchable}
@@ -59,17 +88,24 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
 
           <View style={styles.handleBar} />
 
-          <Text style={styles.bottomSheetTitle}>Se connecter à iTakalo</Text>
+          <Text style={styles.bottomSheetTitle}>S'inscrire sur iTakalo</Text>
+          <View style={styles.bottomSheetDescriptionContainer}>
+            <Text style={styles.bottomSheetDescription}>Utilise ton compte Google, c'est plus</Text>
+            <Text style={styles.bottomSheetDescription}>rapide</Text>
+          </View>
 
-          {/* Google Login */}
-          <TouchableOpacity style={styles.googleButton}>
+          {/* Google Register */}
+          <TouchableOpacity 
+            style={styles.googleButton}
+            onPress={handleGoogleSignIn}
+            disabled={loading}
+          >
             <Image
-              source={{ uri: 'https://www.google.com/favicon.ico' }}
+              source={require('../../../assets/images/LoginScreenImage/Google.png')}
               style={styles.socialIcon}
             />
             <Text style={styles.googleButtonText}>Continuer avec Google</Text>
           </TouchableOpacity>
-
           {/* Divider */}
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
@@ -77,16 +113,19 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
             <View style={styles.divider} />
           </View>
 
-          {/* Facebook Login */}
-          <TouchableOpacity style={styles.facebookButton}>
-            <View style={styles.facebookIconContainer}>
-              <Text style={styles.facebookIcon}>f</Text>
-            </View>
+          {/* Facebook Register */}
+          <TouchableOpacity 
+            style={styles.facebookButton}
+            >
+            <Image
+              source={require('../../../assets/images/LoginScreenImage/Facebook.png')}
+              style={styles.socialIcon}
+            />
             <Text style={styles.facebookButtonText}>Continuer avec Facebook</Text>
           </TouchableOpacity>
 
-          {/* Email Login */}
-          <TouchableOpacity onPress={() => navigation.replace('Login')}>
+          {/* Email Register */}
+          <TouchableOpacity onPress={() => navigation.replace('Register')}>
             <Text style={styles.connexionEmail}>
               Continuer avec une adresse e-mail
             </Text>
@@ -151,8 +190,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     textAlign: 'center',
-    marginBottom: 25,
+    // marginBottom: 25,
     marginTop: 35,
+  },
+  bottomSheetDescriptionContainer: {
+    marginTop: 10,
+    marginBottom: 25,
+  },
+  bottomSheetDescription: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#555',
+    textAlign: 'center',
   },
   googleButton: {
     flexDirection: 'row',
@@ -200,20 +249,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginBottom: 30,
   },
-  facebookIconContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#1877F2',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  facebookIcon: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
   facebookButtonText: {
     fontSize: 15,
     color: '#000',
@@ -227,4 +262,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginBottomSheet;
+export default RegisterBottomSheet;

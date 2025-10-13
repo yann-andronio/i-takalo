@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Image, StatusBar, StyleSheet, Dimensions } from 'react-native';
+import { 
+  View, 
+  Image, 
+  StatusBar, 
+  StyleSheet, 
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 import Animated, { FadeOut, FadeIn } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
@@ -32,12 +39,13 @@ export default function SplashScreen() {
       
 
       <View style={styles.lottieContainer}>
-        <LottieView
+        {/* <LottieView
           source={require('../assets/animations/loading.json')}
           autoPlay
           loop
           style={styles.lottie}
-        />
+        /> */}
+        <ActivityIndicator size={33} color="#fff" />
       </View>
     </LinearGradient>
   );
@@ -71,14 +79,14 @@ const styles = StyleSheet.create({
 
   lottieContainer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 50,
     left: 0,
     right: 0,
     alignItems: 'center',
   },
 
-  lottie: {
-    width: 150,
-    height: 150,
-  },
+  // lottie: {
+  //   width: 150,
+  //   height: 150,
+  // },
 });

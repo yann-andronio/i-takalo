@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+/* import React, { FunctionComponent } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { CheckCircle } from 'phosphor-react-native';
@@ -84,3 +84,4 @@ export function PreferenceCard2({ item, isSelected, toggleCategory }: Preference
     </Animated.View>
   );
 }
+ */

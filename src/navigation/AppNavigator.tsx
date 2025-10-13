@@ -14,16 +14,16 @@ const AppNavigator = () => {
 
   useEffect(() => {
     
-  /*   const timer = setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 4500); */
+    }, 4500); 
 
-/*     return () => clearTimeout(timer);
- */  }, []);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (isLoading) {
-/*     return <SplashScreen />; 
- */  return<PreferencesScreen2/> }
+     return <SplashScreen />; 
+ /* return<PreferencesScreen/>  */}
 
 
 

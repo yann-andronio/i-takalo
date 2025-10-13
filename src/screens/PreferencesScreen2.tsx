@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+/* import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
@@ -237,3 +237,4 @@ export default function PreferencesScreen() {
     </SafeAreaView>
   );
 }
+ */

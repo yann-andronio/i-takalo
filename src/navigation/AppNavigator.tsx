@@ -6,22 +6,23 @@ import { AuthContext } from '../context/AuthContext';
 import SplashScreen from '../screens/SplashScreen';
 import { ActivityIndicator, View } from 'react-native';
 import { red } from 'react-native-reanimated/lib/typescript/Colors';
+import PreferencesScreen from '../screens/PreferencesScreen';
 const AppNavigator = () => {
   const { user , loadingtoken } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     
-    const timer = setTimeout(() => {
+  /*   const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 4500);
+    }, 4500); */
 
-    return () => clearTimeout(timer);
-  }, []);
+/*     return () => clearTimeout(timer);
+ */  }, []);
 
   if (isLoading) {
-    return <SplashScreen />; 
-  }
+/*     return <SplashScreen />; 
+ */  return<PreferencesScreen/> }
 
 
 

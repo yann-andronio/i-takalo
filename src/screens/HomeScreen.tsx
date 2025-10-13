@@ -81,7 +81,7 @@ export default function HomeScreen() {
         </View>
 
         <Text className="text-xl font-bold font-jakarta text-gray-800 mb-2 px-6">
-          Produits de Dons
+          Produits d' échanges
         </Text>
 
         {loading ? (
@@ -111,7 +111,7 @@ export default function HomeScreen() {
         )}
 
         <Text className="text-xl font-bold text-gray-800 mb-2 px-6">
-          Produits en vente
+         Touts les produits
         </Text>
 
         <View className="px-6 mb-24">

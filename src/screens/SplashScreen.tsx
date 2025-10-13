@@ -1,61 +1,84 @@
 import React from 'react';
-import { View, Text, Image, StatusBar } from 'react-native';
-import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
+import { View, Image, StatusBar, StyleSheet, Dimensions } from 'react-native';
+import Animated, { FadeOut, FadeIn } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
-import { ShoppingCartIcon, ArrowsClockwiseIcon, GiftIcon} from 'phosphor-react-native';
+import LottieView from 'lottie-react-native';
+
+
+const { height } = Dimensions.get('window');
 
 export default function SplashScreen() {
   return (
     <LinearGradient
       colors={['#0a2a43', '#04293A', '#064663']}
-      className="flex-1 items-center justify-center px-6"
+      style={styles.container}
     >
       <StatusBar hidden />
 
-      <Animated.View
-        entering={ZoomIn.duration(1000)}
-        exiting={FadeOut.duration(500)}
-        className="w-48 h-48 rounded-full overflow-hidden mb-4"
-      >
-        <Image
-          source={require('../assets/images/Logo/pdp.jpeg')}
-          resizeMode="contain"
-          className="w-full h-full"
+      <View style={styles.centerContent}>
+        
+        <Animated.View
+          entering={FadeIn.duration(800).delay(200)}
+          exiting={FadeOut.duration(600)}
+          style={styles.logoContainer}
+        >
+          <Image
+            source={require('../assets/images/Logo/logo_splashScreen.png')}
+            resizeMode="contain"
+            style={styles.logo}
+          />
+        </Animated.View>
+      </View>
+      
+
+      <View style={styles.lottieContainer}>
+        <LottieView
+          source={require('../assets/animations/loading.json')}
+          autoPlay
+          loop
+          style={styles.lottie}
         />
-      </Animated.View>
-
-      <Animated.Text
-        entering={FadeIn.delay(800).duration(1000)}
-        className="text-[#f1d78a] text-4xl font-extrabold tracking-wide mb-2 text-center"
-      >
-Vos biens, vos choix    </Animated.Text>
-
-      <Animated.Text
-        entering={FadeIn.delay(1000).duration(1000)}
-        className="text-white text-lg text-center mb-6 px-4"
-      >
-        Vente, Échange et Donation de produits en toute simplicité
-      </Animated.Text>
-
-      <Animated.View
-        entering={FadeIn.delay(1300).duration(1000)}
-        className="flex-row justify-around w-full max-w-md"
-      >
-        <View className="items-center">
-          <ShoppingCartIcon size={36} color="#f1d78a" weight="bold" />
-          <Text className="text-white mt-2 text-lg font-semibold">Vente</Text>
-        </View>
-
-        <View className="items-center">
-          <ArrowsClockwiseIcon size={36} color="#f1d78a" weight="bold" />
-          <Text className="text-white mt-2 text-lg font-semibold">Échange</Text>
-        </View>
-
-        <View className="items-center">
-          <GiftIcon size={36} color="#f1d78a" weight="bold" />
-          <Text className="text-white mt-2 text-lg font-semibold">Donation</Text>
-        </View>
-      </Animated.View>
+      </View>
     </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+
+  centerContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  logoContainer: {
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    overflow: 'hidden',
+    position: "absolute",
+    top: height * 0.40 - 130,
+  },
+
+  logo: {
+    width: '100%',
+    height: '100%',
+  },
+
+  lottieContainer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+
+  lottie: {
+    width: 150,
+    height: 150,
+  },
+});

@@ -24,6 +24,7 @@
     "@viro-community/react-viro": "^2.41.1",
     "axios": "^1.11.0",
     "core-js": "^3.45.1",
+    "lottie-react-native": "^7.3.4",
     "nativewind": "^4.1.23",
     "phosphor-react-native": "^3.0.0",
     "react": "19.1.0",

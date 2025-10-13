@@ -130,6 +130,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
 }
 
 apply from: "../../node_modules/@revopush/react-native-code-push/android/codepush.gradle"

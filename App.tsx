@@ -10,6 +10,7 @@ import { ProductProvider } from './src/context/ProductContext';
 import { UserProvider } from './src/context/UserContext';
 import Toast from 'react-native-toast-message';
 import codePush from '@revopush/react-native-code-push';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 // Masque le warning de SafeAreaView
 LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
@@ -22,10 +23,18 @@ const App: React.FC = () => {
   } | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
+  const GOOGLE_WEB_CLIENT_ID = '82290075303-99d1t00h5nfc82af5fs8kf6dlm7vajlc.apps.googleusercontent.com';
+  
   useEffect(() => {
     // Vérifier les mises à jour au démarrage
     syncCodePush();
+
+    GoogleSignin.configure({
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+      offlineAccess: true,
+    });
   }, []);
+
 
   const syncCodePush = () => {
     codePush.sync(

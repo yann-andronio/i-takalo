@@ -1,50 +1,31 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Animated, StyleSheet, Modal, Image, Dimensions } from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  Modal,
+  Image,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 
 interface LoginBottomSheetProps {
   visible: boolean;
   onClose: () => void;
-  onNavigateToLogin: () => void;
+  bottomSheetTranslate: Animated.Value;
+  backdropOpacity: Animated.Value;
+  navigation: any;
 }
 
-const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({ 
-  visible, 
-  onClose, 
-  onNavigateToLogin 
+const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
+  visible,
+  onClose,
+  bottomSheetTranslate,
+  backdropOpacity,
+  navigation,
 }) => {
   const { height } = Dimensions.get('window');
-  const bottomSheetTranslate = useRef(new Animated.Value(height)).current;
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.timing(bottomSheetTranslate, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(bottomSheetTranslate, {
-          toValue: height,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [visible]);
 
   return (
     <Modal
@@ -54,16 +35,16 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.modalContainer}>
-        <Animated.View 
-          style={[styles.backdrop, { opacity: backdropOpacity }]}
-        >
-          <TouchableOpacity 
+        {/* Backdrop */}
+        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+          <TouchableOpacity
             style={styles.backdropTouchable}
             activeOpacity={1}
             onPress={onClose}
           />
         </Animated.View>
 
+        {/* Bottom Sheet */}
         <Animated.View
           style={[
             styles.bottomSheet,
@@ -72,17 +53,15 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
             },
           ]}
         >
-          <TouchableOpacity 
-            style={styles.closeButton}
-            onPress={onClose}
-          >
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
 
           <View style={styles.handleBar} />
-          
+
           <Text style={styles.bottomSheetTitle}>Se connecter à iTakalo</Text>
-          
+
+          {/* Google Login */}
           <TouchableOpacity style={styles.googleButton}>
             <Image
               source={{ uri: 'https://www.google.com/favicon.ico' }}
@@ -90,13 +69,15 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
             />
             <Text style={styles.googleButtonText}>Continuer avec Google</Text>
           </TouchableOpacity>
-          
+
+          {/* Divider */}
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
             <Text style={styles.dividerText}>ou</Text>
             <View style={styles.divider} />
           </View>
 
+          {/* Facebook Login */}
           <TouchableOpacity style={styles.facebookButton}>
             <View style={styles.facebookIconContainer}>
               <Text style={styles.facebookIcon}>f</Text>
@@ -104,8 +85,11 @@ const LoginBottomSheet: React.FC<LoginBottomSheetProps> = ({
             <Text style={styles.facebookButtonText}>Continuer avec Facebook</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onNavigateToLogin}>
-            <Text style={styles.connexionEmail}>Continuer avec une adresse e-mail</Text>
+          {/* Email Login */}
+          <TouchableOpacity onPress={() => navigation.replace('Login')}>
+            <Text style={styles.connexionEmail}>
+              Continuer avec une adresse e-mail
+            </Text>
           </TouchableOpacity>
         </Animated.View>
       </View>

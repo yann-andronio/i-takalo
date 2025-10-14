@@ -17,7 +17,7 @@ const { height } = Dimensions.get('window');
 export default function SplashScreen() {
   return (
     <LinearGradient
-      colors={['#0a2a43', '#04293A', '#064663']}
+      colors={['#FD1C1B', '#FF5100', '#FE9D23']}
       style={styles.container}
     >
       <StatusBar hidden />
@@ -64,12 +64,12 @@ const styles = StyleSheet.create({
   },
 
   logoContainer: {
-    width: 260,
-    height: 260,
+    width: 170,
+    height: 170,
     borderRadius: 130,
     overflow: 'hidden',
     position: "absolute",
-    top: height * 0.40 - 130,
+    top: height * 0.40 - 90,
   },
 
   logo: {

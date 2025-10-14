@@ -18,6 +18,7 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 interface ProductCardProps {
   item: ProductDataI;
+  cardWidth:any
 }
 
 type ProductCardNavigationProp = NativeStackNavigationProp<
@@ -25,7 +26,7 @@ type ProductCardNavigationProp = NativeStackNavigationProp<
   'Product'
 >;
 
-export default function ProductCard({ item }: ProductCardProps) {
+export default function ProductCard({ item , cardWidth }: ProductCardProps) {
   const navigation = useNavigation<ProductCardNavigationProp>();
 
   const { users, fetchAuthorById } = useContext(UserContext);
@@ -76,10 +77,12 @@ export default function ProductCard({ item }: ProductCardProps) {
 
   return (
     <TouchableOpacity
-      className="w-48 overflow-hidden bg-white shadow-lg rounded-2xl"
+/*     w-48*/      
+className=" overflow-hidden bg-white shadow-lg rounded-2xl"
       onPress={() => HandlePressCard()}
       activeOpacity={0.8}
       disabled={isLoading}
+      style={{ width: cardWidth }}
     >
       <ImageBackground
         source={hasImage ? { uri: mainImageUri } : undefined}

@@ -93,7 +93,7 @@ export default function HomeScreen() {
           <FlatList
             data={echangeProducts}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => <ProductCard item={item} />}
+            renderItem={({ item }) => <ProductCard item={item} cardWidth={width * 0.43} />}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
@@ -118,7 +118,7 @@ export default function HomeScreen() {
           <FlatList
             data={allProducts}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => <ProductCard item={item} />}
+            renderItem={({ item }) => <ProductCard item={item}   cardWidth={width * 0.43}/>}
             showsVerticalScrollIndicator={false}
             numColumns={2}
             columnWrapperStyle={{

@@ -1,9 +1,9 @@
 import React from 'react';
-import { 
-  View, 
-  Image, 
-  StatusBar, 
-  StyleSheet, 
+import {
+  View,
+  Image,
+  StatusBar,
+  StyleSheet,
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
@@ -11,19 +11,20 @@ import Animated, { FadeOut, FadeIn } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
 
-
 const { height } = Dimensions.get('window');
 
 export default function SplashScreen() {
   return (
-    <LinearGradient
+      /*   <LinearGradient colors={['#192A6B', '#2F7390']} style={styles.container}>
+          <LinearGradient
       colors={['#FD1C1B', '#FF5100', '#FE9D23']}
       style={styles.container}
-    >
+    ></LinearGradient> */
+
+    <LinearGradient colors={['#03233A', '#1C3E5F']} style={styles.container}>
       <StatusBar hidden />
 
       <View style={styles.centerContent}>
-        
         <Animated.View
           entering={FadeIn.duration(800).delay(200)}
           exiting={FadeOut.duration(600)}
@@ -36,7 +37,6 @@ export default function SplashScreen() {
           />
         </Animated.View>
       </View>
-      
 
       <View style={styles.lottieContainer}>
         {/* <LottieView
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
     height: 170,
     borderRadius: 130,
     overflow: 'hidden',
-    position: "absolute",
-    top: height * 0.40 - 90,
+    position: 'absolute',
+    top: height * 0.4 - 90,
   },
 
   logo: {

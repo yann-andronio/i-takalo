@@ -182,8 +182,8 @@ const styles = StyleSheet.create({
   subtitleContainer: { marginBottom: 16 },
   subtitle: { color: 'white', fontSize: 18 },
   buttonLogin: {
-    backgroundColor: '#FEF094',
-    borderColor: '#FEF094',
+    backgroundColor: '#fff',
+    borderColor: '#fff',
     borderWidth: 1,
     width: '100%',
     alignItems: 'center',
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   buttonTextLogin: { color: '#000', fontWeight: '500', fontSize: 15 },
   buttonRegister: {
     backgroundColor: 'transparent',
-    borderColor: '#FEF094',
+    borderColor: '#fff',
     borderWidth: 1,
     width: '100%',
     alignItems: 'center',

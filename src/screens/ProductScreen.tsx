@@ -1,37 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  Dimensions,
-  TouchableOpacity,
-  Linking,
-  ActivityIndicator,
-  ImageBackground,
-} from 'react-native';
+import { View, Text, Image, ScrollView, Dimensions, TouchableOpacity, Linking, ImageBackground } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import {
-  ProductDataI,
-  ProductSuggestionI,
-  ProductContext,
+import { ProductDataI, ProductSuggestionI, ProductContext,
 } from '../context/ProductContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  ArrowLeftIcon,
-  MapPinIcon,
-  PhoneIcon,
-  TagIcon,
-  ChatTeardropTextIcon,
-  HeartIcon,
-  CubeTransparentIcon,
-  ClockCounterClockwiseIcon,
-  UserIcon,
-  DotsThreeIcon,
-  ImageSquareIcon,
-  HandshakeIcon,
-  MagnifyingGlassIcon,
-  ShoppingCartIcon,
+import { ArrowLeftIcon, MapPinIcon, PhoneIcon, TagIcon, ChatTeardropTextIcon, HeartIcon, CubeTransparentIcon, ClockCounterClockwiseIcon, UserIcon, DotsThreeIcon, ImageSquareIcon, HandshakeIcon, ShoppingCartIcon,
 } from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext, UserI } from '../context/UserContext';
@@ -39,6 +12,7 @@ import PopUpProduct from '../components/popup/PopUpProduct';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListChatnavigatorScreen } from '../types/Types';
 import Carousel from 'react-native-reanimated-carousel';
+import ProductScreenSkeleton from '../components/ProductScreenSkeleton';
 
 const { width } = Dimensions.get('window');
 
@@ -69,15 +43,11 @@ export default function ProductScreen() {
   const [author, setAuthor] = useState<UserI | undefined>(undefined);
   const [loadingProduct, setLoadingProduct] = useState(true);
   const [loadingAuthor, setLoadingAuthor] = useState(true);
-  const [loadingCarousel, setLoadingCarousel] = useState(true);
-  // --- state for index actif de pagination ---
   const [activeIndex, setActiveIndex] = useState(0);
 
   const item = productData || initialItem;
 
   const suggestionProducts = (item.suggestions || []) as ProductSuggestionI[];
-
-  console.log('Suggestions azo:', suggestionProducts);
 
   const [showPopup, setShowPopup] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -86,10 +56,7 @@ export default function ProductScreen() {
   const hasImages = heroItems.length > 0;
 
   useEffect(() => {
-    setLoadingCarousel(hasImages);
-
     const loadData = async () => {
-      // 1. Charger les détails complets du produit (pour les suggestions)
       setLoadingProduct(true);
       const fullProduct = await fetchProductById(initialItem.id);
 
@@ -110,15 +77,11 @@ export default function ProductScreen() {
       setLoadingProduct(false);
     };
     loadData();
-  }, [initialItem.id, fetchProductById, fetchAuthorById, hasImages]);
+  }, [initialItem.id, fetchProductById, fetchAuthorById]);
 
+  // Skeleton Loader
   if (loadingProduct || loadingAuthor) {
-    return (
-      <SafeAreaView className="items-center justify-center flex-1 bg-white">
-        <ActivityIndicator size="large" color="#FEF094" />
-        <Text className="mt-4 text-gray-600">Chargement des détails...</Text>
-      </SafeAreaView>
-    );
+    return <ProductScreenSkeleton />;
   }
 
   const profileImageSource = author?.image ? { uri: author.image } : null;
@@ -168,23 +131,17 @@ export default function ProductScreen() {
       item: suggestion,
     });
   };
+
   const isEchange = item.type === 'ECHANGE';
   const isDonation = item.type === 'DONATION';
   const isSale = item.type === 'SALE';
 
-  const handleImageLoadEnd = () => {
-    setLoadingCarousel(false);
-  };
-
   const linearImageSource = require('../assets/images/productCardImage/linear2.png');
-
-  
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">
         <View className="w-full h-[400px] relative">
-          {/* Carrousel des Images */}
           {hasImages ? (
             <View className="w-full h-full">
               <Carousel
@@ -194,12 +151,8 @@ export default function ProductScreen() {
                 autoPlay
                 autoPlayInterval={4000}
                 data={heroItems}
-                /* achaqu fois miova sary*/
                 onSnapToItem={index => {
                   setActiveIndex(index);
-                  if (loadingCarousel) {
-                    setLoadingCarousel(false);
-                  }
                 }}
                 renderItem={({ item: imageUri, index }) => (
                   <Image
@@ -208,13 +161,12 @@ export default function ProductScreen() {
                     style={{ width: width, height: '100%' }}
                     resizeMode="cover"
                     className="rounded-b-3xl"
-                    onLoadEnd={index === 0 ? handleImageLoadEnd : undefined}
                   />
                 )}
               />
 
-              {/* --- Pagination --- */}
-              <View className=" absolute  bottom-20  w-full  flex-row  justify-center  space-x-2">
+              {/* Pagination */}
+              <View className="absolute bottom-20 w-full flex-row justify-center space-x-2">
                 {heroItems.map((_, index) => (
                   <View
                     key={index}
@@ -234,20 +186,12 @@ export default function ProductScreen() {
             </View>
           )}
 
-          {hasImages && loadingCarousel && (
-            <View className="absolute inset-0 items-center justify-center bg-gray-200 rounded-b-3xl">
-              <ActivityIndicator size="large" color="#03233A" />
-            </View>
-          )}
-
-          {/* Dégradé supérieur et Boutons (positionnés au-dessus du carrousel) */}
-          <View className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent" />
+          {/* Dégradé supérieur et Boutons */}
+         {/*  <View className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent" /> */}
 
           <View className="absolute z-10 flex-row items-center justify-between top-6 left-6 right-6">
             <TouchableOpacity
-              onPress={() => {
-                navigation.goBack();
-              }}
+              onPress={() => { navigation.goBack();}}
               className="p-3 bg-gray-100 rounded-full shadow backdrop-blur-sm"
             >
               <ArrowLeftIcon size={24} color="black" weight="bold" />
@@ -278,7 +222,6 @@ export default function ProductScreen() {
             </View>
           </View>
         </View>
-        {/* --- FIN : carrousel D'IMAGES --- */}
 
         <View className="p-6 -mt-8 bg-white shadow-lg rounded-t-3xl">
           <View className="flex-row items-start justify-between mb-4">
@@ -288,11 +231,9 @@ export default function ProductScreen() {
               </Text>
               <View className="flex-row items-center mt-1">
                 {isSale && (
-                  <>
-                    <Text className="ml-2 text-xl font-bold text-gray-700">
-                      {item.price} Ar
-                    </Text>
-                  </>
+                  <Text className="ml-2 text-xl font-bold text-gray-700">
+                    {item.price} Ar
+                  </Text>
                 )}
                 {isDonation && (
                   <>
@@ -339,7 +280,6 @@ export default function ProductScreen() {
               {item.likes.length} likes
             </Text>
           </View>
-          {/* ... (Section Author, Echange, Description) ... */}
 
           {author && (
             <View className="flex-row items-center p-4 mb-6 bg-gray-100 rounded-xl">
@@ -369,7 +309,7 @@ export default function ProductScreen() {
             </View>
           )}
 
-          {/* Section Recherché en échange  */}
+          {/* Section Recherché en échange */}
           {isEchange &&
             item.mots_cles_recherches &&
             item.mots_cles_recherches.length > 0 && (
@@ -412,7 +352,8 @@ export default function ProductScreen() {
               </TouchableOpacity>
             )}
           </View>
-          {/* Buttons  principale*/}
+
+          {/* Buttons principale */}
           <View className="flex-row items-center justify-between gap-4">
             <TouchableOpacity
               className="flex-row items-center justify-center flex-1 p-4 bg-gray-200 rounded-xl"
@@ -437,7 +378,7 @@ export default function ProductScreen() {
           </View>
         </View>
 
-        {/* suugestion */}
+        {/* Suggestions */}
         {suggestionProducts.length > 0 && (
           <View className="p-6 pt-8 bg-gray-50">
             <Text className="mb-6 text-2xl font-extrabold text-gray-900">
@@ -449,9 +390,9 @@ export default function ProductScreen() {
               className="flex-row px-[0.2rem] py-3"
             >
               {suggestionProducts.map(suggestion => {
-                const izyAtakalo = item.type === 'ECHANGE';
-                const izyOmena = item.type === 'DONATION';
-                const izyAmidy = item.type === 'SALE';
+                const izyAtakalo = suggestion.type === 'ECHANGE';
+                const izyOmena = suggestion.type === 'DONATION';
+                const izyAmidy = suggestion.type === 'SALE';
                 const firstImage = suggestion.images?.[0];
                 const authorProfileImage = suggestion.author_image
                   ? { uri: suggestion.author_image }
@@ -459,7 +400,7 @@ export default function ProductScreen() {
                 return (
                   <TouchableOpacity
                     key={suggestion.id}
-                    className="w-44 h-64 mr-3 bg-white rounded-xl shadow-lg overflow-hidden "
+                    className="w-44 h-64 mr-3 bg-white rounded-xl shadow-lg overflow-hidden"
                     onPress={() => handleSuggestionPress(suggestion)}
                   >
                     <ImageBackground
@@ -467,7 +408,6 @@ export default function ProductScreen() {
                       className="w-full relative h-full"
                       resizeMode="cover"
                     >
-                      
                       <View className="absolute top-3 right-3 z-20 p-1 bg-white rounded-full shadow-md">
                         {authorProfileImage ? (
                           <Image
@@ -484,11 +424,11 @@ export default function ProductScreen() {
                       <Image
                         source={linearImageSource}
                         resizeMode="cover"
-                        className="absolute  bottom-0 w-full h-full opacity-90"
+                        className="absolute bottom-0 w-full h-full opacity-90"
                       />
                       <View className="p-3 flex-1 justify-end">
-                        <View className="mb-2 flew justify-between items-center flex-row">
-                          <View className=" flex-1">
+                        <View className="mb-2 flex-row justify-between items-center">
+                          <View className="flex-1">
                             <Text
                               className="text-base font-extrabold text-white mb-0.5 shadow-md"
                               numberOfLines={2}
@@ -524,43 +464,12 @@ export default function ProductScreen() {
 
                         <View className="flex-row items-end justify-between mt-1">
                           <View className="flex-row items-center">
-                            {/*  {izyAmidy && (
-                              <Text className="text-xl font-extrabold text-yellow-300">
-                                {suggestion.price}
-                              </Text>
-                            )} */}
-
-                            {/* {izyAtakalo && (
-                              <View className="flex-row items-center self-end bg-white p-1 rounded-lg">
-                                <HandshakeIcon
-                                  size={22}
-                                  color="#FCD34D"
-                                  weight="bold"
-                                />
-                                <Text className="ml-1 text-base font-bold text-yellow-300">
-                                  Échange
-                                </Text> 
-                              </View>
-                            )} */}
-
                             {izyOmena && (
                               <Text className="text-xl font-extrabold text-white">
                                 Gratuit
                               </Text>
                             )}
                           </View>
-
-                          {/*  <Text
-                            className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase self-end ${
-                              suggestion.type === 'SALE'
-                                ? 'bg-red-500 text-white' 
-                                : suggestion.type === 'DONATION'
-                                ? 'bg-blue-500 text-white' 
-                                : 'bg-yellow-500 text-white' 
-                            }`}
-                          >
-                            {suggestion.type}
-                          </Text> */}
                         </View>
                       </View>
                     </ImageBackground>

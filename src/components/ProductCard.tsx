@@ -78,11 +78,14 @@ export default function ProductCard({ item , cardWidth }: ProductCardProps) {
   return (
     <TouchableOpacity
 /*     w-48*/      
-className=" overflow-hidden bg-white shadow-lg rounded-2xl"
+      className=" overflow-hidden bg-white shadow-lg"
       onPress={() => HandlePressCard()}
       activeOpacity={0.8}
       disabled={isLoading}
-      style={{ width: cardWidth }}
+      style={{ 
+        width: cardWidth, 
+        borderRadius: 5
+      }}
     >
       <ImageBackground
         source={hasImage ? { uri: mainImageUri } : undefined}

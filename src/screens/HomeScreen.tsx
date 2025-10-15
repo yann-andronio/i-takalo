@@ -69,11 +69,11 @@ export default function HomeScreen() {
           />
         }
       >
-        <View className="px-6 ">
+        <View className="">
           <HeroSection />
         </View>
 
-        <View className="mb-4 px-6">
+        <View className="mb-4 px-2">
           <FilterBarDons
             isselectfilterDonation={isselectfilterDonation}
             onApplyFilters={handleApplyFiltersBarDonation}
@@ -114,11 +114,11 @@ export default function HomeScreen() {
          Touts les produits
         </Text>
 
-        <View className="px-6 mb-24">
+        {/* <View className="px-2 mb-24 bg-[red]">
           <FlatList
             data={allProducts}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => <ProductCard item={item}   cardWidth={width * 0.43}/>}
+            renderItem={({ item }) => <ProductCard item={item}   cardWidth={width * 0.47}/>}
             showsVerticalScrollIndicator={false}
             numColumns={2}
             columnWrapperStyle={{
@@ -126,6 +126,26 @@ export default function HomeScreen() {
               marginBottom: 12,
             }}
             contentContainerStyle={{ paddingBottom: 20 }}
+            scrollEnabled={false}
+          />
+        </View> */}
+        <View style={{ paddingHorizontal: 3, marginBottom: 100 }}>
+          <FlatList
+            data={allProducts}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={{ flex: 1, margin: 0 }}>
+                <ProductCard item={item} cardWidth="100%" />
+              </View>
+            )}
+            showsVerticalScrollIndicator={false}
+            numColumns={2}
+            contentContainerStyle={{
+              gap: 5,
+            }}
+            columnWrapperStyle={{
+              gap: 5, 
+            }}
             scrollEnabled={false}
           />
         </View>

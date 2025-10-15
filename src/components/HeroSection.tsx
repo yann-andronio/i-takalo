@@ -8,10 +8,10 @@ export default function HeroSection() {
   const [heroItems, setHeroItems] = useState(HeroData);
 
   return (
-    <View className="">
+    <View className="" style={{margin: 'auto' }}>
       <Carousel
         loop
-        width={width * 0.9}
+        width={width * 0.99}
         height={200}
         autoPlay
         autoPlayInterval={4000}

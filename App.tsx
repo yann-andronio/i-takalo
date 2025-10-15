@@ -11,6 +11,7 @@ import { UserProvider } from './src/context/UserContext';
 import Toast from 'react-native-toast-message';
 import codePush from '@revopush/react-native-code-push';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { PaperProvider } from 'react-native-paper';
 
 // Masque le warning de SafeAreaView
 LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
@@ -100,6 +101,7 @@ const App: React.FC = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+          <PaperProvider> 
       <AuthProvider>
         <ProductProvider>
           <UserProvider>
@@ -151,6 +153,7 @@ const App: React.FC = () => {
           </UserProvider>
         </ProductProvider>
       </AuthProvider>
+        </PaperProvider>
     </GestureHandlerRootView>
   );
 };

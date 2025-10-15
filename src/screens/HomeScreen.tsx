@@ -4,7 +4,7 @@ import {
   Text,
   FlatList,
   StatusBar,
-  ScrollView,
+  // ScrollView n'est plus utilisé
   ActivityIndicator,
   RefreshControl,
   Image,
@@ -17,6 +17,21 @@ import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
 import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
+import { MagnifyingGlass } from 'phosphor-react-native';
+import FakeSearchBarAfterOpacity from '../components/FakeSearchBarAfterOpacity';
+
+
+
+const SEARCHBAR_HEIGHT = 72; 
+const FADE_START_OFFSET = 150; // Décalage en pixels avant que l'icône de remplacement ne commence à apparaître
+
 export default function HomeScreen() {
   const {
     allProducts,
@@ -31,6 +46,7 @@ export default function HomeScreen() {
   const [isselectfilterDonation, setIsSelectfilterDonation] =
     useState<string>('all');
   const [refreshing, setRefreshing] = useState(false);
+
 
   const handleApplyFilters = (filters: any) => {
     console.log('Filtres vente reçus par HomeScren:', filters);
@@ -50,16 +66,54 @@ export default function HomeScreen() {
 
   const { width } = Dimensions.get('window');
 
+  // --- Scroll animation ---
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler(event => {
+    scrollY.value = event.contentOffset.y;
+  });
+
+  // --- Animation pour SearchBar (fade out) ---
+  const searchBarStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, SEARCHBAR_HEIGHT], // Disparaît complètement à 72px
+      [1, 0],
+      Extrapolate.CLAMP,
+    ),
+  }));
+
+  // --- Animation pour le remplacement  ---
+  const replacementStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [FADE_START_OFFSET, SEARCHBAR_HEIGHT + FADE_START_OFFSET], 
+      [0, 1],                
+      Extrapolate.CLAMP,
+    ),
+  }));
+
   return (
     <SafeAreaView className="flex-1 bg-white font-jakarta">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
 
-      <View className="p-6">
-        <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
+      <View className="px-6 pt-6 relative"> 
+        
+        <Animated.View style={searchBarStyle} className="w-full">
+          <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
+        </Animated.View>
+
+      <Animated.View 
+          style={replacementStyle} 
+          className="absolute top-6 right-6 flex-row justify-end" 
+        >
+         <FakeSearchBarAfterOpacity onFilterPress={() => setModalVisible(true)}/>
+        </Animated.View>
       </View>
+    
 
-
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         className="flex-1"
         refreshControl={
           <RefreshControl
@@ -93,7 +147,9 @@ export default function HomeScreen() {
           <FlatList
             data={echangeProducts}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => <ProductCard item={item} cardWidth={width * 0.43} />}
+            renderItem={({ item }) => (
+              <ProductCard item={item} cardWidth={width * 0.43} />
+            )}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
@@ -101,6 +157,7 @@ export default function HomeScreen() {
               gap: 10,
               marginBottom: 20,
             }}
+     
           />
         ) : (
           <View className="items-center justify-center p-4">
@@ -111,14 +168,16 @@ export default function HomeScreen() {
         )}
 
         <Text className="text-xl font-bold text-gray-800 mb-2 px-6">
-         Touts les produits
+          Touts les produits
         </Text>
 
         <View className="px-6 mb-24">
           <FlatList
             data={allProducts}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => <ProductCard item={item}   cardWidth={width * 0.43}/>}
+            renderItem={({ item }) => (
+              <ProductCard item={item} cardWidth={width * 0.43} />
+            )}
             showsVerticalScrollIndicator={false}
             numColumns={2}
             columnWrapperStyle={{
@@ -126,10 +185,10 @@ export default function HomeScreen() {
               marginBottom: 12,
             }}
             contentContainerStyle={{ paddingBottom: 20 }}
-            scrollEnabled={false}
+           scrollEnabled={false} 
           />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <FilterModalForm
         visible={modalVisible}

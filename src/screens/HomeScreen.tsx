@@ -17,6 +17,10 @@ import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
 import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
+import { SixThenOneLayout } from './PatternLayout';
+
+
+
 export default function HomeScreen() {
   const {
     allProducts,
@@ -130,14 +134,21 @@ export default function HomeScreen() {
           />
         </View> */}
         <View style={{ paddingHorizontal: 3, marginBottom: 100 }}>
-          <FlatList
+          <SixThenOneLayout allProducts={allProducts} />
+          {/* <FlatList
             data={allProducts}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={{ flex: 1, margin: 0 }}>
-                <ProductCard item={item} cardWidth="100%" />
-              </View>
-            )}
+            renderItem={({ item, index }) => {
+              console.log("index", index % 2 == 0)
+              return index % 3 == 0 ?
+                (<View style={{ flex: 1, margin: 0 }}>
+                  <ProductCard item={item} cardWidth="100%" />
+                </View>)
+                : 
+                (<ProductCard item={item} cardWidth="100%" />)
+              }
+              
+            }
             showsVerticalScrollIndicator={false}
             numColumns={2}
             contentContainerStyle={{
@@ -147,7 +158,7 @@ export default function HomeScreen() {
               gap: 5, 
             }}
             scrollEnabled={false}
-          />
+          /> */}
         </View>
       </ScrollView>
 

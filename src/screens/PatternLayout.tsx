@@ -4,70 +4,54 @@ import ProductCard from '../components/ProductCard';
 
 const { width } = Dimensions.get('window');
 
-// Fonction pour transformer les données en format adapté au layout
-const transformDataForLayout = (products: any[]) => {
-  const result: any[] = [];
-  let i = 0;
-
-  while (i < products.length) {
-    // Alterner aléatoirement ou selon un pattern
-    const shouldBeFullWidth = Math.random() > 0.5; // 50% de chance
+// ✅ MÉTHODE OPTIMISÉE - Calcul à la volée sans transformation de données
+export const OptimizedSixThenOneLayout = ({ allProducts }) => {
+  // Fonction pour déterminer le type de ligne en fonction de l'index
+  const getRowType = (index: number) => {
+    // Calculer la position dans le cycle (7-9 produits par cycle)
+    const cycleSize = 8; // 6 produits + 1 ou 2 pleines (moyenne)
+    const positionInCycle = index % cycleSize;
     
-    // Ou utiliser un pattern fixe :
-    // const shouldBeFullWidth = result.length % 2 === 0;
-
-    if (shouldBeFullWidth && i < products.length) {
-      // Une carte pleine largeur
-      result.push({
-        type: 'full',
-        items: [products[i]],
-      });
-      i++;
-    } else if (i + 1 < products.length) {
-      // Deux cartes côte à côte
-      result.push({
-        type: 'double',
-        items: [products[i], products[i + 1]],
-      });
-      i += 2;
-    } else if (i < products.length) {
-      // S'il reste une seule carte
-      result.push({
-        type: 'single',
-        items: [products[i]],
-      });
-      i++;
+    // Les 6 premiers sont en double (indices 0-5)
+    if (positionInCycle < 6) {
+      return 'double';
     }
-  }
+    // Les suivants sont en pleine largeur
+    return 'full';
+  };
 
-  return result;
-};
-
-// Composant pour le HomeScreen
-export const DynamicProductList = ({ allProducts }) => {
-  const transformedData = useMemo(
-    () => transformDataForLayout(allProducts),
-    [allProducts]
-  );
+  // Générer un seed stable basé sur l'ID du produit
+  const getRandomFromSeed = (productId: string | number) => {
+    const seed = typeof productId === 'string' 
+      ? productId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      : productId;
+    return (seed % 10) > 5; // Retourne true ou false de manière déterministe
+  };
 
   return (
     <View style={{ paddingHorizontal: 5, marginBottom: 100 }}>
       <FlatList
-        data={transformedData}
-        keyExtractor={(item, index) => `row-${index}`}
-        renderItem={({ item }) => {
-          if (item.type === 'full') {
-            // Une carte pleine largeur
+        data={allProducts}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item, index }) => {
+          const type = getRowType(index);
+          
+          if (type === 'full') {
             return (
               <View style={{ marginBottom: 5 }}>
                 <ProductCard 
-                  item={item.items[0]} 
+                  item={item} 
                   cardWidth={width - 10} 
                 />
               </View>
             );
-          } else if (item.type === 'double') {
-            // Deux cartes côte à côte
+          } else {
+            // Double - on affiche 2 cartes côte à côte
+            const nextItem = allProducts[index + 1];
+            const isFirstInPair = index % 2 === 0;
+            
+            if (!isFirstInPair) return null; // Ne rendre que la première carte de la paire
+            
             return (
               <View 
                 style={{ 
@@ -78,266 +62,89 @@ export const DynamicProductList = ({ allProducts }) => {
                 }}
               >
                 <ProductCard 
-                  item={item.items[0]} 
+                  item={item} 
                   cardWidth={(width - 15) / 2} 
                 />
-                <ProductCard 
-                  item={item.items[1]} 
-                  cardWidth={(width - 15) / 2} 
-                />
-              </View>
-            );
-          } else {
-            // Une seule carte (si nombre impair)
-            return (
-              <View style={{ marginBottom: 5 }}>
-                <ProductCard 
-                  item={item.items[0]} 
-                  cardWidth={(width - 15) / 2} 
-                />
+                {nextItem && (
+                  <ProductCard 
+                    item={nextItem} 
+                    cardWidth={(width - 15) / 2} 
+                  />
+                )}
               </View>
             );
           }
         }}
         showsVerticalScrollIndicator={false}
         scrollEnabled={false}
+        removeClippedSubviews={true} // ✅ Améliore les performances
+        maxToRenderPerBatch={10} // ✅ Limite le nombre d'items rendus par batch
+        updateCellsBatchingPeriod={50} // ✅ Réduit la fréquence de mise à jour
+        windowSize={5} // ✅ Réduit le nombre d'items gardés en mémoire
       />
     </View>
   );
 };
 
-// VARIANTE 2 : Pattern fixe (1 pleine, 2 petites, 1 pleine, 2 petites...)
-export const PatternLayout = ({ allProducts }) => {
+// ✅ MEILLEURE APPROCHE : Transformation avec seed stable
+export const StableSixThenOneLayout = ({ allProducts }) => {
   const transformedData = useMemo(() => {
     const result: any[] = [];
     let i = 0;
-    let patternIndex = 0;
-
-    while (i < allProducts.length) {
-      // Pattern : full, double, full, double...
-      const shouldBeFullWidth = patternIndex % 2 === 0;
-
-      if (shouldBeFullWidth && i < allProducts.length) {
-        result.push({
-          type: 'full',
-          items: [allProducts[i]],
-        });
-        i++;
-      } else if (i + 1 < allProducts.length) {
-        result.push({
-          type: 'double',
-          items: [allProducts[i], allProducts[i + 1]],
-        });
-        i += 2;
-      } else if (i < allProducts.length) {
-        result.push({
-          type: 'single',
-          items: [allProducts[i]],
-        });
-        i++;
-      }
-
-      patternIndex++;
-    }
-
-    return result;
-  }, [allProducts]);
-
-  return (
-    <View style={{ paddingHorizontal: 5, marginBottom: 100 }}>
-      <FlatList
-        data={transformedData}
-        keyExtractor={(item, index) => `row-${index}`}
-        renderItem={({ item }) => {
-          if (item.type === 'full') {
-            return (
-              <View style={{ marginBottom: 5 }}>
-                <ProductCard 
-                  item={item.items[0]} 
-                  cardWidth={width - 10} 
-                />
-              </View>
-            );
-          } else if (item.type === 'double') {
-            return (
-              <View 
-                style={{ 
-                  flexDirection: 'row', 
-                  justifyContent: 'space-between',
-                  marginBottom: 5,
-                  gap: 5,
-                }}
-              >
-                <ProductCard 
-                  item={item.items[0]} 
-                  cardWidth={(width - 15) / 2} 
-                />
-                <ProductCard 
-                  item={item.items[1]} 
-                  cardWidth={(width - 15) / 2} 
-                />
-              </View>
-            );
-          } else {
-            return (
-              <View style={{ marginBottom: 5 }}>
-                <ProductCard 
-                  item={item.items[0]} 
-                  cardWidth={(width - 15) / 2} 
-                />
-              </View>
-            );
-          }
-        }}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={false}
-      />
-    </View>
-  );
-};
-
-// VARIANTE 3 : 2 cartes, puis 1 pleine, répété
-export const TwoThenOneLayout = ({ allProducts }) => {
-  const transformedData = useMemo(() => {
-    const result: any[] = [];
-    let i = 0;
-
-    while (i < allProducts.length) {
-      // D'abord deux cartes côte à côte
-      if (i + 1 < allProducts.length) {
-        result.push({
-          type: 'double',
-          items: [allProducts[i], allProducts[i + 1]],
-        });
-        i += 2;
-      } else if (i < allProducts.length) {
-        result.push({
-          type: 'single',
-          items: [allProducts[i]],
-        });
-        i++;
-        continue;
-      }
-
-      // Puis une carte pleine largeur
-      if (i < allProducts.length) {
-        result.push({
-          type: 'full',
-          items: [allProducts[i]],
-        });
-        i++;
-      }
-    }
-
-    return result;
-  }, [allProducts]);
-
-  return (
-    <View style={{ paddingHorizontal: 5, marginBottom: 100 }}>
-      <FlatList
-        data={transformedData}
-        keyExtractor={(item, index) => `row-${index}`}
-        renderItem={({ item }) => {
-          if (item.type === 'full') {
-            return (
-              <View style={{ marginBottom: 5 }}>
-                <ProductCard 
-                  item={item.items[0]} 
-                  cardWidth={width - 10} 
-                />
-              </View>
-            );
-          } else if (item.type === 'double') {
-            return (
-              <View 
-                style={{ 
-                  flexDirection: 'row', 
-                  justifyContent: 'space-between',
-                  marginBottom: 5,
-                  gap: 5,
-                }}
-              >
-                <ProductCard 
-                  item={item.items[0]} 
-                  cardWidth={(width - 15) / 2} 
-                />
-                <ProductCard 
-                  item={item.items[1]} 
-                  cardWidth={(width - 15) / 2} 
-                />
-              </View>
-            );
-          } else {
-            return (
-              <View style={{ marginBottom: 5 }}>
-                <ProductCard 
-                  item={item.items[0]} 
-                  cardWidth={(width - 15) / 2} 
-                />
-              </View>
-            );
-          }
-        }}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={false}
-      />
-    </View>
-  );
-};
-
-// VARIANTE 4 : 6 cartes (3 lignes de 2) puis 1 carte pleine largeur
-export const SixThenOneLayout = ({ allProducts }) => {
-  const transformedData = useMemo(() => {
-    const result: any[] = [];
-    let i = 0;
+    let cycleCount = 0;
 
     while (i < allProducts.length) {
       // Créer 3 lignes de 2 cartes (total 6 cartes)
       let rowsCreated = 0;
       while (rowsCreated < 3 && i < allProducts.length) {
         if (i + 1 < allProducts.length) {
-          // Deux cartes côte à côte
           result.push({
             type: 'double',
             items: [allProducts[i], allProducts[i + 1]],
+            id: `double-${i}`,
           });
           i += 2;
         } else {
-          // S'il reste une seule carte
           result.push({
             type: 'single',
             items: [allProducts[i]],
+            id: `single-${i}`,
           });
           i++;
         }
         rowsCreated++;
       }
 
-      // Puis une carte pleine largeur (si disponible)
-      if (i < allProducts.length) {
+      // Utiliser cycleCount pour déterminer 1 ou 2 cartes (stable)
+      const numberOfFullCards = cycleCount % 2 === 0 ? 1 : 2;
+      
+      for (let j = 0; j < numberOfFullCards && i < allProducts.length; j++) {
         result.push({
           type: 'full',
           items: [allProducts[i]],
+          id: `full-${i}`,
         });
         i++;
       }
+      
+      cycleCount++;
     }
 
     return result;
   }, [allProducts]);
 
   return (
-    <View style={{ paddingHorizontal: 5, marginBottom: 100, }}>
+    <View style={{ paddingHorizontal: 5, marginBottom: 100 }}>
       <FlatList
         data={transformedData}
-        keyExtractor={(item, index) => `row-${index}`}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           if (item.type === 'full') {
             return (
               <View style={{ marginBottom: 5 }}>
                 <ProductCard 
                   item={item.items[0]} 
-                  cardWidth={width - 15} 
+                  cardWidth={width - 10} 
                 />
               </View>
             );
@@ -353,11 +160,11 @@ export const SixThenOneLayout = ({ allProducts }) => {
               >
                 <ProductCard 
                   item={item.items[0]} 
-                  cardWidth={(width - 20) / 2} 
+                  cardWidth={(width - 15) / 2} 
                 />
                 <ProductCard 
                   item={item.items[1]} 
-                  cardWidth={(width - 20) / 2} 
+                  cardWidth={(width - 15) / 2} 
                 />
               </View>
             );
@@ -374,6 +181,116 @@ export const SixThenOneLayout = ({ allProducts }) => {
         }}
         showsVerticalScrollIndicator={false}
         scrollEnabled={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        initialNumToRender={10} // ✅ Limite le rendu initial
+      />
+    </View>
+  );
+};
+
+// ✅ VERSION AVEC ScrollView ACTIVÉ (RECOMMANDÉ pour beaucoup de produits)
+export const ScrollableSixThenOneLayout = ({ allProducts }) => {
+  const transformedData = useMemo(() => {
+    const result: any[] = [];
+    let i = 0;
+    let cycleCount = 0;
+
+    while (i < allProducts.length) {
+      let rowsCreated = 0;
+      while (rowsCreated < 3 && i < allProducts.length) {
+        if (i + 1 < allProducts.length) {
+          result.push({
+            type: 'double',
+            items: [allProducts[i], allProducts[i + 1]],
+            id: `double-${i}`,
+          });
+          i += 2;
+        } else {
+          result.push({
+            type: 'single',
+            items: [allProducts[i]],
+            id: `single-${i}`,
+          });
+          i++;
+        }
+        rowsCreated++;
+      }
+
+      const numberOfFullCards = cycleCount % 2 === 0 ? 1 : 2;
+      
+      for (let j = 0; j < numberOfFullCards && i < allProducts.length; j++) {
+        result.push({
+          type: 'full',
+          items: [allProducts[i]],
+          id: `full-${i}`,
+        });
+        i++;
+      }
+      
+      cycleCount++;
+    }
+
+    return result;
+  }, [allProducts]);
+
+  return (
+    <View style={{ flex: 1, paddingHorizontal: 5 }}>
+      <FlatList
+        data={transformedData}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          if (item.type === 'full') {
+            return (
+              <View style={{ marginBottom: 5 }}>
+                <ProductCard 
+                  item={item.items[0]} 
+                  cardWidth={width - 10} 
+                />
+              </View>
+            );
+          } else if (item.type === 'double') {
+            return (
+              <View 
+                style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between',
+                  marginBottom: 5,
+                  gap: 5,
+                }}
+              >
+                <ProductCard 
+                  item={item.items[0]} 
+                  cardWidth={(width - 15) / 2} 
+                />
+                <ProductCard 
+                  item={item.items[1]} 
+                  cardWidth={(width - 15) / 2} 
+                />
+              </View>
+            );
+          } else {
+            return (
+              <View style={{ marginBottom: 5 }}>
+                <ProductCard 
+                  item={item.items[0]} 
+                  cardWidth={(width - 15) / 2} 
+                />
+              </View>
+            );
+          }
+        }}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={true} // ✅ ACTIVÉ pour la virtualisation
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={5}
+        initialNumToRender={5}
+        windowSize={3}
+        getItemLayout={(data, index) => ({
+          length: 288 + 5, // hauteur carte + gap
+          offset: (288 + 5) * index,
+          index,
+        })}
       />
     </View>
   );

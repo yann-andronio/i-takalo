@@ -17,7 +17,7 @@ import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
 import FilterBarDons from '../components/FilterBarDons';
 import { ProductContext } from '../context/ProductContext';
-import { SixThenOneLayout } from './PatternLayout';
+import { OptimizedSixThenOneLayout } from './PatternLayout';
 
 
 
@@ -134,7 +134,7 @@ export default function HomeScreen() {
           />
         </View> */}
         <View style={{ paddingHorizontal: 3, marginBottom: 100 }}>
-          <SixThenOneLayout allProducts={allProducts} />
+          <OptimizedSixThenOneLayout allProducts={allProducts} />
           {/* <FlatList
             data={allProducts}
             keyExtractor={item => item.id.toString()}

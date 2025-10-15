@@ -53,7 +53,7 @@ export const ProductContext = createContext<ProductContextType>({
   addProduct: () => {},
   deleteProduct: () => {},
   fetchProductById: async () => undefined,
-  ToggleLike: async productId => false, 
+  ToggleLike: async productId => false,
 });
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -71,8 +71,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
     setLoading(true);
     try {
       const res = await API.get('/api/v1/products/');
-      const fetchedProducts = res.data.dataset as ProductDataI[];
-
+      const fetchedProducts = (res.data.dataset as ProductDataI[]).map(p => ({ ...p,likes: Array.isArray(p.likes) ? p.likes : [],
+      }));
       const sales = fetchedProducts.filter(i => i.type === 'SALE');
       const donations = fetchedProducts.filter(i => i.type === 'DONATION');
       const echanges = fetchedProducts.filter(i => i.type === 'ECHANGE');
@@ -92,7 +92,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   ): Promise<ProductDataI | undefined> => {
     try {
       const res = await API.get(`/api/v1/products/${id}/`);
-      return res.data as ProductDataI;
+      const data = res.data as ProductDataI;
+      return { ...data, likes: Array.isArray(data.likes) ? data.likes : [] };
     } catch (err) {
       console.error(`Erreur lors du chargement du produit ${id}:`, err);
       return undefined;
@@ -145,46 +146,46 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const ToggleLike = async (productId: number): Promise<boolean> => {
-  
     if (!user || !user.id) {
-        console.warn('Action de like impossible : Utilisateur non connecté.');
-        return false;
+      console.warn('Action de like impossible : Utilisateur non connecté.');
+      return false;
     }
     const userId = user.id;
 
     try {
-        const res = await API.post(`/api/v1/products/${productId}/like/`);
-        const { action } = res.data; 
+      const res = await API.post(`/api/v1/products/${productId}/like/`);
+      const { action } = res.data;
 
-        const updateProductList = (prevProducts: ProductDataI[]): ProductDataI[] => {
-            return prevProducts.map(product => {
-                if (product.id === productId) {
-                    let newLikes = [...product.likes];
-                    if (action === 'added') {
-                        if (!newLikes.includes(userId)) { 
-                            newLikes.push(userId);
-                        }
-                    } else if (action === 'removed') {
-                        newLikes = newLikes.filter(id => id !== userId); 
-                    }
-                    return { ...product, likes: newLikes };
-                }
-                return product;
-            });
-        };
+      const updateProductList = (
+        prevProducts: ProductDataI[],
+      ): ProductDataI[] => {
+        return prevProducts.map(product => {
+          if (product.id === productId) {
+            let newLikes = [...product.likes];
+            if (action === 'added') {
+              if (!newLikes.includes(userId)) {
+                newLikes.push(userId);
+              }
+            } else if (action === 'removed') {
+              newLikes = newLikes.filter(id => id !== userId);
+            }
+            return { ...product, likes: newLikes };
+          }
+          return product;
+        });
+      };
 
-        setAllProducts(updateProductList);
-        setsaleProducts(updateProductList);
-        setDonationProducts(updateProductList);
-        setEchangeProducts(updateProductList);
+      setAllProducts(updateProductList);
+      setsaleProducts(updateProductList);
+      setDonationProducts(updateProductList);
+      setEchangeProducts(updateProductList);
 
-        return true; 
-        
+      return true;
     } catch (err) {
-        console.error(`Erreur lors du like/unlike du produit ${productId}:`, err);
-        return false;
+      console.error(`Erreur lors du like/unlike du produit ${productId}:`, err);
+      return false;
     }
-};
+  };
 
   useEffect(() => {
     fetchProducts();

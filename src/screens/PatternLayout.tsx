@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, FlatList, Dimensions } from 'react-native';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/products/ProductCard';
+import ProductFullCard from '../components/products/ProductFullCard';
 
 const { width } = Dimensions.get('window');
 
@@ -38,10 +39,10 @@ export const OptimizedSixThenOneLayout = ({ allProducts }) => {
           
           if (type === 'full') {
             return (
-              <View style={{ marginBottom: 5 }}>
-                <ProductCard 
+              <View style={{ marginVertical: 30 }}>
+                <ProductFullCard 
                   item={item} 
-                  cardWidth={width - 10} 
+                  cardWidth={width - 15} 
                 />
               </View>
             );

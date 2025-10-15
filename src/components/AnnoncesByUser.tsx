@@ -1,6 +1,6 @@
 import { View, Text, FlatList } from 'react-native';
 import React from 'react';
-import ProductCard from './ProductCard';
+import ProductCard from './products/ProductCard';
 import { ProductDataI } from '../context/ProductContext'; // Import du type
 
 interface AnnoncesByUserProps {

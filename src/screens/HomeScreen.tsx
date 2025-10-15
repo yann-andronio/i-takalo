@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeroSection from '../components/HeroSection';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/products/ProductCard';
 import FakeSearchBar from '../components/FakeSearchBar';
 import FilterModalForm from '../components/FilterModalForm';
 import FilterBarDons from '../components/FilterBarDons';

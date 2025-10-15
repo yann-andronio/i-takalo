@@ -7,13 +7,13 @@ import {
   ImageBackground,
   ActivityIndicator,
 } from 'react-native';
-import { ProductDataI, ProductContext } from '../context/ProductContext';
+import { ProductDataI, ProductContext } from '../../context/ProductContext';
 import { HeartIcon, ImageSquareIcon } from 'phosphor-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamListHomenavigatorScreen } from '../types/Types';
-import { AuthContext } from '../context/AuthContext';
-import { UserContext, UserI } from '../context/UserContext';
+import { RootStackParamListHomenavigatorScreen } from '../../types/Types';
+import { AuthContext } from '../../context/AuthContext';
+import { UserContext, UserI } from '../../context/UserContext';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 interface ProductCardProps {
@@ -58,7 +58,7 @@ export default function ProductCard({ item , cardWidth }: ProductCardProps) {
 
   const profileImageSource = author?.image ? { uri: author.image } : null;
   const isSaleProduct = item.type === 'SALE';
-  const linearImageSource = require('../assets/images/productCardImage/linear2.png');
+  const linearImageSource = require('../../assets/images/productCardImage/linear2.png');
   const hasImage = !!mainImageUri;
 
   const isLiked = user && item.likes.includes(user.id);
@@ -162,7 +162,11 @@ export default function ProductCard({ item , cardWidth }: ProductCardProps) {
                 )}
 
                 <TouchableOpacity
-                  className="flex-row items-center bg-white rounded-md p-[5px]"
+                  className="flex-row items-center bg-white rounded-md"
+                  style={{
+                    paddingVertical: 2,
+                    paddingHorizontal: 6
+                  }}
                   onPress={handleLikePress}
                   disabled={isLiking}
                 >

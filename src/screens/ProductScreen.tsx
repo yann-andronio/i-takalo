@@ -288,7 +288,14 @@ const isLiked = user && Array.isArray(item.likes) && item.likes.includes(user.id
           </View>
         </View>
 
-        <View className="p-6 -mt-8 bg-white shadow-lg rounded-t-3xl">
+        <View 
+          className="-mt-8 bg-white shadow-lg"
+          style={{
+            borderRadius: 10,
+            paddingVertical: 20,
+            paddingHorizontal: 10
+          }}
+        >
           <View className="flex-row items-start justify-between mb-4">
             <View className="flex-1">
               <Text className="mb-1 text-3xl font-extrabold text-gray-900">
@@ -347,7 +354,12 @@ const isLiked = user && Array.isArray(item.likes) && item.likes.includes(user.id
           </View>
 
           {author && (
-            <View className="flex-row items-center p-4 mb-6 bg-gray-100 rounded-xl">
+            <View 
+              className="flex-row items-center p-4 mb-6 bg-gray-100"
+              style={{
+                borderRadius: 5
+              }}
+            >
               {profileImageSource ? (
                 <Image
                   source={profileImageSource}
@@ -419,9 +431,12 @@ const isLiked = user && Array.isArray(item.likes) && item.likes.includes(user.id
           </View>
 
           {/* Buttons principale */}
-          <View className="flex-row items-center justify-between gap-4">
+          <View className="flex-row items-center justify-between gap-2">
             <TouchableOpacity
-              className="flex-row items-center justify-center flex-1 p-4 bg-gray-200 rounded-xl"
+              className="flex-row items-center justify-center flex-1 p-4 bg-gray-200"
+              style={{
+                borderRadius: 5
+              }}
               onPress={handleARPress}
             >
               <CubeTransparentIcon size={20} color="#000" weight="bold" />
@@ -431,7 +446,10 @@ const isLiked = user && Array.isArray(item.likes) && item.likes.includes(user.id
             </TouchableOpacity>
             {!isTomponProduct && (
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center p-4 bg-[#FEF094] rounded-xl"
+                className="flex-1 flex-row items-center justify-center p-4 bg-[#FEF094]"
+                style={{
+                  borderRadius: 5
+                }}
                 onPress={handlePressMessage}
               >
                 <ChatTeardropTextIcon size={20} color="#000" weight="bold" />
@@ -445,14 +463,17 @@ const isLiked = user && Array.isArray(item.likes) && item.likes.includes(user.id
 
         {/* Suggestions */}
         {suggestionProducts.length > 0 && (
-          <View className="p-6 pt-8 bg-gray-50">
+          <View className="p-2 pt-8 bg-gray-50">
             <Text className="mb-6 text-2xl font-extrabold text-gray-900">
               Suggestions pour vous
             </Text>
             <ScrollView
               horizontal={true}
               showsHorizontalScrollIndicator={false}
-              className="flex-row px-[0.2rem] py-3"
+              className="flex-row"
+              style={{
+                gap: 20,
+              }}
             >
               {suggestionProducts.map(suggestion => {
                 const izyAtakalo = suggestion.type === 'ECHANGE';
@@ -465,7 +486,11 @@ const isLiked = user && Array.isArray(item.likes) && item.likes.includes(user.id
                 return (
                   <TouchableOpacity
                     key={suggestion.id}
-                    className="w-44 h-64 mr-3 bg-white rounded-xl shadow-lg overflow-hidden"
+                    className="w-44 h-64 bg-white shadow-lg overflow-hidden"
+                    style={{
+                      borderRadius: 5,
+                      marginRight: 5
+                    }}
                     onPress={() => handleSuggestionPress(suggestion)}
                   >
                     <ImageBackground

@@ -84,7 +84,7 @@ export default function ProductScreen() {
   //resaka like
   const { ToggleLike } = useContext(ProductContext);
   const [isLiking, setIsLiking] = useState(false);
-  const isLiked = user && item.likes.includes(user.id);
+const isLiked = user && Array.isArray(item.likes) && item.likes.includes(user.id);
 
   useEffect(() => {
   const loadData = async () => {

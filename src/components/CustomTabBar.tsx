@@ -16,10 +16,26 @@ import {
   ChatCircleIcon,
 } from 'phosphor-react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { useScroll } from '../context/ScrollContext';
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 const HEIGHT_SIZE = width * 0.17;
 const BAR_WIDTH = width * 0.9;
+
+// ---  FONCTION D'ÉCHELLE POUR LE RESPONSIVE ---
+const STANDARD_WIDTH = 375; // Largeur de référence (e.g., iPhone X/8)
+const scale = (size: number) => (width / STANDARD_WIDTH) * size;
+
+// Tailles des éléments dynamiques
+const ICON_SIZE = scale(28);
+const FONT_SIZE = scale(12);
+const SELL_ICON_SIZE = scale(36);
+const SELL_BUTTON_DIMENSION = scale(60);
+const SELL_BUTTON_RADIUS = scale(35);
 
 interface Props {
   state: any;
@@ -29,9 +45,18 @@ interface Props {
 
 const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
   const route = state.routes[state.index];
+
+/* animation manjavogna*/
+  const { isTabVisible } = useScroll();
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: withTiming(isTabVisible ? 0 : 100, { duration: 500 }) }],
+    opacity: withTiming(isTabVisible ? 1 : 0, { duration: 500 }),
+  }));
+
+
   const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
 
-   const hiddenRoutes = [
+  const hiddenRoutes = [
     'Search',
     'Product',
     'Sell',
@@ -43,130 +68,133 @@ const CustomTabBar: React.FC<Props> = ({ state, descriptors, navigation }) => {
     'TrueProfilUserAccess',
     'Notification',
     'MessageMain',
-    'Chat' , 
-    'ValidationTransaction'
+    'Chat',
+    'ValidationTransaction',
   ];
-    if (hiddenRoutes.includes(routeName)) return null;
-
-  // raha anaty screen de conditon eto de miala le tabbar
- /*  if (
-    routeName === 'Search' ||
-    routeName === 'Product' ||
-    routeName === 'Sell' ||
-    routeName === 'Conversation' ||
-    routeName === 'Profile' ||
-    routeName === 'ProfilMain' ||
-    routeName === 'Chat' ||
-    routeName === 'ConfidentialityScreen' ||
-    routeName === 'TrueProfilUserAccess'
-  )
-    return null; */
+  if (hiddenRoutes.includes(routeName)) return null;
 
   return (
-    <View className="  h-[11%] absolute bottom-0 w-[100%] justify-center items-center ">
-      <ImageBackground
-        source={require('../assets/images/HomeScreenImage/Subtract.png')}
-        style={styles.container}
-        imageStyle={styles.imageBackground}
-      >
-        {state.routes.map((route: any, index: number) => {
-          const { options } = descriptors[route.key];
-          const label = options.tabBarLabel ?? options.title ?? route.name;
-          const isFocused = state.index === index;
+    <Animated.View
+      style={[
+        { position: 'absolute', bottom: 55, width: '100%' },
+        animatedStyle,
+      ]}
+    >
+      <View className="  h-[11%] absolute bottom-0 w-[100%] justify-center items-center ">
+        <ImageBackground
+          source={require('../assets/images/HomeScreenImage/Subtract.png')}
+          style={styles.container}
+          imageStyle={styles.imageBackground}
+        >
+          {state.routes.map((route: any, index: number) => {
+            const { options } = descriptors[route.key];
+            const label = options.tabBarLabel ?? options.title ?? route.name;
+            const isFocused = state.index === index;
 
-          const onPress = () => {
-            if (route.name === 'Home') {
-              // Si on clique sur Home, réinitialiser le stack Home à HomeMain
-              navigation.navigate('Home', { screen: 'HomeMain' });
-            } else if (!isFocused) {
-              navigation.navigate(route.name);
+            const onPress = () => {
+              if (route.name === 'Home') {
+                // Si on clique sur Home, réinitialiser le stack Home à HomeMain
+                navigation.navigate('Home', { screen: 'HomeMain' });
+              } else if (!isFocused) {
+                navigation.navigate(route.name);
+              }
+            };
+
+            // btext hoan btn sell izay mijanona anaty ImageBackground
+            if (route.name === 'Sell') {
+              return (
+                <View key={index} style={styles.tabButton}>
+                  <Text
+                    style={{
+                      color: isFocused ? '#FEF094' : '#fff',
+                      fontSize: FONT_SIZE, 
+                      marginTop: scale(25), 
+                    }}
+                  >
+                    {/* Sell */}
+                  </Text>
+                </View>
+              );
             }
-          };
 
-          // btext hoan btn sell izay mijanona anaty ImageBackground
-          if (route.name === 'Sell') {
+            const renderIcon = () => {
+              switch (label) {
+                case 'Accueil':
+                  return (
+                    <HouseIcon
+                      size={ICON_SIZE} 
+                      color={isFocused ? '#FEF094' : '#fff'}
+                    />
+                  );
+                case 'Message':
+                  return (
+                    <ChatCircleIcon
+                      size={ICON_SIZE} 
+                      color={isFocused ? '#FEF094' : '#fff'}
+                    />
+                  );
+                case 'Notification':
+                  return (
+                    <BellIcon
+                      size={ICON_SIZE} 
+                      color={isFocused ? '#FEF094' : '#fff'}
+                    />
+                  );
+                case 'Profile':
+                  return (
+                    <UserIcon
+                      size={ICON_SIZE} 
+                      color={isFocused ? '#FEF094' : '#fff'}
+                    />
+                  );
+                default:
+                  return null;
+              }
+            };
+
             return (
-              <View key={index} style={styles.tabButton}>
+              <TouchableOpacity
+                key={index}
+                onPress={onPress}
+                style={styles.tabButton}
+              >
+                {renderIcon()}
                 <Text
                   style={{
                     color: isFocused ? '#FEF094' : '#fff',
-                    fontSize: 12,
-                    marginTop: 25,
+                    fontSize: FONT_SIZE, 
                   }}
                 >
-                  {/* Sell */}
+                  {label}
                 </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ImageBackground>
+
+        <Image
+          source={require('../assets/images/HomeScreenImage/fotsybar.png')}
+          className="absolute z-0"
+        />
+        {/* icon btn sell izay ivelany  ImageBackground*/}
+        {state.routes.map((route: any, index: number) => {
+          if (route.name === 'Sell') {
+            const isFocused = state.index === index;
+            const onPress = () => {
+              if (!isFocused) navigation.navigate(route.name);
+            };
+            return (
+              <View key={index} style={styles.parentsellicon}>
+                <TouchableOpacity style={styles.sellicon} onPress={onPress}>
+                  <PlusIcon size={SELL_ICON_SIZE} weight="bold" color="#000000" />
+                </TouchableOpacity>
               </View>
             );
           }
-
-          const renderIcon = () => {
-            switch (label) {
-              case 'Accueil':
-                return (
-                  <HouseIcon size={28} color={isFocused ? '#FEF094' : '#fff'} />
-                );
-              case 'Message':
-                return (
-                  <ChatCircleIcon size={28} color={isFocused ? '#FEF094' : '#fff'} />
-                );
-              case 'Notification':
-                return (
-                  <BellIcon
-                    size={28}
-                    color={isFocused ? '#FEF094' : '#fff'}
-                  />
-                );
-              case 'Profile':
-                return (
-                  <UserIcon size={28} color={isFocused ? '#FEF094' : '#fff'} />
-                );
-              default:
-                return null;
-            }
-          };
-
-          return (
-            <TouchableOpacity
-              key={index}
-              onPress={onPress}
-              style={styles.tabButton}
-            >
-              {renderIcon()}
-              <Text
-                style={{ color: isFocused ? '#FEF094' : '#fff', fontSize: 12 }}
-              >
-                {label}
-              </Text>
-            </TouchableOpacity>
-          );
+          return null;
         })}
-
-        
-      </ImageBackground>
-
-      <Image
-        source={require('../assets/images/HomeScreenImage/fotsybar.png')}
-        className="absolute z-0"
-      />
-      {/* icon btn sell izay ivelany  ImageBackground*/}
-      {state.routes.map((route: any, index: number) => {
-        if (route.name === 'Sell') {
-          const isFocused = state.index === index;
-          const onPress = () => {
-            if (!isFocused) navigation.navigate(route.name);
-          };
-          return (
-            <View key={index} style={styles.parentsellicon}>
-              <TouchableOpacity style={styles.sellicon} onPress={onPress}>
-                <PlusIcon size={36} weight="bold" color="#000000" />
-              </TouchableOpacity>
-            </View>
-          );
-        }
-        return null;
-      })}
-    </View>
+      </View>
+    </Animated.View>
   );
 };
 
@@ -182,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     overflow: 'hidden',
-     zIndex: 1,
+    zIndex: 1,
   },
   imageBackground: {
     borderRadius: 500,
@@ -196,13 +224,13 @@ const styles = StyleSheet.create({
   parentsellicon: {
     position: 'absolute',
     alignSelf: 'center',
-    bottom: 55,
+    bottom: 10,
     alignItems: 'center',
   },
   sellicon: {
-    width: 60,
-    height: 60,
-    borderRadius: 35,
+    width: SELL_BUTTON_DIMENSION, 
+    height: SELL_BUTTON_DIMENSION, 
+    borderRadius: SELL_BUTTON_RADIUS, 
     backgroundColor: '#FEF094',
     alignItems: 'center',
     justifyContent: 'center',

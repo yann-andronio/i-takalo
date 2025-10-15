@@ -21,7 +21,7 @@ export default function SplashScreen() {
       style={styles.container}
     ></LinearGradient> */
 
-    <LinearGradient colors={['#03233A', '#1C3E5F']} style={styles.container}>
+    <LinearGradient colors={['#03233A', '#84A8D1']} style={styles.container}>
       <StatusBar hidden />
 
       <View style={styles.centerContent}>

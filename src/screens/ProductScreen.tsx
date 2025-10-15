@@ -1,10 +1,36 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, Image, ScrollView, Dimensions, TouchableOpacity, Linking, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Dimensions,
+  TouchableOpacity,
+  Linking,
+  ImageBackground,
+  ActivityIndicator,
+} from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { ProductDataI, ProductSuggestionI, ProductContext,
+import {
+  ProductDataI,
+  ProductSuggestionI,
+  ProductContext,
 } from '../context/ProductContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeftIcon, MapPinIcon, PhoneIcon, TagIcon, ChatTeardropTextIcon, HeartIcon, CubeTransparentIcon, ClockCounterClockwiseIcon, UserIcon, DotsThreeIcon, ImageSquareIcon, HandshakeIcon, ShoppingCartIcon,
+import {
+  ArrowLeftIcon,
+  MapPinIcon,
+  PhoneIcon,
+  TagIcon,
+  ChatTeardropTextIcon,
+  HeartIcon,
+  CubeTransparentIcon,
+  ClockCounterClockwiseIcon,
+  UserIcon,
+  DotsThreeIcon,
+  ImageSquareIcon,
+  HandshakeIcon,
+  ShoppingCartIcon,
 } from 'phosphor-react-native';
 import { AuthContext } from '../context/AuthContext';
 import { UserContext, UserI } from '../context/UserContext';
@@ -55,29 +81,35 @@ export default function ProductScreen() {
   const heroItems = item.images || [];
   const hasImages = heroItems.length > 0;
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoadingProduct(true);
-      const fullProduct = await fetchProductById(initialItem.id);
+  //resaka like
+  const { ToggleLike } = useContext(ProductContext);
+  const [isLiking, setIsLiking] = useState(false);
+  const isLiked = user && item.likes.includes(user.id);
 
-      if (fullProduct) {
-        setProductData(fullProduct);
-        setLoadingAuthor(true);
-        if (fullProduct.author === undefined || fullProduct.author === null) {
-          setAuthor(undefined);
-          setLoadingAuthor(false);
-        } else {
-          const fetchedAuthor = await fetchAuthorById(fullProduct.author);
-          setAuthor(fetchedAuthor);
-          setLoadingAuthor(false);
-        }
+  useEffect(() => {
+  const loadData = async () => {
+    setLoadingProduct(true);
+    const fullProduct = await fetchProductById(initialItem.id);
+
+    if (fullProduct) {
+      setProductData(fullProduct);
+      setLoadingAuthor(true);
+      if (fullProduct.author === undefined || fullProduct.author === null) {
+        setAuthor(undefined);
+        setLoadingAuthor(false);
       } else {
+        const fetchedAuthor = await fetchAuthorById(fullProduct.author);
+        setAuthor(fetchedAuthor);
         setLoadingAuthor(false);
       }
-      setLoadingProduct(false);
-    };
-    loadData();
-  }, [initialItem.id, fetchProductById, fetchAuthorById]);
+    } else {
+      setLoadingAuthor(false);
+    }
+    setLoadingProduct(false);
+  };
+  loadData();
+}, [initialItem.id]);
+
 
   // Skeleton Loader
   if (loadingProduct || loadingAuthor) {
@@ -138,6 +170,27 @@ export default function ProductScreen() {
 
   const linearImageSource = require('../assets/images/productCardImage/linear2.png');
 
+  const handleLikePress = async () => {
+  if (!user || isLiking) return;
+  setIsLiking(true);
+
+  const success = await ToggleLike(item.id);
+
+  if (success) {
+    //  update like sans recharge product en local
+    setProductData(prev => {
+      if (!prev) return prev;
+      const hasLiked = prev.likes.includes(user.id);
+      const updatedLikes = hasLiked
+        ? prev.likes.filter(id => id !== user.id)
+        : [...prev.likes, user.id];
+      return { ...prev, likes: updatedLikes };
+    });
+  }
+
+  setIsLiking(false);
+};
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">
@@ -187,11 +240,13 @@ export default function ProductScreen() {
           )}
 
           {/* Dégradé supérieur et Boutons */}
-         {/*  <View className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent" /> */}
+          {/*  <View className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent" /> */}
 
           <View className="absolute z-10 flex-row items-center justify-between top-6 left-6 right-6">
             <TouchableOpacity
-              onPress={() => { navigation.goBack();}}
+              onPress={() => {
+                navigation.goBack();
+              }}
               className="p-3 bg-gray-100 rounded-full shadow backdrop-blur-sm"
             >
               <ArrowLeftIcon size={24} color="black" weight="bold" />
@@ -215,8 +270,18 @@ export default function ProductScreen() {
                   )}
                 </View>
               ) : (
-                <TouchableOpacity className="p-3 rounded-full shadow bg-white/30 backdrop-blur-sm">
-                  <HeartIcon size={24} color="#EF4444" weight="bold" />
+                <TouchableOpacity 
+                 onPress={handleLikePress}
+                  disabled={isLiking}
+                  className="p-3 rounded-full shadow bg-white/30 backdrop-blur-sm">
+                  {isLiking ? (
+                    <ActivityIndicator size="small" color="#03233A" />
+                  ) : (
+                    <HeartIcon  
+                      color={isLiked ? 'red' : '#03233A'}
+                      weight={isLiked ? 'fill' : 'regular'} size={24}
+                       />
+                  )}
                 </TouchableOpacity>
               )}
             </View>

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProductDataI, ProductContext } from '../context/ProductContext';
 import { UserI, UserContext } from '../context/UserContext'; 
@@ -24,14 +24,20 @@ export default function SearchScreen() {
 
   const resultCount = searchType === 'article' ? filteredArticles.length : filteredUsers.length;
 
+    const { width } = Dimensions.get('window');
+  
+
   return (
     <SafeAreaView className="flex-1 bg-white px-6 py-5">
-      <View className="flex-row items-center gap-5 mb-5">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 rounded-full bg-gray-100">
-          <ArrowLeftIcon size={24} color="black" weight="bold" />
-        </TouchableOpacity>
+    <View className="flex-row items-center gap-5 mb-5">
+    <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 rounded-full bg-gray-100">
+        <ArrowLeftIcon size={24} color="black" weight="bold" />
+    </TouchableOpacity>
+    
+    <View className="flex-1"> 
         <SearchBar onChangeText={setSearch} />
-      </View>
+    </View>
+</View>
 
       <View className="flex-row justify-center mb-2 gap-5 ">
         <TouchableOpacity
@@ -63,7 +69,7 @@ export default function SearchScreen() {
             key="articles"
             data={filteredArticles}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => <ProductCard item={item} />}
+            renderItem={({ item }) => <ProductCard item={item} cardWidth={width * 0.43}/>}
             showsVerticalScrollIndicator={false}
             numColumns={2}
             columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 12 }}

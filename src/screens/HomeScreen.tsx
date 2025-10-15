@@ -91,7 +91,8 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
 
-      <View className="px-6 pt-6 relative">
+      <View className="  relative">
+      <View className="px-6 pt-5 relative">
         <Animated.View style={searchBarStyle} className="w-full">
           <FakeSearchBar onFilterPress={() => setModalVisible(true)} />
         </Animated.View>
@@ -101,8 +102,9 @@ export default function HomeScreen() {
         >
           <FakeSearchBarAfterOpacity onFilterPress={() => setModalVisible(true)} />
         </Animated.View>
+        </View>
 
-        <View className="mb-4">
+        <View className="mb-4 ml-5 -mt-5">
           <FilterBarDons
             isselectfilterDonation={isselectfilterDonation}
             onApplyFilters={handleApplyFiltersBarDonation}

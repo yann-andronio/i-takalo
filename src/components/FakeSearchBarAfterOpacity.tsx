@@ -30,7 +30,7 @@ export default function FakeSearchBarAfterOpacity({ onFilterPress }: Props) {
         Itakalo
       </Text>
 
-      <View className="flex-row items-center gap-6">
+      <View className="flex-row items-center gap-3">
         <TouchableOpacity
           onPress={handlePress}
           className="p-3 bg-gray-100 rounded-full shadow-sm"

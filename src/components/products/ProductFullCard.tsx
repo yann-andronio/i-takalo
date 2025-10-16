@@ -176,26 +176,22 @@ export default function ProductFullCard({ item , cardWidth }: ProductCardProps) 
           </>
         )}
       </ImageBackground>
-      
 
-      <View>
-        <View className="flex-1 mt-[10px]">
-          <Text 
-            className="text-[15px] font-semibold text-black leading-tight"
-            numberOfLines={2}
-          >
-            {item.title}
-          </Text>
-          <Text 
-            className="text-[13px] text-gray-500 mt-1 leading-snug"
-            numberOfLines={2}
-          >
-            {item.description}
-          </Text>
-        </View>
-
-        
+      <View className="flex-1 mt-[10px]">
+        <Text 
+          className="text-[15px] font-semibold text-black leading-tight"
+          numberOfLines={2}
+        >
+          {item.title}
+        </Text>
+        <Text 
+          className="text-[13px] text-gray-500 mt-1 leading-snug"
+          numberOfLines={2}
+        >
+          {item.description}
+        </Text>
       </View>
+        
     </TouchableOpacity>
   );
 }

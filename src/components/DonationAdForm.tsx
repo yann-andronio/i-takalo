@@ -168,7 +168,7 @@ export default function DonationAdForm() {
         }
       });
 
-      console.log('--- ENVOI DE LA DONATION ---');
+      console.log('--- ENVOI DE LA DONATION --- formData', formData);
 
       const response = await API.post('/api/v1/products/create/', formData, {
         headers: {

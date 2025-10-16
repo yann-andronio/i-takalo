@@ -18,9 +18,9 @@ import { AuthContext } from '../context/AuthContext';
 import { User, Conversation, Message } from "../types/ModelTypes";
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeftIcon } from 'phosphor-react-native';
-import { API_SOCKET_URL } from '@env';
+// import { API_SOCKET_URL } from '@env';
 import ChatScreenSkeleton from "../components/Skeleton/ChatScreenSkeleton"
-// const API_SOCKET_URL = "wss://mounting-draws-answering-extras.trycloudflare.com"
+const API_SOCKET_URL = "wss://distances-eau-attempt-impose.trycloudflare.com"
 
 
 const ChatScreen = () => {

@@ -44,7 +44,7 @@ const ProductRowItem = memo(({
   }
   
   return (
-    <View style={{ paddingHorizontal: 5 }}>
+    <View style={{ paddingHorizontal: 8 }}>
       {showPourVous && <PourVousSection marginTop={marginTop} />}
       
       <View
@@ -57,12 +57,12 @@ const ProductRowItem = memo(({
       >
         <ProductCard
           item={item}
-          cardWidth={(width - 15) / 2}
+          cardWidth={(width - 19) / 2}
         />
         {nextItem && (
           <ProductCard
             item={nextItem}
-            cardWidth={(width - 15) / 2}
+            cardWidth={(width - 19) / 2}
           />
         )}
       </View>

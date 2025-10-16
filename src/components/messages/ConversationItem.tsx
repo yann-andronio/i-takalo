@@ -99,10 +99,10 @@ const ConversationItem = ({
 
   return (
     <Animated.View
-      entering={FadeInRight.delay(index * 200)
-        .duration(500)
-        .springify()
-        .damping(14)}
+      // entering={FadeInRight.delay(index * 200)
+      //   .duration(500)
+      //   .springify()
+      //   .damping(14)}
     >
       <Pressable style={styles.container} onPress={handlePress}>
         <View style={styles.avatarContainer}>

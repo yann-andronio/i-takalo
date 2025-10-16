@@ -38,7 +38,7 @@ import PopUpProduct from '../components/popup/PopUpProduct';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamListChatnavigatorScreen } from '../types/Types';
 import Carousel from 'react-native-reanimated-carousel';
-import ProductScreenSkeleton from '../components/ProductScreenSkeleton';
+import ProductScreenSkeleton from '../components/Skeleton/ProductScreenSkeleton';
 
 const { width } = Dimensions.get('window');
 

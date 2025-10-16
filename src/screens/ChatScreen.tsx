@@ -19,7 +19,7 @@ import { User, Conversation, Message } from "../types/ModelTypes";
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeftIcon } from 'phosphor-react-native';
 import { API_SOCKET_URL } from '@env';
-
+import ChatScreenSkeleton from "../components/Skeleton/ChatScreenSkeleton"
 // const API_SOCKET_URL = "wss://mounting-draws-answering-extras.trycloudflare.com"
 
 
@@ -34,11 +34,15 @@ const ChatScreen = () => {
 
 
   const fetchConversations = async () => {
+    setIsRefreshing(true);
+
     await getConversations()
       .then((data) => setConversations(data))
       .catch((err) =>
         console.error("Erreur lors du chargement des conversations :", err)
       );
+    setIsRefreshing(false);
+
   };
 
   useEffect(() => {
@@ -161,10 +165,10 @@ const ChatScreen = () => {
   };
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
     await fetchConversations();
-    setIsRefreshing(false);
   };
+
+
 
 
   return (
@@ -178,7 +182,7 @@ const ChatScreen = () => {
         <Text className="text-lg font-bold ml-5">Message</Text>
       </View>
 
-      <View className="flex-row justify-center mb-5 mt-2 gap-5 px-5 ">
+      {/* <View className="flex-row justify-center mb-5 mt-2 gap-5 px-5 ">
         
         <TouchableOpacity
           className={`py-3 rounded-full flex-1 items-center justify-center  ${filter == 'nonlus' ? 'bg-[#03233A]' : 'bg-gray-200'}`}
@@ -197,7 +201,7 @@ const ChatScreen = () => {
             Lus
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
 
 
@@ -214,27 +218,32 @@ const ChatScreen = () => {
         >
           <Text style={styles.sectionTitle}>Conversations</Text>
         </View> */}
-
-        <FlatList
-          data={conversations}
-          renderItem={({ item, index }) => (
-            <ConversationItem conversation={item} index={index} />
-          )}
-          // keyExtractor={(item) => item.id}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={handleRefresh}
-              colors={[colors.neutral800]}
-              tintColor={colors.neutral800}
-            />
-          }
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          contentContainerStyle={{ gap: 5, paddingHorizontal: 12 }}
-        />
+        {
+        isRefreshing ?
+          <ChatScreenSkeleton />
+        : 
+          <FlatList
+            data={conversations}
+            renderItem={({ item, index }) => (
+              <ConversationItem conversation={item} index={index} />
+            )}
+            // keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                colors={[colors.neutral800]}
+                tintColor={colors.neutral800}
+              />
+            }
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            contentContainerStyle={{ gap: 5, paddingHorizontal: 12 }}
+          />
+        }
+        
       </View>
     </SafeAreaView>
   );

@@ -28,7 +28,7 @@ export default function FakeSearchBar({ onFilterPress }: Props) {
         >
           <MagnifyingGlassIcon size={21} weight="bold" color="#9F9F9F" />
           <Text className="flex-1 ml-2 text-base text-[#9F9F9F]">
-            Rechercher un article ou un membre
+            Recherche article et autres...
           </Text>
         </TouchableOpacity>
 

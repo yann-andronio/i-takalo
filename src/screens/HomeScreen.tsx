@@ -81,12 +81,12 @@ export default function HomeScreen() {
     fetchFilteredProductsDonation(filters);
   };
 
-  const onRefresh = async () => {
+/*   const onRefresh = async () => {
     setRefreshing(true);
     await fetchProducts();
     setRefreshing(false);
   };
-
+ */
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden={false} translucent backgroundColor="transparent" />
@@ -116,9 +116,9 @@ export default function HomeScreen() {
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         className="flex-1"
-        refreshControl={
+       /*  refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#03233A']} />
-        }
+        } */
       >
         <View className="px-6">
           <HeroSection />

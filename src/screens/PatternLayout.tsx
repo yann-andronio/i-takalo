@@ -3,6 +3,7 @@ import { View, FlatList, Dimensions, Text, TouchableOpacity } from 'react-native
 import ProductCard from '../components/products/ProductCard';
 import ProductFullCard from '../components/products/ProductFullCard';
 import { DotsThreeVertical, } from 'phosphor-react-native';
+import { FlashList } from '@shopify/flash-list';
 
 const { width } = Dimensions.get('window');
 
@@ -59,99 +60,95 @@ export const OptimizedSixThenOneLayout = ({ allProducts }) => {
   
     return (
       <View style={{ paddingHorizontal: 5, marginBottom: 100 }}>
-        <FlatList
-          data={allProducts}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item, index }) => {
+        <FlashList
+        data={allProducts}
+        keyExtractor={(item) => item.id.toString()}
+        estimatedItemSize={200} // Ajustez selon la taille moyenne de vos items
+        renderItem={({ item, index }) => {
             const type = getRowType(index);
             const marginTop = getMarginTop(index);
             const showPourVous = shouldShowPourVous(index);
             
             if (type === 'full') {
-              return (
+            return (
                 <View style={{ marginTop }}>
-                  <ProductFullCard
+                <ProductFullCard
                     item={item}
                     cardWidth={width - 15}
-                  />
+                />
                 </View>
-              );
+            );
             } else {
-              // Double - on affiche 2 cartes côte à côte
-              const nextItem = allProducts[index + 1];
-              const isFirstInPair = index % 2 === 0;
-              
-              if (!isFirstInPair) return null;
-              
-              return (
+            // Double - on affiche 2 cartes côte à côte
+            const nextItem = allProducts[index + 1];
+            const isFirstInPair = index % 2 === 0;
+            
+            if (!isFirstInPair) return null;
+            
+            return (
                 <View>
-                  {/*  Afficher "Pour vous" si nécessaire */}
-                  {showPourVous && (
-                    <View style={{ 
-                        display: "flex", 
-                        flexDirection: "row", 
-                        justifyContent: "space-between" ,
-                        alignItems: "center",
-                        marginTop: marginTop,
-                        marginBottom: 15,
-                        paddingHorizontal: 5,
+                {/* Afficher "Pour vous" si nécessaire */}
+                {showPourVous && (
+                    <View style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: marginTop,
+                    marginBottom: 15,
+                    paddingHorizontal: 5,
                     }}>
-                        <Text 
-                        style={{ 
-                            fontSize: 25,
-                            fontWeight: 'bold',
-                            color: '#000',
+                    <Text
+                        style={{
+                        fontSize: 25,
+                        fontWeight: 'bold',
+                        color: '#000',
                         }}
-                        >
+                    >
                         Pour vous
-                        </Text>
-                        <TouchableOpacity
-                            className="flex-row items-center bg-white rounded-md"
-                            style={{
-                                paddingVertical: 2,
-                                paddingHorizontal: 6
-                            }}
-                            onPress={() => console.log("Option cliqué") }
-                        >
-                            <DotsThreeVertical
-                                size={20}
-                                color='#03233A'
-                                weight='bold'
-                            />    
-                        </TouchableOpacity>
-                        
+                    </Text>
+                    <TouchableOpacity
+                        className="flex-row items-center bg-white rounded-md"
+                        style={{
+                        paddingVertical: 2,
+                        paddingHorizontal: 6
+                        }}
+                        onPress={() => console.log("Option cliqué")}
+                    >
+                        <DotsThreeVertical
+                        size={20}
+                        color='#03233A'
+                        weight='bold'
+                        />
+                    </TouchableOpacity>
                     </View>
-                  )}
-                  
-                  <View
+                )}
+                
+                <View
                     style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      marginTop: showPourVous ? 0 : marginTop,
-                      gap: 5,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginTop: showPourVous ? 0 : marginTop,
+                    gap: 5,
                     }}
-                  >
+                >
                     <ProductCard
-                      item={item}
-                      cardWidth={(width - 15) / 2}
+                    item={item}
+                    cardWidth={(width - 15) / 2}
                     />
                     {nextItem && (
-                      <ProductCard
+                    <ProductCard
                         item={nextItem}
                         cardWidth={(width - 15) / 2}
-                      />
+                    />
                     )}
-                  </View>
                 </View>
-              );
+                </View>
+            );
             }
-          }}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-          removeClippedSubviews={true}
-          maxToRenderPerBatch={10}
-          updateCellsBatchingPeriod={50}
-          windowSize={5}
+        }}
+        showsVerticalScrollIndicator={false}
+        // scrollEnabled={false} // ⚠️ À retirer si vous voulez que la liste soit scrollable
         />
       </View>
     );

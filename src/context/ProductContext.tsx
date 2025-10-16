@@ -11,6 +11,7 @@ export interface ProductSuggestionI {
   type: 'SALE' | 'DONATION' | 'ECHANGE';
   category: string;
 }
+
 export interface ProductDataI {
   id: number;
   title: string;
@@ -34,7 +35,11 @@ interface ProductContextType {
   echangeProducts: ProductDataI[];
   donationProducts: ProductDataI[];
   loading: boolean;
+  loadingMore: boolean;
+  hasMore: boolean;
+  currentPage: number;
   fetchProducts: () => void;
+  fetchMoreProducts: () => void;
   fetchFilteredProductsDonation: (filters: any) => void;
   addProduct: (newProduct: ProductDataI) => void;
   deleteProduct: (id: number) => void;
@@ -48,7 +53,11 @@ export const ProductContext = createContext<ProductContextType>({
   donationProducts: [],
   echangeProducts: [],
   loading: false,
+  loadingMore: false,
+  hasMore: true,
+  currentPage: 1,
   fetchProducts: () => {},
+  fetchMoreProducts: () => {},
   fetchFilteredProductsDonation: () => {},
   addProduct: () => {},
   deleteProduct: () => {},
@@ -64,26 +73,107 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
   const [donationProducts, setDonationProducts] = useState<ProductDataI[]>([]);
   const [echangeProducts, setEchangeProducts] = useState<ProductDataI[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { user } = useContext(AuthContext);
 
+  // ✅ Fetch initial des produits
   const fetchProducts = async () => {
     setLoading(true);
+    setCurrentPage(1);
     try {
-      const res = await API.get('/api/v1/products/');
-      const fetchedProducts = (res.data.dataset as ProductDataI[]).map(p => ({ ...p,likes: Array.isArray(p.likes) ? p.likes : [],
+      const res = await API.get('/api/v1/products/', {
+        params: {
+          per_page: 25,
+          page_no: 1,
+        },
+      });
+      
+      const fetchedProducts = (res.data.dataset as ProductDataI[]).map(p => ({
+        ...p,
+        likes: Array.isArray(p.likes) ? p.likes : [],
       }));
+      
       const sales = fetchedProducts.filter(i => i.type === 'SALE');
       const donations = fetchedProducts.filter(i => i.type === 'DONATION');
       const echanges = fetchedProducts.filter(i => i.type === 'ECHANGE');
+      
       setAllProducts(fetchedProducts);
       setDonationProducts(donations);
       setsaleProducts(sales);
       setEchangeProducts(echanges);
+      
+      // Vérifier s'il y a plus de données
+      setHasMore(fetchedProducts.length === 25);
     } catch (err) {
       console.error('Erreur lors du chargement des produits:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ✅ Fetch des produits suivants (pagination)
+  const fetchMoreProducts = async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    const nextPage = currentPage + 1;
+    
+    try {
+      const res = await API.get('/api/v1/products/', {
+        params: {
+          per_page: 25,
+          page_no: nextPage,
+        },
+      });
+      
+      const fetchedProducts = (res.data.dataset as ProductDataI[]).map(p => ({
+        ...p,
+        likes: Array.isArray(p.likes) ? p.likes : [],
+      }));
+      
+      if (fetchedProducts.length === 0) {
+        setHasMore(false);
+        return;
+      }
+      
+      const sales = fetchedProducts.filter(i => i.type === 'SALE');
+      const donations = fetchedProducts.filter(i => i.type === 'DONATION');
+      const echanges = fetchedProducts.filter(i => i.type === 'ECHANGE');
+      
+      // Ajouter les nouveaux produits sans doublons
+      setAllProducts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const newProducts = fetchedProducts.filter(p => !existingIds.has(p.id));
+        return [...prev, ...newProducts];
+      });
+      
+      setDonationProducts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const newDonations = donations.filter(p => !existingIds.has(p.id));
+        return [...prev, ...newDonations];
+      });
+      
+      setsaleProducts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const newSales = sales.filter(p => !existingIds.has(p.id));
+        return [...prev, ...newSales];
+      });
+      
+      setEchangeProducts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const newEchanges = echanges.filter(p => !existingIds.has(p.id));
+        return [...prev, ...newEchanges];
+      });
+      
+      setCurrentPage(nextPage);
+      setHasMore(fetchedProducts.length === 25);
+    } catch (err) {
+      console.error('Erreur lors du chargement de plus de produits:', err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -123,6 +213,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
       setsaleProducts(prevProducts => [newProduct, ...prevProducts]);
     } else if (newProduct.type === 'DONATION') {
       setDonationProducts(prevDonations => [newProduct, ...prevDonations]);
+    } else if (newProduct.type === 'ECHANGE') {
+      setEchangeProducts(prev => [newProduct, ...prev]);
     }
     setAllProducts(prevProducts => [newProduct, ...prevProducts]);
   };
@@ -199,12 +291,16 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({
         saleProducts,
         echangeProducts,
         loading,
+        loadingMore,
+        hasMore,
+        currentPage,
         fetchFilteredProductsDonation,
         fetchProducts,
+        fetchMoreProducts,
         addProduct,
         deleteProduct,
         fetchProductById,
-        ToggleLike, // Fonction de like ajoutée
+        ToggleLike,
       }}
     >
       {children}

@@ -19,7 +19,7 @@ const MainNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{ headerShown: false }}
-      tabBar={props => <CustomTabBar {...props} />}
+      tabBar={props => <CustomTabBar2 {...props} />}
     >
       <Tab.Screen name="Accueil" component={HomeStackNavigator} />
       <Tab.Screen name="Message" component={ChatStackNavigator} />

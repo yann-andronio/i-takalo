@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { HouseIcon, ChatIcon, WalletIcon, UserIcon, PlusIcon } from 'phosphor-react-native';
+import { HouseIcon, ChatIcon, BellIcon, UserIcon, PlusIcon } from 'phosphor-react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 interface Props {
@@ -30,7 +30,7 @@ const CustomTabBar2: React.FC<Props> = ({ state, descriptors, navigation }) => {
   ];
   if (hiddenRoutes.includes(routeName)) return null;
 
-  const activeColor = '#9f7126';
+  const activeColor = '#03233A';
   const inactiveColor = '#212529';
 
   return (
@@ -52,16 +52,20 @@ const CustomTabBar2: React.FC<Props> = ({ state, descriptors, navigation }) => {
 
         const renderIcon = () => {
           switch (label) {
-            case 'Home':
+            case 'Accueil':
               return <HouseIcon size={24} color={isFocused ? activeColor : inactiveColor} />;
-            case 'Chat':
+            case 'Message':
               return <ChatIcon size={24} color={isFocused ? activeColor : inactiveColor} />;
-            case 'Wallet':
-              return <WalletIcon size={24} color={isFocused ? activeColor : inactiveColor} />;
+            case 'Notification':
+              return <BellIcon size={24} color={isFocused ? activeColor : inactiveColor} />;
             case 'Profile':
               return <UserIcon size={24} color={isFocused ? activeColor : inactiveColor} />;
             case 'Sell':
-              return <PlusIcon size={24} color={isFocused ? activeColor : inactiveColor} />;
+              return (
+                <View className='rounded-full' style={{backgroundColor:"#03233A", padding: 12, marginBottom: "-20"}}>
+                  <PlusIcon size={24} color={isFocused ? activeColor : "#fff"} />;
+                </View>
+              );
             default:
               return null;
           }
@@ -76,7 +80,7 @@ const CustomTabBar2: React.FC<Props> = ({ state, descriptors, navigation }) => {
           >
             {renderIcon()}
             <Text style={{ color: isFocused ? activeColor : inactiveColor, fontSize: 12 }}>
-              {label}
+              {label !== "Sell" && label}
             </Text>
           </TouchableOpacity>
         );

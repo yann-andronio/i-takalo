@@ -152,7 +152,8 @@ export const OptimizedSixThenOneLayout = ({ allProducts }) => {
         />
       </View>
     );
-  };
+};
+
 //  MEILLEURE APPROCHE : Transformation avec seed stable
 export const StableSixThenOneLayout = ({ allProducts }) => {
   const transformedData = useMemo(() => {
